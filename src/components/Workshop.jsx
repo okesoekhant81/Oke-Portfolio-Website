@@ -8,11 +8,10 @@ export default function Workshop() {
         alt=""
         className="absolute inset-0 size-full object-cover"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/50 to-black/20" />
-      <div className="relative mx-auto max-w-3xl px-8 py-16 text-white sm:px-12 sm:py-20 md:px-16">
-        <h2 className="text-xl sm:text-2xl">
-          <span className="font-display font-bold italic">Strategic workshop</span>{' '}
-          for Myanmar SME OWNERS
+      <div className="relative mx-auto max-w-3xl px-6 py-14 text-white sm:px-12 sm:py-20 md:px-16">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl">
+          <span className="font-display font-bold italic">Strategic Workshop</span>{' '}
+          For Myanmar SME OWNERS
         </h2>
         <p className="mt-5 text-sm font-light leading-relaxed sm:text-base">
           From doing marketing to thinking strategically about growth.

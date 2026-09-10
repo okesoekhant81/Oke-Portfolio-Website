@@ -1,9 +1,9 @@
 export default function Strategy() {
   return (
-    <section className="bg-brand px-8 py-14 text-white sm:px-12 sm:py-16 md:px-16">
-      <div className="mx-auto max-w-3xl text-center">
-        <h2 className="text-4xl leading-tight sm:text-5xl">
-          Strategy <span className="font-display font-bold italic">before tactics.</span>
+    <section className="bg-brand px-6 py-12 text-white sm:px-12 sm:py-16 md:px-16">
+      <div className="mx-auto max-w-3xl">
+        <h2 className="text-4xl leading-tight sm:text-5xl md:text-6xl">
+          Strategy <span className="font-display font-bold italic">Before Tactics.</span>
         </h2>
         <p className="mt-6 text-sm font-light leading-relaxed sm:text-base">
           A new campaign, content format, platform, or tool is rarely the first answer.

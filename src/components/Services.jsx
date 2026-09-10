@@ -37,9 +37,8 @@ export default function Services() {
               alt=""
               className="absolute inset-0 size-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10" />
             <div className="relative flex h-full flex-col justify-end p-5 text-white">
-              <h3 className="font-display text-sm font-bold leading-snug sm:text-base">{service.title}</h3>
+              <h3 className="font-display text-base font-bold leading-snug sm:text-lg">{service.title}</h3>
               <p className="mt-2 text-xs font-light leading-relaxed">{service.copy}</p>
             </div>
           </div>

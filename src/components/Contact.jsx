@@ -2,9 +2,9 @@ const EMAIL = 'okesoekhant81@gmail.com'
 
 export default function Contact() {
   return (
-    <footer className="bg-white px-8 py-16 text-ink sm:px-12 md:px-16">
-      <div className="mx-auto max-w-3xl text-center">
-        <h2 className="text-3xl leading-tight sm:text-4xl">
+    <footer className="bg-white px-6 py-14 text-ink sm:px-12 sm:py-16 md:px-16">
+      <div className="mx-auto max-w-3xl">
+        <h2 className="text-3xl leading-tight sm:text-4xl md:text-5xl">
           LET&rsquo;S BUILD{' '}
           <span className="font-display font-bold italic">SOMETHING USEFUL</span>
         </h2>

@@ -18,23 +18,23 @@ const projects = [
 
 export default function ThingsImBuilding() {
   return (
-    <section className="bg-white px-8 py-14 sm:px-12 sm:py-16 md:px-16">
+    <section className="bg-white px-6 py-12 sm:px-12 sm:py-16 md:px-16">
       <div className="mx-auto max-w-4xl">
-        <h2 className="text-center text-4xl text-ink sm:text-5xl md:text-left">
-          Thing <span className="font-display font-bold italic text-brand">i&rsquo;m Building</span>
+        <h2 className="text-4xl text-ink sm:text-5xl md:text-6xl">
+          Thing <span className="font-display font-bold italic text-brand">I&rsquo;m Building</span>
         </h2>
-        <p className="mt-3 text-center text-sm text-muted sm:text-base md:text-left">
+        <p className="mt-3 text-sm text-muted sm:text-base">
           I don&rsquo;t only work on brands.{' '}
           <span className="font-display font-bold italic text-ink">I like building things too.</span>
         </p>
 
-        <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2">
+        <div className="mt-10 grid grid-cols-2 gap-6 sm:gap-8">
           {projects.map((project) => (
             <div key={project.name}>
               <img
                 src={project.logo}
                 alt={`${project.name} logo`}
-                className="h-10 w-auto rounded-md object-contain"
+                className="h-24 w-auto object-contain sm:h-28"
               />
               <p className="mt-4 text-xs leading-relaxed text-ink">
                 A digital discovery platform built for the{' '}
