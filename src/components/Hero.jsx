@@ -33,7 +33,7 @@ export default function Hero() {
         <img
           src={heroOke}
           alt="Oke Soe Khant"
-          className="h-[30rem] w-full object-cover object-top sm:h-auto sm:w-56 sm:shrink-0 sm:aspect-[3/4] md:w-64 lg:w-72"
+          className="mx-auto h-auto w-56 sm:mx-0 sm:w-44 sm:shrink-0 md:w-52 lg:w-60"
         />
       </div>
     </section>
