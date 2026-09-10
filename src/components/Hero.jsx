@@ -32,7 +32,7 @@ export default function Hero() {
       <img
         src={heroOke}
         alt="Oke Soe Khant"
-        className="h-72 w-full object-cover object-top sm:mx-auto sm:aspect-[3/4] sm:h-auto sm:max-w-sm md:max-w-md"
+        className="h-[30rem] w-full object-cover object-top sm:mx-auto sm:aspect-[3/4] sm:h-auto sm:max-w-sm md:max-w-md"
       />
     </section>
   )
