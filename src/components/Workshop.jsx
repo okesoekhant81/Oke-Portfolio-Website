@@ -1,4 +1,5 @@
 import workshopImg from '../assets/img/workshop.jpg'
+import Reveal from './Reveal'
 
 export default function Workshop() {
   return (
@@ -8,7 +9,7 @@ export default function Workshop() {
         alt=""
         className="absolute inset-0 size-full object-cover"
       />
-      <div className="relative mx-auto max-w-3xl px-6 py-14 text-white sm:px-12 sm:py-20 md:px-16">
+      <Reveal className="relative mx-auto max-w-3xl px-6 py-14 text-white sm:px-12 sm:py-20 md:px-16">
         <h2 className="text-2xl sm:text-3xl md:text-4xl">
           <span className="block font-display font-bold italic">Strategic Workshop</span>
           <span className="block">For Myanmar SME Owners</span>
@@ -27,7 +28,7 @@ export default function Workshop() {
         <p className="mt-4 font-display text-sm font-bold italic sm:text-base">
           Framework Creator / Strategist / Workshop Instructor
         </p>
-      </div>
+      </Reveal>
     </section>
   )
 }

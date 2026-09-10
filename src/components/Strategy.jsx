@@ -1,7 +1,9 @@
+import Reveal from './Reveal'
+
 export default function Strategy() {
   return (
     <section className="bg-brand px-6 py-12 text-white sm:px-12 sm:py-16 md:px-16">
-      <div className="mx-auto max-w-3xl">
+      <Reveal className="mx-auto max-w-3xl">
         <h2 className="text-4xl leading-tight sm:text-5xl md:text-6xl">
           <span className="block">Strategy</span>
           <span className="block font-display font-bold italic">Before Tactics.</span>
@@ -12,7 +14,7 @@ export default function Strategy() {
         <p className="mt-4 font-display text-sm font-bold italic leading-relaxed sm:text-base">
           &ldquo;Understanding the problem is.&rdquo;
         </p>
-      </div>
+      </Reveal>
     </section>
   )
 }

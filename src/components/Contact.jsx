@@ -1,9 +1,11 @@
+import Reveal from './Reveal'
+
 const EMAIL = 'hello@okesoekhant.com'
 
 export default function Contact() {
   return (
     <footer className="bg-white px-6 py-14 text-ink sm:px-12 sm:py-16 md:px-16">
-      <div className="mx-auto max-w-3xl">
+      <Reveal className="mx-auto max-w-3xl">
         <h2 className="text-3xl leading-tight sm:text-4xl md:text-5xl">
           <span className="block">Let&rsquo;s Build</span>
           <span className="block font-display font-bold italic">Something Useful</span>
@@ -19,7 +21,7 @@ export default function Contact() {
         <p className="mt-6 text-sm sm:text-base">Let&rsquo;s Start a Conversation</p>
         <a
           href={`mailto:${EMAIL}`}
-          className="mt-1 inline-block text-sm text-brand underline decoration-brand/40 underline-offset-4 sm:text-base"
+          className="mt-1 inline-block text-sm text-brand underline decoration-brand/40 underline-offset-4 transition-colors duration-200 hover:text-ink hover:decoration-ink/50 sm:text-base"
         >
           {EMAIL}
         </a>
@@ -28,7 +30,7 @@ export default function Contact() {
         <p className="mt-1 font-display text-xs font-bold italic text-muted">
           Strategy / Brands / Marketing / Building
         </p>
-      </div>
+      </Reveal>
     </footer>
   )
 }

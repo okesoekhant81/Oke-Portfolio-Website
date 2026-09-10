@@ -1,7 +1,9 @@
+import Reveal from './Reveal'
+
 export default function NotJustMarketing() {
   return (
     <section className="bg-brand px-6 py-12 text-white sm:px-12 sm:py-16 md:px-16">
-      <div className="mx-auto max-w-3xl">
+      <Reveal className="mx-auto max-w-3xl">
         <h2 className="text-4xl leading-tight sm:text-5xl md:text-6xl">
           <span className="block">Not Just</span>
           <span className="block font-display font-bold italic">Marketing</span>
@@ -20,7 +22,7 @@ export default function NotJustMarketing() {
           That&rsquo;s why my work usually sits somewhere between{' '}
           <em className="font-display not-italic">strategy, marketing, content, product, and execution.</em>
         </p>
-      </div>
+      </Reveal>
     </section>
   )
 }

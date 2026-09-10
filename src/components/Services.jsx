@@ -2,6 +2,7 @@ import brandPositioning from '../assets/img/brand-positioning.jpg'
 import growthMarketing from '../assets/img/growth-marketing.jpg'
 import contentSystems from '../assets/img/content-systems.jpg'
 import digitalExperiences from '../assets/img/digital-experiences.jpg'
+import Reveal from './Reveal'
 
 const services = [
   {
@@ -30,18 +31,19 @@ export default function Services() {
   return (
     <section className="bg-white">
       <div className="grid grid-cols-2">
-        {services.map((service) => (
-          <div key={service.title} className="relative min-h-72 overflow-hidden sm:min-h-80">
+        {services.map((service, i) => (
+          <Reveal key={service.title} delay={i * 0.08} className="group relative min-h-72 overflow-hidden sm:min-h-80">
             <img
               src={service.image}
               alt=""
-              className="absolute inset-0 size-full object-cover"
+              className="absolute inset-0 size-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
             />
+            <div className="absolute inset-0 bg-black/0 transition-colors duration-500 group-hover:bg-black/20" />
             <div className="relative flex h-full flex-col justify-end p-5 text-white">
               <h3 className="font-display text-base font-bold leading-snug sm:text-lg">{service.title}</h3>
               <p className="mt-2 text-xs font-light leading-relaxed">{service.copy}</p>
             </div>
-          </div>
+          </Reveal>
         ))}
       </div>
     </section>
