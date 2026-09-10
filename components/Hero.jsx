@@ -1,3 +1,5 @@
+'use client'
+
 import { motion } from 'framer-motion'
 import heroOke from '../assets/img/hero-oke.png'
 import Reveal from './Reveal'
@@ -39,7 +41,7 @@ export default function Hero() {
 
         <Reveal delay={0.15} className="mx-auto sm:mx-0 sm:shrink-0">
           <motion.img
-            src={heroOke}
+            src={heroOke.src}
             alt="Oke Soe Khant"
             whileHover={{ scale: 1.03 }}
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}

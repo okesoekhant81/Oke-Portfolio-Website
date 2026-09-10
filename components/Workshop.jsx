@@ -5,7 +5,7 @@ export default function Workshop() {
   return (
     <section className="relative overflow-hidden bg-ink">
       <img
-        src={workshopImg}
+        src={workshopImg.src}
         alt=""
         className="absolute inset-0 size-full object-cover"
       />

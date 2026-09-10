@@ -1,3 +1,5 @@
+'use client'
+
 import { motion } from 'framer-motion'
 import dubaiLogo from '../assets/img/dubai-directory-logo.png'
 import thailandLogo from '../assets/img/thailand-directory-logo.png'
@@ -38,7 +40,7 @@ export default function ThingsImBuilding() {
             <Reveal key={project.name} delay={0.1 + i * 0.1}>
               <motion.div whileHover={{ y: -4 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }}>
                 <img
-                  src={project.logo}
+                  src={project.logo.src}
                   alt={`${project.name} logo`}
                   className="h-auto w-32 object-contain sm:w-44"
                 />

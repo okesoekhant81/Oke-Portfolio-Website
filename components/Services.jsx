@@ -34,7 +34,7 @@ export default function Services() {
         {services.map((service, i) => (
           <Reveal key={service.title} delay={i * 0.08} className="group relative min-h-72 overflow-hidden sm:min-h-80">
             <img
-              src={service.image}
+              src={service.image.src}
               alt=""
               className="absolute inset-0 size-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
             />

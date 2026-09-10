@@ -4,8 +4,9 @@ Personal portfolio site for Oke Soe Khant, built from the Figma design.
 
 ## Stack
 
-- React + Vite
+- Next.js (App Router)
 - Tailwind CSS v4
+- Framer Motion
 
 ## Getting started
 
@@ -18,5 +19,5 @@ npm run dev
 
 ```bash
 npm run build
-npm run preview
+npm run start
 ```
