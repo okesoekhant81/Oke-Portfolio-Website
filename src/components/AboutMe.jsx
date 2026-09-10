@@ -3,7 +3,8 @@ export default function AboutMe() {
     <section className="bg-brand px-6 py-12 text-white sm:px-12 sm:py-16 md:px-16">
       <div className="mx-auto max-w-3xl">
         <h2 className="text-4xl leading-tight sm:text-5xl md:text-6xl">
-          About Me <span className="font-display font-bold italic">You Need To Know</span>
+          <span className="block">About me</span>
+          <span className="block font-display font-bold italic">You Need To Know</span>
         </h2>
 
         <div className="mt-6 space-y-4 text-sm font-light leading-relaxed sm:text-base">

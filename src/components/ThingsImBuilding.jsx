@@ -21,7 +21,8 @@ export default function ThingsImBuilding() {
     <section className="bg-white px-6 py-12 sm:px-12 sm:py-16 md:px-16">
       <div className="mx-auto max-w-4xl">
         <h2 className="text-4xl text-ink sm:text-5xl md:text-6xl">
-          Thing <span className="font-display font-bold italic text-brand">I&rsquo;m Building</span>
+          <span className="block">Thing</span>
+          <span className="block font-display font-bold italic text-brand">I&rsquo;m Building</span>
         </h2>
         <p className="mt-3 text-sm text-muted sm:text-base">
           I don&rsquo;t only work on brands.{' '}
@@ -34,7 +35,7 @@ export default function ThingsImBuilding() {
               <img
                 src={project.logo}
                 alt={`${project.name} logo`}
-                className="h-24 w-auto object-contain sm:h-28"
+                className="h-auto w-32 object-contain sm:w-44"
               />
               <p className="mt-4 text-xs leading-relaxed text-ink">
                 A digital discovery platform built for the{' '}

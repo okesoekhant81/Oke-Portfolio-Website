@@ -3,7 +3,8 @@ export default function NotJustMarketing() {
     <section className="bg-brand px-6 py-12 text-white sm:px-12 sm:py-16 md:px-16">
       <div className="mx-auto max-w-3xl">
         <h2 className="text-4xl leading-tight sm:text-5xl md:text-6xl">
-          Not Just <span className="font-display font-bold italic">Marketing</span>
+          <span className="block">Not Just</span>
+          <span className="block font-display font-bold italic">Marketing</span>
         </h2>
 
         <p className="mt-6 text-sm font-light leading-relaxed sm:text-base">
