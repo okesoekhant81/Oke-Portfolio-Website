@@ -7,7 +7,7 @@ import Workshop from '../components/Workshop'
 import AboutMe from '../components/AboutMe'
 import Contact from '../components/Contact'
 import { getHomepage } from '../lib/getHomepage'
-import { SITE_URL, SITE_NAME } from '../lib/site'
+import { SITE_URL, SITE_NAME, SOCIAL_LINKS } from '../lib/site'
 
 const personJsonLd = {
   '@context': 'https://schema.org',
@@ -18,7 +18,15 @@ const personJsonLd = {
   description:
     'Brand strategy, marketing, content, and digital experience — helping businesses turn ideas into brands and brands into growth.',
   email: 'hello@okesoekhant.com',
-  sameAs: [],
+  knowsAbout: [
+    'Brand Strategy',
+    'Brand Positioning',
+    'Digital Marketing',
+    'Content Strategy',
+    'Digital Experience Design',
+    'Business Growth',
+  ],
+  sameAs: SOCIAL_LINKS,
 }
 
 export default async function Home() {
