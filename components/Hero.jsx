@@ -18,9 +18,9 @@ export default function Hero({ name, body, badgePrefix, badgeEmphasis, image }) 
 
           <div className="mt-5">
             <motion.span
-              whileHover={{ scale: 1.05 }}
+              whileHover={{ scale: 1.06, boxShadow: '0 10px 25px -8px rgba(232,54,6,0.55)' }}
               whileTap={{ scale: 0.97 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+              transition={{ type: 'spring', stiffness: 350, damping: 22, mass: 0.6 }}
               className="inline-block cursor-default rounded-full bg-brand px-5 py-2 text-xs font-light text-white"
             >
               {badgePrefix} <span className="font-display font-bold italic">{badgeEmphasis}</span>
@@ -32,8 +32,8 @@ export default function Hero({ name, body, badgePrefix, badgeEmphasis, image }) 
           <motion.img
             src={image}
             alt={`Portrait of ${name}`}
-            whileHover={{ scale: 1.03 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+            whileHover={{ scale: 1.04, rotate: -0.5 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 22, mass: 0.7 }}
             className="h-auto w-56 sm:w-44 md:w-52 lg:w-60"
           />
         </Reveal>

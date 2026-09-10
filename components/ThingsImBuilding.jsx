@@ -20,11 +20,18 @@ export default function ThingsImBuilding({ line1, line2, intro, emphasis, projec
         <div className="mt-10 grid grid-cols-2 gap-6 sm:gap-8">
           {projects.map((project, i) => (
             <Reveal key={project.name} delay={0.1 + i * 0.1}>
-              <motion.div whileHover={{ y: -4 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }}>
-                <img
+              <motion.div
+                whileHover="hover"
+                initial="rest"
+                transition={{ type: 'spring', stiffness: 280, damping: 24, mass: 0.6 }}
+                variants={{ rest: { y: 0 }, hover: { y: -6 } }}
+              >
+                <motion.img
                   src={project.logo}
                   alt={`${project.name} logo`}
-                  className="h-auto w-32 object-contain sm:w-44"
+                  variants={{ rest: { scale: 1 }, hover: { scale: 1.06 } }}
+                  transition={{ type: 'spring', stiffness: 280, damping: 20, mass: 0.6 }}
+                  className="h-auto w-32 origin-left object-contain sm:w-44"
                 />
                 <p className="mt-4 text-xs leading-relaxed text-ink">
                   A digital discovery platform built for the <em className="font-display not-italic">{project.location}</em>.{' '}
