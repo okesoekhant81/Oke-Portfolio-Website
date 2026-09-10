@@ -2,14 +2,24 @@ import { PortableText } from '@portabletext/react'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getPost } from '../../../lib/blog'
+import { SITE_URL, SITE_NAME } from '../../../lib/site'
 
 export async function generateMetadata({ params }) {
   const { slug } = await params
   const post = await getPost(slug)
   if (!post) return {}
   return {
-    title: `${post.title} — Oke Soe Khant`,
+    title: post.title,
     description: post.excerpt,
+    alternates: { canonical: `/blog/${slug}` },
+    openGraph: {
+      type: 'article',
+      url: `${SITE_URL}/blog/${slug}`,
+      title: post.title,
+      description: post.excerpt,
+      publishedTime: post.publishedAt,
+      images: post.coverImageUrl ? [{ url: post.coverImageUrl }] : undefined,
+    },
   }
 }
 
@@ -35,8 +45,19 @@ export default async function BlogPost({ params }) {
 
   if (!post) notFound()
 
+  const articleJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: post.title,
+    description: post.excerpt,
+    image: post.coverImageUrl ? [post.coverImageUrl] : undefined,
+    datePublished: post.publishedAt,
+    author: { '@type': 'Person', name: SITE_NAME, url: SITE_URL },
+  }
+
   return (
     <main className="mx-auto max-w-3xl px-6 py-14 sm:px-12 sm:py-16 md:px-16">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }} />
       <Link href="/blog" className="text-sm text-brand underline underline-offset-4">
         &larr; All articles
       </Link>
@@ -56,7 +77,7 @@ export default async function BlogPost({ params }) {
       )}
 
       {post.coverImageUrl && (
-        <img src={post.coverImageUrl} alt="" className="mt-6 aspect-video w-full rounded-lg object-cover" />
+        <img src={post.coverImageUrl} alt={post.title} className="mt-6 aspect-video w-full rounded-lg object-cover" />
       )}
 
       {post.body && <PortableText value={post.body} components={portableTextComponents} />}

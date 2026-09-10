@@ -1,8 +1,12 @@
 import Link from 'next/link'
 import { getPosts } from '../../lib/blog'
+import { SITE_URL } from '../../lib/site'
 
 export const metadata = {
-  title: 'Articles — Oke Soe Khant',
+  title: 'Articles',
+  description: 'Writing on brand strategy, marketing, content, and digital growth from Oke Soe Khant.',
+  alternates: { canonical: '/blog' },
+  openGraph: { url: `${SITE_URL}/blog`, title: 'Articles' },
 }
 
 export default async function BlogIndex() {
@@ -26,7 +30,7 @@ export default async function BlogIndex() {
                 {post.coverImageUrl && (
                   <img
                     src={post.coverImageUrl}
-                    alt=""
+                    alt={post.title}
                     className="mb-4 aspect-video w-full rounded-lg object-cover transition-transform duration-500 group-hover:scale-[1.02]"
                   />
                 )}

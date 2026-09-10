@@ -7,12 +7,26 @@ import Workshop from '../components/Workshop'
 import AboutMe from '../components/AboutMe'
 import Contact from '../components/Contact'
 import { getHomepage } from '../lib/getHomepage'
+import { SITE_URL, SITE_NAME } from '../lib/site'
+
+const personJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: SITE_NAME,
+  url: SITE_URL,
+  jobTitle: 'Brand Strategist',
+  description:
+    'Brand strategy, marketing, content, and digital experience — helping businesses turn ideas into brands and brands into growth.',
+  email: 'hello@okesoekhant.com',
+  sameAs: [],
+}
 
 export default async function Home() {
   const content = await getHomepage()
 
   return (
     <main>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }} />
       <Hero
         name={content.heroName}
         body={content.heroBody}

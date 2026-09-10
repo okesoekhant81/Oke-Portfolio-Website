@@ -4,7 +4,7 @@ import RichText from './RichText'
 export default function Workshop({ image, line1, line2, body, role }) {
   return (
     <section className="relative overflow-hidden bg-ink">
-      <img src={image} alt="" className="absolute inset-0 size-full object-cover" />
+      <img src={image} alt={`${line1} ${line2}`} className="absolute inset-0 size-full object-cover" />
       <Reveal className="relative mx-auto max-w-3xl px-6 py-14 text-white sm:px-12 sm:py-20 md:px-16">
         <h2 className="text-2xl sm:text-3xl md:text-4xl">
           <span className="block font-display font-bold italic">{line1}</span>

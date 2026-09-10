@@ -31,7 +31,7 @@ export default function Hero({ name, body, badgePrefix, badgeEmphasis, image }) 
         <Reveal delay={0.15} className="mx-auto sm:mx-0 sm:shrink-0">
           <motion.img
             src={image}
-            alt={name}
+            alt={`Portrait of ${name}`}
             whileHover={{ scale: 1.03 }}
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
             className="h-auto w-56 sm:w-44 md:w-52 lg:w-60"
