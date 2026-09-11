@@ -31,6 +31,16 @@ body {
   background: #ffffff;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: opacity 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Toggled imperatively by LocaleToggle around its router.refresh() call —
+   switching language re-renders the page from the server (translated text
+   can't be swapped client-side without risking a flash of the wrong
+   language), so this dims the page for that round-trip instead of letting
+   every section's text snap to the new language in one abrupt frame. */
+body.locale-transitioning {
+  opacity: 0.45;
 }
 
 /* Background only, deliberately not `color`: every public component sets
