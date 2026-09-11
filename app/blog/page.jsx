@@ -28,7 +28,7 @@ export default async function BlogIndex() {
   return (
     <main>
       <NavMenu />
-      <div className="mx-auto max-w-2xl px-6 pt-20 pb-14 sm:px-12 sm:pt-24 sm:pb-16 md:px-16 lg:max-w-4xl">
+      <div className="mx-auto max-w-2xl px-6 py-14 sm:px-12 sm:py-16 md:px-16 lg:max-w-4xl">
         <Reveal>
           <h1 className="font-display text-4xl font-bold italic text-brand sm:text-5xl">Articles</h1>
         </Reveal>

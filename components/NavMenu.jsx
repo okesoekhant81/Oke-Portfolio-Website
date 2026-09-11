@@ -33,7 +33,7 @@ export default function NavMenu() {
         onClick={() => setOpen((v) => !v)}
         aria-label={open ? 'Close menu' : 'Open menu'}
         aria-expanded={open}
-        className="fixed left-5 top-5 z-50 flex h-11 w-11 flex-col items-center justify-center gap-[5px] rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-colors duration-300 hover:bg-white sm:left-8 sm:top-8"
+        className="fixed right-5 top-5 z-50 flex h-11 w-11 flex-col items-center justify-center gap-[5px] rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-colors duration-300 hover:bg-white sm:right-8 sm:top-8"
       >
         <motion.span
           animate={open ? { rotate: 45, y: 5.5 } : { rotate: 0, y: 0 }}

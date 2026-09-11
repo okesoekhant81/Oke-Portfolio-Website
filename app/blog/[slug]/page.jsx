@@ -52,7 +52,7 @@ export default async function BlogPost({ params }) {
   return (
     <main>
       <NavMenu />
-      <div className="mx-auto max-w-2xl px-6 pt-20 pb-14 sm:px-12 sm:pt-24 sm:pb-16 md:px-16 lg:max-w-3xl">
+      <div className="mx-auto max-w-2xl px-6 py-14 sm:px-12 sm:py-16 md:px-16 lg:max-w-3xl">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }} />
 
         <Link
