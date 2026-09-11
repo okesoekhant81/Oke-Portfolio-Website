@@ -11,6 +11,7 @@ import Contact from '../components/Contact'
 import { getHomepageContent } from '../lib/content/homepage'
 import { getPosts } from '../lib/content/posts'
 import { getLocale } from '../lib/i18n'
+import { localizeHomepageContent, localizePost } from '../lib/localizeContent'
 import { SITE_URL, SITE_NAME, SOCIAL_LINKS } from '../lib/site'
 
 const personJsonLd = {
@@ -34,7 +35,9 @@ const personJsonLd = {
 }
 
 export default async function Home() {
-  const [content, posts, locale] = await Promise.all([getHomepageContent(), getPosts(), getLocale()])
+  const [rawContent, rawPosts, locale] = await Promise.all([getHomepageContent(), getPosts(), getLocale()])
+  const content = localizeHomepageContent(rawContent, locale)
+  const posts = rawPosts.slice(0, 4).map((post) => localizePost(post, locale))
 
   return (
     <main>
@@ -46,14 +49,21 @@ export default async function Home() {
         badgePrefix={content.heroBadgePrefix}
         badgeEmphasis={content.heroBadgeEmphasis}
         image={content.heroImage}
+        locale={locale}
       />
-      <NotJustMarketing line1={content.marketingLine1} line2={content.marketingLine2} body={content.marketingBody} />
+      <NotJustMarketing
+        line1={content.marketingLine1}
+        line2={content.marketingLine2}
+        body={content.marketingBody}
+        locale={locale}
+      />
       <Services services={content.services} />
       <Strategy
         line1={content.strategyLine1}
         line2={content.strategyLine2}
         paragraph={content.strategyParagraph}
         quote={content.strategyQuote}
+        locale={locale}
       />
       <ThingsImBuilding
         line1={content.buildingLine1}
@@ -61,6 +71,7 @@ export default async function Home() {
         intro={content.buildingIntro}
         emphasis={content.buildingEmphasis}
         projects={content.projects}
+        locale={locale}
       />
       <Workshop
         image={content.workshopImage}
@@ -68,9 +79,10 @@ export default async function Home() {
         line2={content.workshopLine2}
         body={content.workshopBody}
         role={content.workshopRole}
+        locale={locale}
       />
-      <AboutMe line1={content.aboutLine1} line2={content.aboutLine2} body={content.aboutBody} />
-      <LatestArticles posts={posts.slice(0, 4)} locale={locale} />
+      <AboutMe line1={content.aboutLine1} line2={content.aboutLine2} body={content.aboutBody} locale={locale} />
+      <LatestArticles posts={posts} locale={locale} />
       <Contact
         line1={content.contactLine1}
         line2={content.contactLine2}
@@ -79,6 +91,7 @@ export default async function Home() {
         email={content.contactEmail}
         copyright={content.contactCopyright}
         tagline={content.contactTagline}
+        locale={locale}
       />
     </main>
   )

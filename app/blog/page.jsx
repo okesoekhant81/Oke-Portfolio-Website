@@ -5,6 +5,7 @@ import Reveal from '../../components/Reveal'
 import { getPosts } from '../../lib/content/posts'
 import { getHomepageContent } from '../../lib/content/homepage'
 import { getLocale } from '../../lib/i18n'
+import { localizeHomepageContent, localizePost } from '../../lib/localizeContent'
 import { getDictionary, italicIfLatin } from '../../lib/dictionaries'
 import { SITE_URL } from '../../lib/site'
 
@@ -24,8 +25,10 @@ function chunk(items, size) {
 }
 
 export default async function BlogIndex() {
-  const [posts, content, locale] = await Promise.all([getPosts(), getHomepageContent(), getLocale()])
+  const [rawPosts, rawContent, locale] = await Promise.all([getPosts(), getHomepageContent(), getLocale()])
   const dict = getDictionary(locale)
+  const content = localizeHomepageContent(rawContent, locale)
+  const posts = rawPosts.map((post) => localizePost(post, locale))
   const groups = chunk(posts, 4)
 
   return (
@@ -91,6 +94,7 @@ export default async function BlogIndex() {
         email={content.contactEmail}
         copyright={content.contactCopyright}
         tagline={content.contactTagline}
+        locale={locale}
       />
     </main>
   )

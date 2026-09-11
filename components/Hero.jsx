@@ -3,8 +3,9 @@
 import { motion } from 'framer-motion'
 import Reveal from './Reveal'
 import RichText from './RichText'
+import { italicIfLatin } from '../lib/dictionaries'
 
-export default function Hero({ name, body, badgePrefix, badgeEmphasis, image }) {
+export default function Hero({ name, body, badgePrefix, badgeEmphasis, image, locale = 'en' }) {
   return (
     <section className="bg-white pt-6 sm:pt-8 md:pt-10 dark:bg-ink">
       <div className="mx-auto flex max-w-5xl flex-col sm:flex-row sm:items-center sm:gap-10 sm:px-10 md:gap-16 md:px-16">
@@ -14,7 +15,11 @@ export default function Hero({ name, body, badgePrefix, badgeEmphasis, image }) 
             <span className="font-display font-bold italic text-brand">{name}</span>
           </h1>
 
-          <RichText value={body} className="text-sm leading-relaxed text-muted sm:text-base dark:text-neutral-400" />
+          <RichText
+            value={body}
+            locale={locale}
+            className="text-sm leading-relaxed text-muted sm:text-base dark:text-neutral-400"
+          />
 
           <div className="mt-5">
             <motion.span
@@ -23,7 +28,7 @@ export default function Hero({ name, body, badgePrefix, badgeEmphasis, image }) 
               transition={{ type: 'spring', stiffness: 350, damping: 22, mass: 0.6 }}
               className="inline-block cursor-default rounded-full bg-brand px-5 py-2 text-xs font-light text-white"
             >
-              {badgePrefix} <span className="font-display font-bold italic">{badgeEmphasis}</span>
+              {badgePrefix} <span className={`font-display font-bold text-white ${italicIfLatin(locale)}`}>{badgeEmphasis}</span>
             </motion.span>
           </div>
         </Reveal>

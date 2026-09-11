@@ -2,8 +2,11 @@
 // italic serif, *emphasis* becomes non-italic serif, blank lines split
 // paragraphs. Kept dependency-free since this is the only formatting the
 // admin panel needs to produce.
+//
+// `locale` drops the italic on **bold** spans when the text is Myanmar —
+// see italicIfLatin in lib/dictionaries.js for why.
 
-function renderInline(text) {
+function renderInline(text, italic) {
   const nodes = []
   const pattern = /\*\*(.+?)\*\*|\*(.+?)\*/g
   let lastIndex = 0
@@ -14,7 +17,7 @@ function renderInline(text) {
     if (match.index > lastIndex) nodes.push(text.slice(lastIndex, match.index))
     if (match[1] !== undefined) {
       nodes.push(
-        <strong key={key++} className="font-display font-bold italic">
+        <strong key={key++} className={`font-display font-bold ${italic ? 'italic' : ''}`}>
           {match[1]}
         </strong>
       )
@@ -31,15 +34,16 @@ function renderInline(text) {
   return nodes
 }
 
-export default function RichText({ value, className }) {
+export default function RichText({ value, className, locale = 'en' }) {
   if (!value) return null
   const paragraphs = value.split(/\n\s*\n/).filter((p) => p.trim())
+  const italic = locale !== 'my'
 
   return (
     <div className={className}>
       {paragraphs.map((p, i) => (
         <p key={i} className="mt-4">
-          {renderInline(p)}
+          {renderInline(p, italic)}
         </p>
       ))}
     </div>

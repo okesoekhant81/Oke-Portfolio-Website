@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Reveal from './Reveal'
-import { getDictionary } from '../lib/dictionaries'
+import { getDictionary, italicIfLatin } from '../lib/dictionaries'
 
 function formatDate(dateString, dateLocale) {
   if (!dateString) return null
@@ -49,12 +49,12 @@ export default function ArticleCard({ post, variant = 'square', delay = 0, class
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 p-4 lg:p-6">
-          {date && <p className="font-display text-[10px] italic text-white/70 lg:text-xs">{date}</p>}
+          {date && <p className={`font-display text-[10px] text-white/70 lg:text-xs ${italicIfLatin(locale)}`}>{date}</p>}
           <h3
             className={
               variant === 'featured'
-                ? 'mt-1 font-display text-sm font-bold italic text-white lg:text-xl'
-                : 'mt-1 font-display text-xs font-bold italic text-white line-clamp-3 lg:text-base'
+                ? `mt-1 font-display text-sm font-bold text-white lg:text-xl ${italicIfLatin(locale)}`
+                : `mt-1 font-display text-xs font-bold text-white line-clamp-3 lg:text-base ${italicIfLatin(locale)}`
             }
           >
             {post.title}

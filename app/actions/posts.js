@@ -18,11 +18,14 @@ export async function savePostAction(prevState, formData) {
 
   const post = {
     title,
+    titleMy: get('titleMy'),
     slug,
     excerpt: get('excerpt'),
+    excerptMy: get('excerptMy'),
     coverImageUrl: get('coverImageUrl') || null,
     publishedAt: get('publishedAt') || new Date().toISOString(),
     body: get('body'),
+    bodyMy: get('bodyMy'),
   }
 
   try {

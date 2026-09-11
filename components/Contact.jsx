@@ -1,17 +1,18 @@
 import Reveal from './Reveal'
 import RichText from './RichText'
 import SocialIcons from './SocialIcons'
+import { italicIfLatin } from '../lib/dictionaries'
 
-export default function Contact({ line1, line2, body, cta, email, copyright, tagline }) {
+export default function Contact({ line1, line2, body, cta, email, copyright, tagline, locale = 'en' }) {
   return (
     <footer id="contact" className="bg-white px-6 py-14 text-ink sm:px-12 sm:py-16 md:px-16 dark:bg-ink dark:text-neutral-100">
       <Reveal className="mx-auto max-w-3xl">
         <h2 className="text-3xl leading-tight sm:text-4xl md:text-5xl">
           <span className="block">{line1}</span>
-          <span className="block font-display font-bold italic">{line2}</span>
+          <span className={`block font-display font-bold ${italicIfLatin(locale)}`}>{line2}</span>
         </h2>
 
-        <RichText value={body} className="text-sm leading-relaxed text-muted sm:text-base dark:text-neutral-400" />
+        <RichText value={body} locale={locale} className="text-sm leading-relaxed text-muted sm:text-base dark:text-neutral-400" />
 
         <p className="mt-6 text-sm sm:text-base">{cta}</p>
         <a
@@ -24,7 +25,7 @@ export default function Contact({ line1, line2, body, cta, email, copyright, tag
         <SocialIcons className="mt-8" />
 
         <p className="mt-6 text-xs text-muted dark:text-neutral-400">{copyright}</p>
-        <p className="mt-1 font-display text-xs font-bold italic text-muted dark:text-neutral-400">{tagline}</p>
+        <p className={`mt-1 font-display text-xs font-bold text-muted dark:text-neutral-400 ${italicIfLatin(locale)}`}>{tagline}</p>
       </Reveal>
     </footer>
   )

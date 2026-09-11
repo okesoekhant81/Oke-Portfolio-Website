@@ -10,6 +10,7 @@ import { getPost, getPosts } from '../../../lib/content/posts'
 import { getHomepageContent } from '../../../lib/content/homepage'
 import { recordView } from '../../../lib/content/analytics'
 import { getLocale } from '../../../lib/i18n'
+import { localizeHomepageContent, localizePost } from '../../../lib/localizeContent'
 import { getDictionary, italicIfLatin } from '../../../lib/dictionaries'
 import { SITE_URL, SITE_NAME } from '../../../lib/site'
 
@@ -34,7 +35,7 @@ export async function generateMetadata({ params }) {
 
 export default async function BlogPost({ params }) {
   const { slug } = await params
-  const [post, allPosts, content, locale] = await Promise.all([
+  const [rawPost, allPosts, rawContent, locale] = await Promise.all([
     getPost(slug),
     getPosts(),
     getHomepageContent(),
@@ -42,14 +43,20 @@ export default async function BlogPost({ params }) {
   ])
   const dict = getDictionary(locale)
 
-  if (!post) notFound()
+  if (!rawPost) notFound()
 
   // Deferred past the response so a slow Blob write never delays the page.
   after(() => recordView(slug))
 
+  const post = localizePost(rawPost, locale)
+  const content = localizeHomepageContent(rawContent, locale)
+
   // Recency-only, capped at four, no filtering by topic or tags — kept
   // deliberately simple per the design brief.
-  const relatedPosts = allPosts.filter((p) => p.slug !== post.slug).slice(0, 4)
+  const relatedPosts = allPosts
+    .filter((p) => p.slug !== post.slug)
+    .slice(0, 4)
+    .map((related) => localizePost(related, locale))
 
   const articleJsonLd = {
     '@context': 'https://schema.org',
@@ -86,7 +93,7 @@ export default async function BlogPost({ params }) {
 
         <Reveal delay={0.1}>
           {post.publishedAt && (
-            <p className="mt-6 font-display text-xs italic text-muted dark:text-neutral-400">
+            <p className={`mt-6 font-display text-xs text-muted dark:text-neutral-400 ${italicIfLatin(locale)}`}>
               {new Date(post.publishedAt).toLocaleDateString(dict.locale.dateLocale, {
                 year: 'numeric',
                 month: 'long',
@@ -95,11 +102,17 @@ export default async function BlogPost({ params }) {
             </p>
           )}
 
-          <h1 className="mt-2 font-display text-2xl font-bold italic text-ink sm:text-3xl md:text-4xl dark:text-neutral-100">
+          <h1
+            className={`mt-2 font-display text-2xl font-bold text-ink sm:text-3xl md:text-4xl dark:text-neutral-100 ${italicIfLatin(locale)}`}
+          >
             {post.title}
           </h1>
 
-          <RichText value={post.body} className="text-sm leading-relaxed text-ink sm:text-base dark:text-neutral-100" />
+          <RichText
+            value={post.body}
+            locale={locale}
+            className="text-sm leading-relaxed text-ink sm:text-base dark:text-neutral-100"
+          />
         </Reveal>
 
         {relatedPosts.length > 0 && (
@@ -126,6 +139,7 @@ export default async function BlogPost({ params }) {
         email={content.contactEmail}
         copyright={content.contactCopyright}
         tagline={content.contactTagline}
+        locale={locale}
       />
     </main>
   )
