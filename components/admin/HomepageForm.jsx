@@ -6,7 +6,7 @@ import ImageField from './ImageField'
 
 function Section({ title, children }) {
   return (
-    <fieldset className="mt-8 rounded-xl border border-neutral-200 bg-white p-6">
+    <fieldset className="mt-8 min-w-0 rounded-xl border border-neutral-200 bg-white p-6">
       <legend className="px-1 font-display text-base font-bold italic text-brand">{title}</legend>
       <div className="mt-4 space-y-4">{children}</div>
     </fieldset>
@@ -48,7 +48,7 @@ export default function HomepageForm({ content }) {
       <Section title="Hero">
         <Field label="Name (e.g. Oke)" name="heroName" defaultValue={content.heroName} />
         <TextArea label="Intro" name="heroBody" defaultValue={content.heroBody} rows={5} />
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Badge prefix" name="heroBadgePrefix" defaultValue={content.heroBadgePrefix} />
           <Field label="Badge emphasis" name="heroBadgeEmphasis" defaultValue={content.heroBadgeEmphasis} />
         </div>
@@ -56,7 +56,7 @@ export default function HomepageForm({ content }) {
       </Section>
 
       <Section title="Not Just Marketing">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Heading line 1" name="marketingLine1" defaultValue={content.marketingLine1} />
           <Field label="Heading line 2 (accent)" name="marketingLine2" defaultValue={content.marketingLine2} />
         </div>
@@ -77,7 +77,7 @@ export default function HomepageForm({ content }) {
       </Section>
 
       <Section title="Strategy Before Tactics">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Heading line 1" name="strategyLine1" defaultValue={content.strategyLine1} />
           <Field label="Heading line 2 (accent)" name="strategyLine2" defaultValue={content.strategyLine2} />
         </div>
@@ -86,11 +86,11 @@ export default function HomepageForm({ content }) {
       </Section>
 
       <Section title="Thing I'm Building">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Heading line 1" name="buildingLine1" defaultValue={content.buildingLine1} />
           <Field label="Heading line 2 (accent)" name="buildingLine2" defaultValue={content.buildingLine2} />
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Intro" name="buildingIntro" defaultValue={content.buildingIntro} />
           <Field label="Intro emphasis" name="buildingEmphasis" defaultValue={content.buildingEmphasis} />
         </div>
@@ -110,7 +110,7 @@ export default function HomepageForm({ content }) {
 
       <Section title="Workshop">
         <ImageField label="Background photo" name="workshopImage" defaultValue={content.workshopImage} />
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Heading line 1 (accent)" name="workshopLine1" defaultValue={content.workshopLine1} />
           <Field label="Heading line 2" name="workshopLine2" defaultValue={content.workshopLine2} />
         </div>
@@ -119,7 +119,7 @@ export default function HomepageForm({ content }) {
       </Section>
 
       <Section title="About Me">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Heading line 1" name="aboutLine1" defaultValue={content.aboutLine1} />
           <Field label="Heading line 2 (accent)" name="aboutLine2" defaultValue={content.aboutLine2} />
         </div>
@@ -127,16 +127,16 @@ export default function HomepageForm({ content }) {
       </Section>
 
       <Section title="Contact">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Heading line 1" name="contactLine1" defaultValue={content.contactLine1} />
           <Field label="Heading line 2 (accent)" name="contactLine2" defaultValue={content.contactLine2} />
         </div>
         <TextArea label="Body" name="contactBody" defaultValue={content.contactBody} rows={2} />
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="CTA line" name="contactCta" defaultValue={content.contactCta} />
           <Field label="Email" name="contactEmail" defaultValue={content.contactEmail} />
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Copyright line" name="contactCopyright" defaultValue={content.contactCopyright} />
           <Field label="Tagline" name="contactTagline" defaultValue={content.contactTagline} />
         </div>
