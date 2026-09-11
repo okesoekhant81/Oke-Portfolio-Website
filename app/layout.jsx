@@ -1,5 +1,6 @@
 import './globals.css'
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from '../lib/site'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 
 export const metadata = {
   metadataBase: new URL(SITE_URL),
@@ -53,7 +54,10 @@ export default function RootLayout({ children }) {
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <SpeedInsights />
+      </body>
     </html>
   )
 }
