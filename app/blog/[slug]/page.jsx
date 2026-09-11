@@ -9,6 +9,8 @@ import RichText from '../../../components/RichText'
 import { getPost, getPosts } from '../../../lib/content/posts'
 import { getHomepageContent } from '../../../lib/content/homepage'
 import { recordView } from '../../../lib/content/analytics'
+import { getLocale } from '../../../lib/i18n'
+import { getDictionary, italicIfLatin } from '../../../lib/dictionaries'
 import { SITE_URL, SITE_NAME } from '../../../lib/site'
 
 export async function generateMetadata({ params }) {
@@ -32,7 +34,13 @@ export async function generateMetadata({ params }) {
 
 export default async function BlogPost({ params }) {
   const { slug } = await params
-  const [post, allPosts, content] = await Promise.all([getPost(slug), getPosts(), getHomepageContent()])
+  const [post, allPosts, content, locale] = await Promise.all([
+    getPost(slug),
+    getPosts(),
+    getHomepageContent(),
+    getLocale(),
+  ])
+  const dict = getDictionary(locale)
 
   if (!post) notFound()
 
@@ -55,7 +63,7 @@ export default async function BlogPost({ params }) {
 
   return (
     <main className="dark:bg-ink">
-      <NavMenu />
+      <NavMenu locale={locale} />
       <div className="mx-auto max-w-2xl px-6 pt-8 pb-14 sm:px-12 sm:pt-10 sm:pb-16 md:px-16 lg:max-w-3xl">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }} />
 
@@ -63,7 +71,7 @@ export default async function BlogPost({ params }) {
           href="/blog"
           className="inline-flex items-center gap-1.5 border-b border-brand/40 pb-0.5 text-xs text-brand transition-colors duration-300 hover:border-brand hover:text-ink dark:hover:text-white"
         >
-          <span aria-hidden="true">&larr;</span> All articles
+          <span aria-hidden="true">&larr;</span> {dict.blog.allArticles}
         </Link>
 
         <Reveal delay={0.05}>
@@ -79,7 +87,7 @@ export default async function BlogPost({ params }) {
         <Reveal delay={0.1}>
           {post.publishedAt && (
             <p className="mt-6 font-display text-xs italic text-muted dark:text-neutral-400">
-              {new Date(post.publishedAt).toLocaleDateString('en-US', {
+              {new Date(post.publishedAt).toLocaleDateString(dict.locale.dateLocale, {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric',
@@ -97,11 +105,13 @@ export default async function BlogPost({ params }) {
         {relatedPosts.length > 0 && (
           <div className="mt-16 sm:mt-20">
             <Reveal>
-              <h2 className="font-display text-base font-bold italic text-brand sm:text-lg">Articles You May Like</h2>
+              <h2 className={`font-display text-base font-bold text-brand sm:text-lg ${italicIfLatin(locale)}`}>
+                {dict.blog.youMayLike}
+              </h2>
             </Reveal>
             <div className="mt-6 grid grid-cols-2 gap-4">
               {relatedPosts.map((related, i) => (
-                <ArticleCard key={related.slug} post={related} variant="square" delay={i * 0.05} />
+                <ArticleCard key={related.slug} post={related} variant="square" locale={locale} delay={i * 0.05} />
               ))}
             </div>
           </div>

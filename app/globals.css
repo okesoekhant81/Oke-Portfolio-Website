@@ -6,8 +6,12 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-display: "Playfair Display", "SF Pro Display", Georgia, serif;
+  /* "Noto Sans/Serif Myanmar" sit at the end of each stack purely as a
+     per-glyph fallback — SF Pro / Playfair Display have no Myanmar glyphs,
+     so the browser substitutes these automatically wherever Myanmar text
+     appears, without any conditional font-switching logic. */
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, "Noto Sans Myanmar", sans-serif;
+  --font-display: "Playfair Display", "SF Pro Display", Georgia, "Noto Serif Myanmar", serif;
   --color-brand: #e83606;
   --color-ink: #1e1e1e;
   --color-muted: #707070;

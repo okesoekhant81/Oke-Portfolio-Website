@@ -10,6 +10,7 @@ import LatestArticles from '../components/LatestArticles'
 import Contact from '../components/Contact'
 import { getHomepageContent } from '../lib/content/homepage'
 import { getPosts } from '../lib/content/posts'
+import { getLocale } from '../lib/i18n'
 import { SITE_URL, SITE_NAME, SOCIAL_LINKS } from '../lib/site'
 
 const personJsonLd = {
@@ -33,12 +34,12 @@ const personJsonLd = {
 }
 
 export default async function Home() {
-  const [content, posts] = await Promise.all([getHomepageContent(), getPosts()])
+  const [content, posts, locale] = await Promise.all([getHomepageContent(), getPosts(), getLocale()])
 
   return (
     <main>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }} />
-      <NavMenu />
+      <NavMenu locale={locale} />
       <Hero
         name={content.heroName}
         body={content.heroBody}
@@ -69,7 +70,7 @@ export default async function Home() {
         role={content.workshopRole}
       />
       <AboutMe line1={content.aboutLine1} line2={content.aboutLine2} body={content.aboutBody} />
-      <LatestArticles posts={posts.slice(0, 4)} />
+      <LatestArticles posts={posts.slice(0, 4)} locale={locale} />
       <Contact
         line1={content.contactLine1}
         line2={content.contactLine2}

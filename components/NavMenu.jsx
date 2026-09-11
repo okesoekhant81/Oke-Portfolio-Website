@@ -4,20 +4,23 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { AnimatePresence, motion } from 'framer-motion'
 import ThemeToggle from './ThemeToggle'
-
-const LINKS = [
-  { href: '/', label: 'Home' },
-  { href: '/#services', label: 'Services' },
-  { href: '/#work', label: 'Work' },
-  { href: '/#about', label: 'About' },
-  { href: '/blog', label: 'Articles' },
-  { href: '/#contact', label: 'Contact' },
-]
+import LocaleToggle from './LocaleToggle'
+import { getDictionary, italicIfLatin } from '../lib/dictionaries'
 
 const EASE = [0.16, 1, 0.3, 1]
 
-export default function NavMenu() {
+export default function NavMenu({ locale = 'en' }) {
   const [open, setOpen] = useState(false)
+  const dict = getDictionary(locale)
+
+  const links = [
+    { href: '/', label: dict.nav.home },
+    { href: '/#services', label: dict.nav.services },
+    { href: '/#work', label: dict.nav.work },
+    { href: '/#about', label: dict.nav.about },
+    { href: '/blog', label: dict.nav.articles },
+    { href: '/#contact', label: dict.nav.contact },
+  ]
 
   useEffect(() => {
     if (!open) return
@@ -67,7 +70,7 @@ export default function NavMenu() {
           >
             <nav className="mx-auto w-full max-w-3xl px-6 sm:px-12 md:px-16">
               <ul className="space-y-4 sm:space-y-6">
-                {LINKS.map((link, i) => (
+                {links.map((link, i) => (
                   <motion.li
                     key={link.href}
                     initial={{ opacity: 0, y: 16 }}
@@ -77,13 +80,22 @@ export default function NavMenu() {
                     <Link
                       href={link.href}
                       onClick={() => setOpen(false)}
-                      className="font-display text-4xl font-bold italic text-white transition-colors duration-300 hover:text-brand sm:text-5xl"
+                      className={`font-display text-4xl font-bold text-white transition-colors duration-300 hover:text-brand sm:text-5xl ${italicIfLatin(locale)}`}
                     >
                       {link.label}
                     </Link>
                   </motion.li>
                 ))}
               </ul>
+
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 + links.length * 0.06, ease: EASE }}
+                className="mt-8 sm:mt-10"
+              >
+                <LocaleToggle locale={locale} />
+              </motion.div>
             </nav>
           </motion.div>
         )}

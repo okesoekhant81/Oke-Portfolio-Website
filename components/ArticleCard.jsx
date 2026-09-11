@@ -1,9 +1,10 @@
 import Link from 'next/link'
 import Reveal from './Reveal'
+import { getDictionary } from '../lib/dictionaries'
 
-function formatDate(dateString) {
+function formatDate(dateString, dateLocale) {
   if (!dateString) return null
-  return new Date(dateString).toLocaleDateString('en-US', {
+  return new Date(dateString).toLocaleDateString(dateLocale, {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -27,8 +28,9 @@ const VARIANT_CLASSES = {
 // may like" rail. `featured` adds an excerpt beneath the title; `square`
 // and `wide` only differ in aspect ratio. `className` lets callers add grid
 // placement utilities (col-span, row-start, etc.) for desktop layouts.
-export default function ArticleCard({ post, variant = 'square', delay = 0, className = '' }) {
-  const date = formatDate(post.publishedAt)
+export default function ArticleCard({ post, variant = 'square', delay = 0, className = '', locale = 'en' }) {
+  const dict = getDictionary(locale)
+  const date = formatDate(post.publishedAt, dict.locale.dateLocale)
 
   return (
     <Reveal

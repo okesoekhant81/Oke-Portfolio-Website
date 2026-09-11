@@ -1,4 +1,13 @@
 import './globals.css'
+// Self-hosted rather than pulled from Google Fonts at runtime: Playfair
+// Display / SF Pro have no Myanmar glyphs, and this site's Myanmar-reading
+// audience shouldn't depend on fonts.googleapis.com being reachable for
+// its own UI to render correctly. Only the 400/700 weights actually used
+// (bold headings, regular body) to keep the bundle lean.
+import '@fontsource/noto-sans-myanmar/400.css'
+import '@fontsource/noto-sans-myanmar/700.css'
+import '@fontsource/noto-serif-myanmar/400.css'
+import '@fontsource/noto-serif-myanmar/700.css'
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from '../lib/site'
 
 export const metadata = {
@@ -43,6 +52,11 @@ export const metadata = {
 }
 
 export default function RootLayout({ children }) {
+  // Deliberately not locale-aware here (stays a plain, static component):
+  // reading the locale cookie in the shared root layout would force every
+  // route through it — including /admin, which has nothing to do with this
+  // feature — into dynamic rendering. The public pages that actually need
+  // the locale (home, blog list, blog detail) read the cookie themselves.
   return (
     <html lang="en">
       <head>
