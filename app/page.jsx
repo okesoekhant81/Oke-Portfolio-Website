@@ -6,8 +6,10 @@ import Strategy from '../components/Strategy'
 import ThingsImBuilding from '../components/ThingsImBuilding'
 import Workshop from '../components/Workshop'
 import AboutMe from '../components/AboutMe'
+import LatestArticles from '../components/LatestArticles'
 import Contact from '../components/Contact'
 import { getHomepageContent } from '../lib/content/homepage'
+import { getPosts } from '../lib/content/posts'
 import { SITE_URL, SITE_NAME, SOCIAL_LINKS } from '../lib/site'
 
 const personJsonLd = {
@@ -31,7 +33,7 @@ const personJsonLd = {
 }
 
 export default async function Home() {
-  const content = await getHomepageContent()
+  const [content, posts] = await Promise.all([getHomepageContent(), getPosts()])
 
   return (
     <main>
@@ -67,6 +69,7 @@ export default async function Home() {
         role={content.workshopRole}
       />
       <AboutMe line1={content.aboutLine1} line2={content.aboutLine2} body={content.aboutBody} />
+      <LatestArticles posts={posts.slice(0, 4)} />
       <Contact
         line1={content.contactLine1}
         line2={content.contactLine2}
