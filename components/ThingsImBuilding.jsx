@@ -5,7 +5,7 @@ import Reveal from './Reveal'
 
 export default function ThingsImBuilding({ line1, line2, intro, emphasis, projects }) {
   return (
-    <section className="bg-white px-6 py-12 sm:px-12 sm:py-16 md:px-16">
+    <section id="work" className="bg-white px-6 py-12 sm:px-12 sm:py-16 md:px-16">
       <div className="mx-auto max-w-4xl">
         <Reveal>
           <h2 className="text-4xl text-ink sm:text-5xl md:text-6xl">

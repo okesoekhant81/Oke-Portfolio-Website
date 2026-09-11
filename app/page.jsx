@@ -1,3 +1,4 @@
+import NavMenu from '../components/NavMenu'
 import Hero from '../components/Hero'
 import NotJustMarketing from '../components/NotJustMarketing'
 import Services from '../components/Services'
@@ -35,6 +36,7 @@ export default async function Home() {
   return (
     <main>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }} />
+      <NavMenu />
       <Hero
         name={content.heroName}
         body={content.heroBody}

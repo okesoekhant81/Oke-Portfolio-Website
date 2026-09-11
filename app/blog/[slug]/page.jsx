@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import ArticleCard from '../../../components/ArticleCard'
 import Contact from '../../../components/Contact'
+import NavMenu from '../../../components/NavMenu'
 import Reveal from '../../../components/Reveal'
 import RichText from '../../../components/RichText'
 import { getPost, getPosts } from '../../../lib/content/posts'
@@ -50,7 +51,8 @@ export default async function BlogPost({ params }) {
 
   return (
     <main>
-      <div className="mx-auto max-w-2xl px-6 py-14 sm:px-12 sm:py-16 md:px-16 lg:max-w-3xl">
+      <NavMenu />
+      <div className="mx-auto max-w-2xl px-6 pt-20 pb-14 sm:px-12 sm:pt-24 sm:pb-16 md:px-16 lg:max-w-3xl">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }} />
 
         <Link

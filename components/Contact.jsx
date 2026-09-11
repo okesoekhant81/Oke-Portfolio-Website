@@ -3,7 +3,7 @@ import RichText from './RichText'
 
 export default function Contact({ line1, line2, body, cta, email, copyright, tagline }) {
   return (
-    <footer className="bg-white px-6 py-14 text-ink sm:px-12 sm:py-16 md:px-16">
+    <footer id="contact" className="bg-white px-6 py-14 text-ink sm:px-12 sm:py-16 md:px-16">
       <Reveal className="mx-auto max-w-3xl">
         <h2 className="text-3xl leading-tight sm:text-4xl md:text-5xl">
           <span className="block">{line1}</span>

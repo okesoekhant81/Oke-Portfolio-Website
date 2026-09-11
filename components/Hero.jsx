@@ -6,7 +6,7 @@ import RichText from './RichText'
 
 export default function Hero({ name, body, badgePrefix, badgeEmphasis, image }) {
   return (
-    <section className="bg-white pt-10 sm:pt-14 md:pt-16">
+    <section className="bg-white pt-20 sm:pt-24">
       <div className="mx-auto flex max-w-5xl flex-col sm:flex-row sm:items-center sm:gap-10 sm:px-10 md:gap-16 md:px-16">
         <Reveal className="px-6 pb-8 sm:flex-1 sm:px-0 sm:pb-14">
           <h1 className="text-3xl text-ink sm:text-5xl md:text-6xl">
