@@ -29,7 +29,7 @@ export default function NavMenu() {
 
   return (
     <>
-      <div className="fixed right-5 bottom-5 z-50 flex items-center gap-2 sm:right-8 sm:bottom-8">
+      <div className="fixed right-5 bottom-5 z-50 flex flex-col items-center gap-2 sm:right-8 sm:bottom-8">
         <ThemeToggle />
         <button
           type="button"
