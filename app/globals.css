@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Class-based dark mode (toggled via ThemeToggle, not just prefers-color-scheme),
+   scoped to the public site only — admin components never use `dark:` classes,
+   so they're unaffected even if `.dark` is present on <html>. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-display: "Playfair Display", "SF Pro Display", Georgia, serif;
@@ -12,10 +17,24 @@ html {
   scroll-behavior: smooth;
 }
 
+html.dark {
+  color-scheme: dark;
+}
+
 body {
   font-family: var(--font-sans);
   color: var(--color-ink);
   background: #ffffff;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Background only, deliberately not `color`: every public component sets
+   its own text color explicitly (including its dark: variant), so nothing
+   should rely on inheriting from body — that would leak into /admin for
+   any element that doesn't set its own color, even though admin never
+   opts into dark: classes itself. Admin's own bg-neutral-50 on <main>
+   fully covers the viewport regardless, so this is invisible there. */
+.dark body {
+  background: var(--color-ink);
 }

@@ -4,27 +4,27 @@ import SocialIcons from './SocialIcons'
 
 export default function Contact({ line1, line2, body, cta, email, copyright, tagline }) {
   return (
-    <footer id="contact" className="bg-white px-6 py-14 text-ink sm:px-12 sm:py-16 md:px-16">
+    <footer id="contact" className="bg-white px-6 py-14 text-ink sm:px-12 sm:py-16 md:px-16 dark:bg-ink dark:text-neutral-100">
       <Reveal className="mx-auto max-w-3xl">
         <h2 className="text-3xl leading-tight sm:text-4xl md:text-5xl">
           <span className="block">{line1}</span>
           <span className="block font-display font-bold italic">{line2}</span>
         </h2>
 
-        <RichText value={body} className="text-sm leading-relaxed text-muted sm:text-base" />
+        <RichText value={body} className="text-sm leading-relaxed text-muted sm:text-base dark:text-neutral-400" />
 
         <p className="mt-6 text-sm sm:text-base">{cta}</p>
         <a
           href={`mailto:${email}`}
-          className="mt-1 inline-block text-sm text-brand underline decoration-brand/40 underline-offset-4 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-ink hover:decoration-ink/50 hover:underline-offset-[6px] sm:text-base"
+          className="mt-1 inline-block text-sm text-brand underline decoration-brand/40 underline-offset-4 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-ink hover:decoration-ink/50 hover:underline-offset-[6px] sm:text-base dark:hover:text-white dark:hover:decoration-white/50"
         >
           {email}
         </a>
 
         <SocialIcons className="mt-8" />
 
-        <p className="mt-6 text-xs text-muted">{copyright}</p>
-        <p className="mt-1 font-display text-xs font-bold italic text-muted">{tagline}</p>
+        <p className="mt-6 text-xs text-muted dark:text-neutral-400">{copyright}</p>
+        <p className="mt-1 font-display text-xs font-bold italic text-muted dark:text-neutral-400">{tagline}</p>
       </Reveal>
     </footer>
   )

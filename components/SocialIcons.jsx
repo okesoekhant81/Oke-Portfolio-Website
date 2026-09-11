@@ -26,7 +26,7 @@ export default function SocialIcons({ className = '' }) {
           target="_blank"
           rel="noopener noreferrer"
           aria-label={name}
-          className="text-ink/70 transition-colors duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-brand"
+          className="text-ink/70 transition-colors duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-brand dark:text-neutral-400 dark:hover:text-brand"
         >
           <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="currentColor" aria-hidden="true">
             <path d={PATHS[name]} />

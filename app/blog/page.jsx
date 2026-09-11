@@ -26,7 +26,7 @@ export default async function BlogIndex() {
   const groups = chunk(posts, 4)
 
   return (
-    <main>
+    <main className="dark:bg-ink">
       <NavMenu />
       <div className="mx-auto max-w-2xl px-6 pt-8 pb-14 sm:px-12 sm:pt-10 sm:pb-16 md:px-16 lg:max-w-4xl">
         <Reveal>
@@ -34,7 +34,7 @@ export default async function BlogIndex() {
         </Reveal>
 
         {posts.length === 0 ? (
-          <p className="mt-10 text-sm leading-relaxed text-muted sm:text-base">
+          <p className="mt-10 text-sm leading-relaxed text-muted sm:text-base dark:text-neutral-400">
             No articles published yet — check back soon.
           </p>
         ) : (

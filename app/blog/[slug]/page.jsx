@@ -54,14 +54,14 @@ export default async function BlogPost({ params }) {
   }
 
   return (
-    <main>
+    <main className="dark:bg-ink">
       <NavMenu />
       <div className="mx-auto max-w-2xl px-6 pt-8 pb-14 sm:px-12 sm:pt-10 sm:pb-16 md:px-16 lg:max-w-3xl">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }} />
 
         <Link
           href="/blog"
-          className="inline-flex items-center gap-1.5 border-b border-brand/40 pb-0.5 text-xs text-brand transition-colors duration-300 hover:border-brand hover:text-ink"
+          className="inline-flex items-center gap-1.5 border-b border-brand/40 pb-0.5 text-xs text-brand transition-colors duration-300 hover:border-brand hover:text-ink dark:hover:text-white"
         >
           <span aria-hidden="true">&larr;</span> All articles
         </Link>
@@ -78,7 +78,7 @@ export default async function BlogPost({ params }) {
 
         <Reveal delay={0.1}>
           {post.publishedAt && (
-            <p className="mt-6 font-display text-xs italic text-muted">
+            <p className="mt-6 font-display text-xs italic text-muted dark:text-neutral-400">
               {new Date(post.publishedAt).toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'long',
@@ -87,11 +87,11 @@ export default async function BlogPost({ params }) {
             </p>
           )}
 
-          <h1 className="mt-2 font-display text-2xl font-bold italic text-ink sm:text-3xl md:text-4xl">
+          <h1 className="mt-2 font-display text-2xl font-bold italic text-ink sm:text-3xl md:text-4xl dark:text-neutral-100">
             {post.title}
           </h1>
 
-          <RichText value={post.body} className="text-sm leading-relaxed text-ink sm:text-base" />
+          <RichText value={post.body} className="text-sm leading-relaxed text-ink sm:text-base dark:text-neutral-100" />
         </Reveal>
 
         {relatedPosts.length > 0 && (

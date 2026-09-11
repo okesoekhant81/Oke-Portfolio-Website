@@ -2,7 +2,7 @@ import Reveal from './Reveal'
 
 export default function Services({ services }) {
   return (
-    <section id="services" className="bg-white">
+    <section id="services" className="bg-white dark:bg-ink">
       <div className="grid grid-cols-2">
         {services.map((service, i) => (
           <Reveal key={service.title} delay={i * 0.08} className="group relative min-h-72 overflow-hidden sm:min-h-80">

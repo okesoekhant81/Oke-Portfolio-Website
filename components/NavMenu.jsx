@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { AnimatePresence, motion } from 'framer-motion'
+import ThemeToggle from './ThemeToggle'
 
 const LINKS = [
   { href: '/', label: 'Home' },
@@ -28,29 +29,32 @@ export default function NavMenu() {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-label={open ? 'Close menu' : 'Open menu'}
-        aria-expanded={open}
-        className="fixed right-5 top-5 z-50 flex h-11 w-11 flex-col items-center justify-center gap-[5px] rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-colors duration-300 hover:bg-white sm:right-8 sm:top-8"
-      >
-        <motion.span
-          animate={open ? { rotate: 45, y: 5.5 } : { rotate: 0, y: 0 }}
-          transition={{ duration: 0.3, ease: EASE }}
-          className="h-[1.5px] w-5 bg-ink"
-        />
-        <motion.span
-          animate={open ? { opacity: 0 } : { opacity: 1 }}
-          transition={{ duration: 0.2 }}
-          className="h-[1.5px] w-5 bg-ink"
-        />
-        <motion.span
-          animate={open ? { rotate: -45, y: -5.5 } : { rotate: 0, y: 0 }}
-          transition={{ duration: 0.3, ease: EASE }}
-          className="h-[1.5px] w-5 bg-ink"
-        />
-      </button>
+      <div className="fixed right-5 top-5 z-50 flex items-center gap-2 sm:right-8 sm:top-8">
+        <ThemeToggle />
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          aria-label={open ? 'Close menu' : 'Open menu'}
+          aria-expanded={open}
+          className="flex h-11 w-11 shrink-0 flex-col items-center justify-center gap-[5px] rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-colors duration-300 hover:bg-white"
+        >
+          <motion.span
+            animate={open ? { rotate: 45, y: 5.5 } : { rotate: 0, y: 0 }}
+            transition={{ duration: 0.3, ease: EASE }}
+            className="h-[1.5px] w-5 bg-ink"
+          />
+          <motion.span
+            animate={open ? { opacity: 0 } : { opacity: 1 }}
+            transition={{ duration: 0.2 }}
+            className="h-[1.5px] w-5 bg-ink"
+          />
+          <motion.span
+            animate={open ? { rotate: -45, y: -5.5 } : { rotate: 0, y: 0 }}
+            transition={{ duration: 0.3, ease: EASE }}
+            className="h-[1.5px] w-5 bg-ink"
+          />
+        </button>
+      </div>
 
       <AnimatePresence>
         {open && (

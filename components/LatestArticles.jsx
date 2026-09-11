@@ -10,13 +10,13 @@ export default function LatestArticles({ posts }) {
   const [featured, squareA, squareB, wide] = posts
 
   return (
-    <section className="bg-white px-6 py-12 sm:px-12 sm:py-16 md:px-16">
+    <section className="bg-white px-6 py-12 sm:px-12 sm:py-16 md:px-16 dark:bg-ink">
       <div className="mx-auto max-w-4xl">
         <Reveal className="flex items-end justify-between gap-4">
           <h2 className="font-display text-3xl font-bold italic text-brand sm:text-4xl">Latest Articles</h2>
           <Link
             href="/blog"
-            className="shrink-0 text-xs text-brand underline decoration-brand/40 underline-offset-4 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-ink hover:decoration-ink/50 sm:text-sm"
+            className="shrink-0 text-xs text-brand underline decoration-brand/40 underline-offset-4 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-ink hover:decoration-ink/50 dark:hover:text-white dark:hover:decoration-white/50 sm:text-sm"
           >
             View all
           </Link>

@@ -46,6 +46,15 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
+        {/* Runs before paint so the stored/preferred theme applies with no
+            flash of the wrong theme; admin pages never render a toggle or
+            use dark: classes, so this only affects the public site. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{var t=localStorage.getItem('theme');var d=t?t==='dark':window.matchMedia('(prefers-color-scheme: dark)').matches;if(d)document.documentElement.classList.add('dark');}catch(e){}})();",
+          }}
+        />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
