@@ -7,7 +7,7 @@ Personal portfolio site for Oke Soe Khant, built from the Figma design.
 - Next.js (App Router)
 - Tailwind CSS v4
 - Framer Motion
-- Sanity (CMS + admin panel, embedded at `/studio`)
+- Custom admin panel at `/admin` (Vercel KV for content, Vercel Blob for images)
 
 ## Getting started
 
@@ -17,27 +17,28 @@ npm run dev
 ```
 
 Without any setup, the site renders from the bundled default content
-(`lib/defaultContent.js`) — nothing breaks if Sanity isn't connected yet.
+(`lib/defaultContent.js`) — nothing breaks if storage isn't connected yet.
 
-## Connecting the CMS
+## Connecting the admin panel
 
-1. Create a free project at [sanity.io/manage](https://www.sanity.io/manage) (or run `npx sanity init` from this folder and choose "create new project").
-2. Copy `.env.local.example` to `.env.local` and fill in the project ID it gives you:
-   ```
-   NEXT_PUBLIC_SANITY_PROJECT_ID=your-project-id
-   NEXT_PUBLIC_SANITY_DATASET=production
-   ```
-3. Add the site's own URL to that Sanity project's CORS origins (Manage → API → CORS Origins) so the Studio can talk to it — add both your local dev URL and the deployed Vercel URL.
-4. Run the site and open `/studio` — sign in with the same account, and you'll see:
-   - **Homepage** — every section's text and images, grouped by section
-   - **Articles** — blog posts (title, cover image, body)
-5. Once you save a "Homepage" document in the Studio, the live site immediately
-   starts pulling from it instead of the bundled defaults — any field left
-   empty still falls back to the default content, so it's safe to fill in
-   gradually.
+1. Copy `.env.local.example` to `.env.local`, set `ADMIN_PASSWORD` to something
+   strong, and generate `ADMIN_SESSION_SECRET` with `openssl rand -hex 32`.
+2. In the Vercel dashboard: **Storage → Create Database → KV** (content) and
+   **Storage → Create Database → Blob** (images), both connected to this
+   project. Vercel injects their env vars automatically — nothing to copy by
+   hand.
+3. Also add `ADMIN_PASSWORD` and `ADMIN_SESSION_SECRET` as environment
+   variables in the Vercel project settings (same values as your `.env.local`).
+4. Redeploy, then open `/admin` and log in with `ADMIN_PASSWORD`.
 
-On Vercel, add the same two `NEXT_PUBLIC_SANITY_*` environment variables in
-the project settings so the deployed site can connect too.
+Once you save changes in `/admin/homepage`, the live site immediately starts
+pulling from your saved content instead of the bundled defaults — any field
+left blank still falls back to the default, so it's safe to fill in
+gradually. `/admin/posts` is full CRUD for blog articles.
+
+Body text fields use a tiny markdown-lite syntax: `*word*` for serif
+emphasis, `**word**` for bold italic, and a blank line to start a new
+paragraph.
 
 ## Build
 

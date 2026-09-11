@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getPosts } from '../../lib/blog'
+import { getPosts } from '../../lib/content/posts'
 import { SITE_URL } from '../../lib/site'
 
 export const metadata = {

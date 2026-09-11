@@ -6,7 +6,7 @@ import ThingsImBuilding from '../components/ThingsImBuilding'
 import Workshop from '../components/Workshop'
 import AboutMe from '../components/AboutMe'
 import Contact from '../components/Contact'
-import { getHomepage } from '../lib/getHomepage'
+import { getHomepageContent } from '../lib/content/homepage'
 import { SITE_URL, SITE_NAME, SOCIAL_LINKS } from '../lib/site'
 
 const personJsonLd = {
@@ -30,7 +30,7 @@ const personJsonLd = {
 }
 
 export default async function Home() {
-  const content = await getHomepage()
+  const content = await getHomepageContent()
 
   return (
     <main>

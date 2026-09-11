@@ -1,7 +1,7 @@
-import { PortableText } from '@portabletext/react'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { getPost } from '../../../lib/blog'
+import RichText from '../../../components/RichText'
+import { getPost } from '../../../lib/content/posts'
 import { SITE_URL, SITE_NAME } from '../../../lib/site'
 
 export async function generateMetadata({ params }) {
@@ -21,22 +21,6 @@ export async function generateMetadata({ params }) {
       images: post.coverImageUrl ? [{ url: post.coverImageUrl }] : undefined,
     },
   }
-}
-
-const portableTextComponents = {
-  marks: {
-    em: ({ children }) => <em className="font-display not-italic">{children}</em>,
-    strong: ({ children }) => <strong className="font-display font-bold italic">{children}</strong>,
-  },
-  block: {
-    normal: ({ children }) => <p className="mt-4 text-sm leading-relaxed text-ink sm:text-base">{children}</p>,
-    h2: ({ children }) => <h2 className="mt-8 font-display text-2xl font-bold italic text-ink">{children}</h2>,
-  },
-  types: {
-    image: ({ value }) => (
-      <img src={value.asset?.url} alt="" className="mt-6 w-full rounded-lg object-cover" />
-    ),
-  },
 }
 
 export default async function BlogPost({ params }) {
@@ -80,7 +64,7 @@ export default async function BlogPost({ params }) {
         <img src={post.coverImageUrl} alt={post.title} className="mt-6 aspect-video w-full rounded-lg object-cover" />
       )}
 
-      {post.body && <PortableText value={post.body} components={portableTextComponents} />}
+      <RichText value={post.body} className="text-sm leading-relaxed text-ink sm:text-base" />
     </main>
   )
 }

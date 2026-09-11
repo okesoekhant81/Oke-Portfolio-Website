@@ -1,5 +1,5 @@
 import { SITE_URL } from '../lib/site'
-import { getPosts } from '../lib/blog'
+import { getPosts } from '../lib/content/posts'
 
 export default async function sitemap() {
   const posts = await getPosts()

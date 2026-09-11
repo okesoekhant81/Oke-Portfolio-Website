@@ -1,5 +1,5 @@
 import { SITE_URL, SITE_NAME, SOCIAL_LINKS } from '../../lib/site'
-import { getPosts } from '../../lib/blog'
+import { getPosts } from '../../lib/content/posts'
 
 export async function GET() {
   const posts = await getPosts()
