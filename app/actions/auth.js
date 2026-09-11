@@ -1,8 +1,14 @@
 'use server'
 
-import { cookies } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { SESSION_COOKIE, createSessionToken } from '../../lib/auth'
+import { SESSION_COOKIE, SESSION_MAX_AGE_MS, createSessionToken } from '../../lib/auth'
+import { checkLockout, recordFailedAttempt, clearFailedAttempts } from '../../lib/loginAttempts'
+
+async function clientIp() {
+  const headerList = await headers()
+  return headerList.get('x-forwarded-for')?.split(',')[0]?.trim() || headerList.get('x-real-ip') || 'unknown'
+}
 
 export async function login(prevState, formData) {
   const password = formData.get('password')
@@ -10,9 +16,24 @@ export async function login(prevState, formData) {
   if (!process.env.ADMIN_PASSWORD) {
     return { error: 'ADMIN_PASSWORD is not set on the server yet.' }
   }
+
+  const ip = await clientIp()
+
+  const lockout = await checkLockout(ip)
+  if (lockout.locked) {
+    const minutes = Math.ceil(lockout.retryAfterSeconds / 60)
+    return { error: `Too many failed attempts. Try again in ${minutes} minute${minutes === 1 ? '' : 's'}.` }
+  }
+
   if (password !== process.env.ADMIN_PASSWORD) {
+    await recordFailedAttempt(ip)
+    // Slows brute-force throughput even if the lockout above hasn't
+    // kicked in yet for this window.
+    await new Promise((resolve) => setTimeout(resolve, 800))
     return { error: 'Incorrect password.' }
   }
+
+  await clearFailedAttempts(ip)
 
   const token = await createSessionToken()
   const cookieStore = await cookies()
@@ -21,7 +42,7 @@ export async function login(prevState, formData) {
     secure: true,
     sameSite: 'lax',
     path: '/',
-    maxAge: 60 * 60 * 24 * 30,
+    maxAge: SESSION_MAX_AGE_MS / 1000,
   })
 
   redirect('/admin')
