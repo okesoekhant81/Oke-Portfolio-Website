@@ -50,7 +50,7 @@ export default async function BlogPost({ params }) {
 
   return (
     <main>
-      <div className="mx-auto max-w-2xl px-6 py-14 sm:px-12 sm:py-16 md:px-16">
+      <div className="mx-auto max-w-2xl px-6 py-14 sm:px-12 sm:py-16 md:px-16 lg:max-w-3xl">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }} />
 
         <Link
@@ -65,7 +65,7 @@ export default async function BlogPost({ params }) {
             <img
               src={post.coverImageUrl}
               alt=""
-              className="mt-6 aspect-square w-full rounded-[10px] object-cover"
+              className="mt-6 aspect-square w-full rounded-[10px] object-cover lg:aspect-[16/9]"
             />
           )}
         </Reveal>

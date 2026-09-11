@@ -26,7 +26,7 @@ export default async function BlogIndex() {
 
   return (
     <main>
-      <div className="mx-auto max-w-2xl px-6 py-14 sm:px-12 sm:py-16 md:px-16">
+      <div className="mx-auto max-w-2xl px-6 py-14 sm:px-12 sm:py-16 md:px-16 lg:max-w-4xl">
         <Reveal>
           <h1 className="font-display text-4xl font-bold italic text-brand sm:text-5xl">Articles</h1>
         </Reveal>
@@ -36,19 +36,19 @@ export default async function BlogIndex() {
             No articles published yet — check back soon.
           </p>
         ) : (
-          <div className="mt-10 space-y-4 sm:mt-14">
+          <div className="mt-10 space-y-4 sm:mt-14 lg:space-y-6">
             {groups.map((group, i) => {
               const [featured, squareA, squareB, wide] = group
               return (
-                <div key={i} className="space-y-4">
-                  {featured && <ArticleCard post={featured} variant="featured" />}
-                  {(squareA || squareB) && (
-                    <div className="grid grid-cols-2 gap-4">
-                      {squareA && <ArticleCard post={squareA} variant="square" delay={0.05} />}
-                      {squareB && <ArticleCard post={squareB} variant="square" delay={0.1} />}
-                    </div>
+                <div key={i} className="grid grid-cols-2 gap-4 lg:grid-cols-3 lg:gap-6">
+                  {featured && <ArticleCard post={featured} variant="featured" className="col-span-2 lg:row-span-2" />}
+                  {squareA && (
+                    <ArticleCard post={squareA} variant="square" delay={0.05} className="lg:col-start-3 lg:row-start-1" />
                   )}
-                  {wide && <ArticleCard post={wide} variant="wide" delay={0.05} />}
+                  {squareB && (
+                    <ArticleCard post={squareB} variant="square" delay={0.1} className="lg:col-start-3 lg:row-start-2" />
+                  )}
+                  {wide && <ArticleCard post={wide} variant="wide" delay={0.05} className="col-span-2 lg:col-span-3" />}
                 </div>
               )
             })}
