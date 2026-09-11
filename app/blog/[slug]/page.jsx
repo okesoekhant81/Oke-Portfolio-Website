@@ -16,8 +16,9 @@ import { SITE_URL, SITE_NAME } from '../../../lib/site'
 
 export async function generateMetadata({ params }) {
   const { slug } = await params
-  const post = await getPost(slug)
-  if (!post) return {}
+  const [rawPost, locale] = await Promise.all([getPost(slug), getLocale()])
+  if (!rawPost) return {}
+  const post = localizePost(rawPost, locale)
   return {
     title: post.title,
     description: post.excerpt,
@@ -29,6 +30,7 @@ export async function generateMetadata({ params }) {
       description: post.excerpt,
       publishedTime: post.publishedAt,
       images: post.coverImageUrl ? [{ url: post.coverImageUrl }] : undefined,
+      locale: locale === 'my' ? 'my_MM' : 'en_US',
     },
   }
 }
@@ -66,6 +68,7 @@ export default async function BlogPost({ params }) {
     image: post.coverImageUrl ? [post.coverImageUrl] : undefined,
     datePublished: post.publishedAt,
     author: { '@type': 'Person', name: SITE_NAME, url: SITE_URL },
+    inLanguage: locale,
   }
 
   return (

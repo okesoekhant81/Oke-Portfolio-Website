@@ -9,11 +9,20 @@ import { localizeHomepageContent, localizePost } from '../../lib/localizeContent
 import { getDictionary, italicIfLatin } from '../../lib/dictionaries'
 import { SITE_URL } from '../../lib/site'
 
-export const metadata = {
-  title: 'Articles',
-  description: 'Writing on brand strategy, marketing, content, and digital growth from Oke Soe Khant.',
-  alternates: { canonical: '/blog' },
-  openGraph: { url: `${SITE_URL}/blog`, title: 'Articles' },
+export async function generateMetadata() {
+  const locale = await getLocale()
+  const dict = getDictionary(locale)
+  return {
+    title: dict.blog.heading,
+    description: dict.blog.metaDescription,
+    alternates: { canonical: '/blog' },
+    openGraph: {
+      url: `${SITE_URL}/blog`,
+      title: dict.blog.heading,
+      description: dict.blog.metaDescription,
+      locale: locale === 'my' ? 'my_MM' : 'en_US',
+    },
+  }
 }
 
 // The design repeats a 4-post cluster — one large featured card, two square

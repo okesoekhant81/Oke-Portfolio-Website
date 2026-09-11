@@ -14,30 +14,34 @@ import { getLocale } from '../lib/i18n'
 import { localizeHomepageContent, localizePost } from '../lib/localizeContent'
 import { SITE_URL, SITE_NAME, SOCIAL_LINKS } from '../lib/site'
 
-const personJsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'Person',
-  name: SITE_NAME,
-  url: SITE_URL,
-  jobTitle: 'Brand Strategist',
-  description:
-    'Brand strategy, marketing, content, and digital experience — helping businesses turn ideas into brands and brands into growth.',
-  email: 'hello@okesoekhant.com',
-  knowsAbout: [
-    'Brand Strategy',
-    'Brand Positioning',
-    'Digital Marketing',
-    'Content Strategy',
-    'Digital Experience Design',
-    'Business Growth',
-  ],
-  sameAs: SOCIAL_LINKS,
+function buildPersonJsonLd(locale) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: SITE_NAME,
+    url: SITE_URL,
+    jobTitle: 'Brand Strategist',
+    description:
+      'Brand strategy, marketing, content, and digital experience — helping businesses turn ideas into brands and brands into growth.',
+    email: 'hello@okesoekhant.com',
+    knowsAbout: [
+      'Brand Strategy',
+      'Brand Positioning',
+      'Digital Marketing',
+      'Content Strategy',
+      'Digital Experience Design',
+      'Business Growth',
+    ],
+    sameAs: SOCIAL_LINKS,
+    inLanguage: locale,
+  }
 }
 
 export default async function Home() {
   const [rawContent, rawPosts, locale] = await Promise.all([getHomepageContent(), getPosts(), getLocale()])
   const content = localizeHomepageContent(rawContent, locale)
   const posts = rawPosts.slice(0, 4).map((post) => localizePost(post, locale))
+  const personJsonLd = buildPersonJsonLd(locale)
 
   return (
     <main>

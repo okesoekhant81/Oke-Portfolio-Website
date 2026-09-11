@@ -38,6 +38,7 @@ export const metadata = {
     title: `${SITE_NAME} — Brand Strategy & Growth`,
     description: SITE_DESCRIPTION,
     images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: SITE_NAME }],
+    locale: 'en_US',
   },
   twitter: {
     card: 'summary_large_image',
