@@ -71,15 +71,15 @@ export default function ImageField({ name, label, defaultValue }) {
   return (
     <div>
       <label className="block text-xs font-medium text-neutral-600">{label}</label>
-      <div className="mt-2 flex items-center gap-4">
+      <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
         {url ? (
-          <img src={url} alt="" className="h-20 w-20 rounded-md border border-neutral-200 object-cover" />
+          <img src={url} alt="" className="h-20 w-20 shrink-0 rounded-md border border-neutral-200 object-cover" />
         ) : (
-          <div className="flex h-20 w-20 items-center justify-center rounded-md border border-dashed border-neutral-300 text-[10px] text-neutral-400">
+          <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-md border border-dashed border-neutral-300 text-[10px] text-neutral-400">
             No image
           </div>
         )}
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           <input ref={inputRef} type="file" accept="image/*" onChange={handleFileChange} className="text-xs" />
 
           {(phase === 'uploading' || phase === 'optimizing') && (
