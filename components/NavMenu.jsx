@@ -34,6 +34,7 @@ export default function NavMenu({ locale = 'en' }) {
     <>
       <div className="fixed right-5 bottom-5 z-50 flex flex-col items-center gap-2 sm:right-8 sm:bottom-8">
         <ThemeToggle />
+        <LocaleToggle locale={locale} />
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
@@ -87,15 +88,6 @@ export default function NavMenu({ locale = 'en' }) {
                   </motion.li>
                 ))}
               </ul>
-
-              <motion.div
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.1 + links.length * 0.06, ease: EASE }}
-                className="mt-8 sm:mt-10"
-              >
-                <LocaleToggle locale={locale} />
-              </motion.div>
             </nav>
           </motion.div>
         )}
