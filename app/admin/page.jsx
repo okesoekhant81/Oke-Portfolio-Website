@@ -1,10 +1,15 @@
 import Link from 'next/link'
 import AdminNav from '../../components/admin/AdminNav'
+import AnalyticsPanel from '../../components/admin/AnalyticsPanel'
 import { isBlobConfigured } from '../../lib/blobStore'
+import { getAnalytics } from '../../lib/content/analytics'
+import { getPosts } from '../../lib/content/posts'
 
 export const dynamic = 'force-dynamic'
 
-export default function AdminDashboard() {
+export default async function AdminDashboard() {
+  const [{ postViews, daily }, posts] = await Promise.all([getAnalytics(), getPosts()])
+
   return (
     <main className="min-h-screen bg-neutral-50">
       <AdminNav active="/admin" />
@@ -34,6 +39,8 @@ export default function AdminDashboard() {
             <p className="mt-1 text-sm text-neutral-500">Write, edit, and publish blog posts.</p>
           </Link>
         </div>
+
+        <AnalyticsPanel postViews={postViews} daily={daily} posts={posts} />
       </div>
     </main>
   )

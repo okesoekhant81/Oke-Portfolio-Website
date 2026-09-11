@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation'
+import { after } from 'next/server'
 import Link from 'next/link'
 import ArticleCard from '../../../components/ArticleCard'
 import Contact from '../../../components/Contact'
@@ -7,6 +8,7 @@ import Reveal from '../../../components/Reveal'
 import RichText from '../../../components/RichText'
 import { getPost, getPosts } from '../../../lib/content/posts'
 import { getHomepageContent } from '../../../lib/content/homepage'
+import { recordView } from '../../../lib/content/analytics'
 import { SITE_URL, SITE_NAME } from '../../../lib/site'
 
 export async function generateMetadata({ params }) {
@@ -33,6 +35,9 @@ export default async function BlogPost({ params }) {
   const [post, allPosts, content] = await Promise.all([getPost(slug), getPosts(), getHomepageContent()])
 
   if (!post) notFound()
+
+  // Deferred past the response so a slow Blob write never delays the page.
+  after(() => recordView(slug))
 
   // Recency-only, capped at four, no filtering by topic or tags — kept
   // deliberately simple per the design brief.
