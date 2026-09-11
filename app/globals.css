@@ -38,3 +38,19 @@ body {
 .dark body {
   background: var(--color-ink);
 }
+
+/* Smooth every color-related change site-wide — most directly the dark/light
+   toggle, but this also polishes any hover state that never had its own
+   transition declared. Deliberately color-only (never transform/opacity),
+   so it can't fight Framer Motion's own transform-driven animations, and it
+   sits in Tailwind's base layer so any component's own `transition-*` /
+   `duration-*` utility (higher specificity) still wins over this default. */
+@layer base {
+  *,
+  ::before,
+  ::after {
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    transition-duration: 350ms;
+  }
+}
