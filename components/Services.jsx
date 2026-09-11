@@ -11,6 +11,7 @@ export default function Services({ services }) {
               alt={service.title}
               className="absolute inset-0 size-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-110"
             />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
             <div className="absolute inset-0 bg-black/0 transition-colors duration-500 ease-out group-hover:bg-black/25" />
             <div className="relative flex h-full flex-col justify-end p-5 text-white">
               <h3 className="font-display text-base font-bold leading-snug transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-1 sm:text-lg">
