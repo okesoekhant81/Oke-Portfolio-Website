@@ -28,11 +28,11 @@ export default async function BlogIndex() {
     <main>
       <div className="mx-auto max-w-2xl px-6 py-14 sm:px-12 sm:py-16 md:px-16">
         <Reveal>
-          <h1 className="text-center font-display text-4xl font-bold italic text-brand sm:text-5xl">Articles</h1>
+          <h1 className="font-display text-4xl font-bold italic text-brand sm:text-5xl">Articles</h1>
         </Reveal>
 
         {posts.length === 0 ? (
-          <p className="mt-10 text-center text-sm leading-relaxed text-muted sm:text-base">
+          <p className="mt-10 text-sm leading-relaxed text-muted sm:text-base">
             No articles published yet — check back soon.
           </p>
         ) : (
