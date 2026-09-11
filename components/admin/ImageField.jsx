@@ -3,6 +3,10 @@
 import { useState, useRef } from 'react'
 import { uploadImage } from '../../app/actions/upload'
 
+function formatKb(bytes) {
+  return `${Math.max(1, Math.round(bytes / 1024))}KB`
+}
+
 export default function ImageField({ name, label, defaultValue }) {
   const [url, setUrl] = useState(defaultValue || '')
   const [status, setStatus] = useState('idle')
@@ -15,7 +19,9 @@ export default function ImageField({ name, label, defaultValue }) {
     const result = await uploadImage(file)
     if (result.url) {
       setUrl(result.url)
-      setStatus('idle')
+      setStatus(
+        `Optimized: ${formatKb(result.originalSize)} → ${formatKb(result.optimizedSize)}`
+      )
     } else {
       setStatus(result.error || 'Upload failed.')
     }
@@ -36,7 +42,7 @@ export default function ImageField({ name, label, defaultValue }) {
         <div>
           <input ref={inputRef} type="file" accept="image/*" onChange={handleFileChange} className="text-xs" />
           <p className="mt-1 text-xs text-neutral-400">
-            {status === 'uploading' ? 'Uploading…' : status !== 'idle' ? status : ' '}
+            {status === 'uploading' ? 'Uploading & optimizing…' : status !== 'idle' ? status : ' '}
           </p>
         </div>
       </div>
