@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Reveal from './Reveal'
-import { getDictionary, italicIfLatin } from '../lib/dictionaries'
+import { getDictionary, headingLeading, italicIfLatin } from '../lib/dictionaries'
 
 function formatDate(dateString, dateLocale) {
   if (!dateString) return null
@@ -53,8 +53,8 @@ export default function ArticleCard({ post, variant = 'square', delay = 0, class
           <h3
             className={
               variant === 'featured'
-                ? `mt-1 font-display text-sm font-bold text-white lg:text-xl ${italicIfLatin(locale)}`
-                : `mt-1 font-display text-xs font-bold text-white line-clamp-3 lg:text-base ${italicIfLatin(locale)}`
+                ? `mt-1 font-display text-sm font-bold text-white lg:text-xl ${italicIfLatin(locale)} ${headingLeading(locale)}`
+                : `mt-1 font-display text-xs font-bold text-white line-clamp-3 lg:text-base ${italicIfLatin(locale)} ${headingLeading(locale)}`
             }
           >
             {post.title}

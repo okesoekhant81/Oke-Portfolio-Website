@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { AnimatePresence, motion } from 'framer-motion'
 import ThemeToggle from './ThemeToggle'
 import LocaleToggle from './LocaleToggle'
-import { getDictionary, italicIfLatin } from '../lib/dictionaries'
+import { getDictionary, headingLeading, italicIfLatin } from '../lib/dictionaries'
 
 const EASE = [0.16, 1, 0.3, 1]
 
@@ -81,7 +81,7 @@ export default function NavMenu({ locale = 'en' }) {
                     <Link
                       href={link.href}
                       onClick={() => setOpen(false)}
-                      className={`font-display text-4xl font-bold text-white transition-colors duration-300 hover:text-brand sm:text-5xl ${italicIfLatin(locale)}`}
+                      className={`font-display text-4xl font-bold text-white transition-colors duration-300 hover:text-brand sm:text-5xl ${italicIfLatin(locale)} ${headingLeading(locale)}`}
                     >
                       {link.label}
                     </Link>

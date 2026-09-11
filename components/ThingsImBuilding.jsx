@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 import Reveal from './Reveal'
-import { getDictionary, italicIfLatin } from '../lib/dictionaries'
+import { getDictionary, headingLeading, italicIfLatin } from '../lib/dictionaries'
 
 export default function ThingsImBuilding({ line1, line2, intro, emphasis, projects, locale = 'en' }) {
   const dict = getDictionary(locale)
@@ -11,7 +11,7 @@ export default function ThingsImBuilding({ line1, line2, intro, emphasis, projec
     <section id="work" className="bg-white px-6 py-12 sm:px-12 sm:py-16 md:px-16 dark:bg-ink">
       <div className="mx-auto max-w-4xl">
         <Reveal>
-          <h2 className="text-4xl text-ink sm:text-5xl md:text-6xl dark:text-neutral-100">
+          <h2 className={`text-4xl text-ink sm:text-5xl md:text-6xl dark:text-neutral-100 ${headingLeading(locale)}`}>
             <span className="block">{line1}</span>
             <span className={`block font-display font-bold text-brand ${italicIfLatin(locale)}`}>{line2}</span>
           </h2>

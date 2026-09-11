@@ -11,7 +11,7 @@ import { getHomepageContent } from '../../../lib/content/homepage'
 import { recordView } from '../../../lib/content/analytics'
 import { getLocale } from '../../../lib/i18n'
 import { localizeHomepageContent, localizePost } from '../../../lib/localizeContent'
-import { getDictionary, italicIfLatin } from '../../../lib/dictionaries'
+import { getDictionary, headingLeading, italicIfLatin } from '../../../lib/dictionaries'
 import { SITE_URL, SITE_NAME } from '../../../lib/site'
 
 export async function generateMetadata({ params }) {
@@ -106,7 +106,7 @@ export default async function BlogPost({ params }) {
           )}
 
           <h1
-            className={`mt-2 font-display text-2xl font-bold text-ink sm:text-3xl md:text-4xl dark:text-neutral-100 ${italicIfLatin(locale)}`}
+            className={`mt-2 font-display text-2xl font-bold text-ink sm:text-3xl md:text-4xl dark:text-neutral-100 ${italicIfLatin(locale)} ${headingLeading(locale)}`}
           >
             {post.title}
           </h1>
@@ -121,7 +121,7 @@ export default async function BlogPost({ params }) {
         {relatedPosts.length > 0 && (
           <div className="mt-16 sm:mt-20">
             <Reveal>
-              <h2 className={`font-display text-base font-bold text-brand sm:text-lg ${italicIfLatin(locale)}`}>
+              <h2 className={`font-display text-base font-bold text-brand sm:text-lg ${italicIfLatin(locale)} ${headingLeading(locale)}`}>
                 {dict.blog.youMayLike}
               </h2>
             </Reveal>

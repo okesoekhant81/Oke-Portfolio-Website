@@ -6,7 +6,7 @@ import { getPosts } from '../../lib/content/posts'
 import { getHomepageContent } from '../../lib/content/homepage'
 import { getLocale } from '../../lib/i18n'
 import { localizeHomepageContent, localizePost } from '../../lib/localizeContent'
-import { getDictionary, italicIfLatin } from '../../lib/dictionaries'
+import { getDictionary, headingLeading, italicIfLatin } from '../../lib/dictionaries'
 import { SITE_URL } from '../../lib/site'
 
 export async function generateMetadata() {
@@ -45,7 +45,7 @@ export default async function BlogIndex() {
       <NavMenu locale={locale} />
       <div className="mx-auto max-w-2xl px-6 pt-8 pb-14 sm:px-12 sm:pt-10 sm:pb-16 md:px-16 lg:max-w-4xl">
         <Reveal>
-          <h1 className={`font-display text-4xl font-bold text-brand sm:text-5xl ${italicIfLatin(locale)}`}>
+          <h1 className={`font-display text-4xl font-bold text-brand sm:text-5xl ${italicIfLatin(locale)} ${headingLeading(locale)}`}>
             {dict.blog.heading}
           </h1>
         </Reveal>

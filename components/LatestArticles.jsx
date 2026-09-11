@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import ArticleCard from './ArticleCard'
 import Reveal from './Reveal'
-import { getDictionary, italicIfLatin } from '../lib/dictionaries'
+import { getDictionary, headingLeading, italicIfLatin } from '../lib/dictionaries'
 
 // Mirrors the single 4-post cluster used on /blog (1 featured + 2 square +
 // 1 wide) so the homepage preview reads as the same design system, not a
@@ -15,7 +15,7 @@ export default function LatestArticles({ posts, locale = 'en' }) {
     <section className="bg-white px-6 py-12 sm:px-12 sm:py-16 md:px-16 dark:bg-ink">
       <div className="mx-auto max-w-4xl">
         <Reveal className="flex items-end justify-between gap-4">
-          <h2 className={`font-display text-3xl font-bold text-brand sm:text-4xl ${italicIfLatin(locale)}`}>
+          <h2 className={`font-display text-3xl font-bold text-brand sm:text-4xl ${italicIfLatin(locale)} ${headingLeading(locale)}`}>
             {dict.home.latestArticles}
           </h2>
           <Link
