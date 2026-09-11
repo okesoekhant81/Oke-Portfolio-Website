@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import AdminNav from '../../components/admin/AdminNav'
-import { isKvConfigured } from '../../lib/kv'
+import { isBlobConfigured } from '../../lib/blobStore'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,10 +11,10 @@ export default function AdminDashboard() {
       <div className="mx-auto max-w-4xl px-6 py-10">
         <h1 className="text-2xl font-bold text-ink">Dashboard</h1>
 
-        {!isKvConfigured && (
+        {!isBlobConfigured && (
           <p className="mt-4 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-            Storage isn&rsquo;t connected yet — the site is showing bundled default content. Connect a Vercel KV
-            store (and a Blob store for images) in the Vercel dashboard, then redeploy, to start editing for real.
+            Storage isn&rsquo;t connected yet — the site is showing bundled default content. Connect a Vercel Blob
+            store in the Vercel dashboard, then redeploy, to start editing for real.
           </p>
         )}
 
