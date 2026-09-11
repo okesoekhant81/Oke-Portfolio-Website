@@ -11,9 +11,14 @@ function formatDate(dateString) {
 }
 
 const VARIANT_CLASSES = {
-  // On desktop the featured card sits in a 2-col/2-row bento cell, so its
-  // height should come from the grid area rather than its own aspect-ratio.
-  featured: 'aspect-square lg:aspect-auto',
+  // Keeping this square (not deriving height from the row-span-2 grid area)
+  // is deliberate: with 3 equal columns and a shared gap, a square card
+  // spanning 2 columns is exactly as tall as 2 stacked square cards in the
+  // 3rd column, so it lines up without depending on those cards existing —
+  // a lone featured card (no square siblings after it) would otherwise
+  // collapse to zero height, since its own children are all absolutely
+  // positioned and contribute no intrinsic size.
+  featured: 'aspect-square',
   square: 'aspect-square',
   wide: 'aspect-[345/150] lg:aspect-[3/1]',
 }
