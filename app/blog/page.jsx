@@ -1,5 +1,8 @@
-import Link from 'next/link'
+import ArticleCard from '../../components/ArticleCard'
+import Contact from '../../components/Contact'
+import Reveal from '../../components/Reveal'
 import { getPosts } from '../../lib/content/posts'
+import { getHomepageContent } from '../../lib/content/homepage'
 import { SITE_URL } from '../../lib/site'
 
 export const metadata = {
@@ -9,47 +12,59 @@ export const metadata = {
   openGraph: { url: `${SITE_URL}/blog`, title: 'Articles' },
 }
 
+// The design repeats a 4-post cluster — one large featured card, two square
+// cards side by side, then one wide card — for as many posts as exist.
+function chunk(items, size) {
+  const groups = []
+  for (let i = 0; i < items.length; i += size) groups.push(items.slice(i, i + size))
+  return groups
+}
+
 export default async function BlogIndex() {
-  const posts = await getPosts()
+  const [posts, content] = await Promise.all([getPosts(), getHomepageContent()])
+  const groups = chunk(posts, 4)
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-14 sm:px-12 sm:py-16 md:px-16">
-      <h1 className="text-4xl text-ink sm:text-5xl">
-        <span className="font-display font-bold italic text-brand">Articles</span>
-      </h1>
+    <main>
+      <div className="mx-auto max-w-2xl px-6 py-14 sm:px-12 sm:py-16 md:px-16">
+        <Reveal>
+          <h1 className="text-center font-display text-4xl font-bold italic text-brand sm:text-5xl">Articles</h1>
+        </Reveal>
 
-      {posts.length === 0 ? (
-        <p className="mt-6 text-sm leading-relaxed text-muted sm:text-base">
-          No articles published yet — check back soon.
-        </p>
-      ) : (
-        <ul className="mt-10 space-y-10">
-          {posts.map((post) => (
-            <li key={post.slug} className="border-b border-black/10 pb-10 last:border-none">
-              <Link href={`/blog/${post.slug}`} className="group block">
-                {post.coverImageUrl && (
-                  <img
-                    src={post.coverImageUrl}
-                    alt={post.title}
-                    className="mb-4 aspect-video w-full rounded-lg object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-                  />
-                )}
-                <h2 className="font-display text-xl font-bold italic text-ink">{post.title}</h2>
-                {post.excerpt && <p className="mt-2 text-sm leading-relaxed text-muted">{post.excerpt}</p>}
-                {post.publishedAt && (
-                  <p className="mt-3 text-xs text-muted">
-                    {new Date(post.publishedAt).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    })}
-                  </p>
-                )}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
+        {posts.length === 0 ? (
+          <p className="mt-10 text-center text-sm leading-relaxed text-muted sm:text-base">
+            No articles published yet — check back soon.
+          </p>
+        ) : (
+          <div className="mt-10 space-y-4 sm:mt-14">
+            {groups.map((group, i) => {
+              const [featured, squareA, squareB, wide] = group
+              return (
+                <div key={i} className="space-y-4">
+                  {featured && <ArticleCard post={featured} variant="featured" />}
+                  {(squareA || squareB) && (
+                    <div className="grid grid-cols-2 gap-4">
+                      {squareA && <ArticleCard post={squareA} variant="square" delay={0.05} />}
+                      {squareB && <ArticleCard post={squareB} variant="square" delay={0.1} />}
+                    </div>
+                  )}
+                  {wide && <ArticleCard post={wide} variant="wide" delay={0.05} />}
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      <Contact
+        line1={content.contactLine1}
+        line2={content.contactLine2}
+        body={content.contactBody}
+        cta={content.contactCta}
+        email={content.contactEmail}
+        copyright={content.contactCopyright}
+        tagline={content.contactTagline}
+      />
     </main>
   )
 }
