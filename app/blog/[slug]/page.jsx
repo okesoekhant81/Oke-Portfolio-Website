@@ -34,10 +34,9 @@ export default async function BlogPost({ params }) {
 
   if (!post) notFound()
 
-  // Recency-only, capped at three, no filtering by topic or tags — kept
+  // Recency-only, capped at four, no filtering by topic or tags — kept
   // deliberately simple per the design brief.
-  const relatedPosts = allPosts.filter((p) => p.slug !== post.slug).slice(0, 3)
-  const [relatedA, relatedB, relatedC] = relatedPosts
+  const relatedPosts = allPosts.filter((p) => p.slug !== post.slug).slice(0, 4)
 
   const articleJsonLd = {
     '@context': 'https://schema.org',
@@ -90,19 +89,15 @@ export default async function BlogPost({ params }) {
           <RichText value={post.body} className="text-sm leading-relaxed text-ink sm:text-base" />
         </Reveal>
 
-        {relatedA && (
+        {relatedPosts.length > 0 && (
           <div className="mt-16 sm:mt-20">
             <Reveal>
               <h2 className="font-display text-base font-bold italic text-brand sm:text-lg">Articles You May Like</h2>
             </Reveal>
-            <div className="mt-6 space-y-4">
-              {(relatedA || relatedB) && (
-                <div className="grid grid-cols-2 gap-4">
-                  {relatedA && <ArticleCard post={relatedA} variant="square" />}
-                  {relatedB && <ArticleCard post={relatedB} variant="square" delay={0.05} />}
-                </div>
-              )}
-              {relatedC && <ArticleCard post={relatedC} variant="wide" delay={0.1} />}
+            <div className="mt-6 grid grid-cols-2 gap-4">
+              {relatedPosts.map((related, i) => (
+                <ArticleCard key={related.slug} post={related} variant="square" delay={i * 0.05} />
+              ))}
             </div>
           </div>
         )}
