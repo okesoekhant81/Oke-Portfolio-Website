@@ -1,5 +1,6 @@
 import Reveal from './Reveal'
 import RichText from './RichText'
+import SocialIcons from './SocialIcons'
 
 export default function Contact({ line1, line2, body, cta, email, copyright, tagline }) {
   return (
@@ -20,7 +21,9 @@ export default function Contact({ line1, line2, body, cta, email, copyright, tag
           {email}
         </a>
 
-        <p className="mt-8 text-xs text-muted">{copyright}</p>
+        <SocialIcons className="mt-8" />
+
+        <p className="mt-6 text-xs text-muted">{copyright}</p>
         <p className="mt-1 font-display text-xs font-bold italic text-muted">{tagline}</p>
       </Reveal>
     </footer>
