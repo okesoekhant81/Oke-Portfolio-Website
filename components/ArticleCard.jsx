@@ -1,7 +1,14 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import Reveal from './Reveal'
 import ViewCount from './ViewCount'
 import { getDictionary, headingLeading, italicIfLatin } from '../lib/dictionaries'
+
+const SIZES = {
+  featured: '(min-width: 1024px) 66vw, 100vw',
+  square: '(min-width: 1024px) 33vw, 50vw',
+  wide: '100vw',
+}
 
 function formatDate(dateString, dateLocale) {
   if (!dateString) return null
@@ -40,10 +47,12 @@ export default function ArticleCard({ post, variant = 'square', delay = 0, class
     >
       <Link href={`/blog/${post.slug}`} className="group block size-full">
         {post.coverImageUrl ? (
-          <img
+          <Image
             src={post.coverImageUrl}
-            alt=""
-            className="absolute inset-0 size-full object-cover transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.04]"
+            alt={post.title}
+            fill
+            sizes={SIZES[variant]}
+            className="object-cover transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.04]"
           />
         ) : (
           <div className="absolute inset-0 bg-ink/90" />

@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import { after } from 'next/server'
+import Image from 'next/image'
 import Link from 'next/link'
 import ArticleCard from '../../../components/ArticleCard'
 import Contact from '../../../components/Contact'
@@ -88,11 +89,16 @@ export default async function BlogPost({ params }) {
 
         <Reveal delay={0.05}>
           {post.coverImageUrl && (
-            <img
-              src={post.coverImageUrl}
-              alt=""
-              className="mt-6 aspect-square w-full rounded-[10px] object-cover lg:aspect-[16/9]"
-            />
+            <div className="relative mt-6 aspect-square w-full overflow-hidden rounded-[10px] lg:aspect-[16/9]">
+              <Image
+                src={post.coverImageUrl}
+                alt={post.title}
+                fill
+                priority
+                sizes="(min-width: 1024px) 768px, (min-width: 640px) 672px, 100vw"
+                className="object-cover"
+              />
+            </div>
           )}
         </Reveal>
 

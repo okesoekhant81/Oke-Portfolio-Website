@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Reveal from './Reveal'
 import RichText from './RichText'
 import { headingGap, headingLeading, italicIfLatin } from '../lib/dictionaries'
@@ -5,7 +6,7 @@ import { headingGap, headingLeading, italicIfLatin } from '../lib/dictionaries'
 export default function Workshop({ image, line1, line2, body, role, locale = 'en' }) {
   return (
     <section className="relative overflow-hidden bg-ink">
-      <img src={image} alt={`${line1} ${line2}`} className="absolute inset-0 size-full object-cover" />
+      <Image src={image} alt={`${line1} ${line2}`} fill sizes="100vw" className="object-cover" />
       <div className="absolute inset-0 bg-black/45" />
       <Reveal className="relative mx-auto max-w-3xl px-6 py-14 text-white sm:px-12 sm:py-20 md:px-16">
         <h2 className={`text-2xl sm:text-3xl md:text-4xl ${headingLeading(locale)} ${headingGap(locale)}`}>

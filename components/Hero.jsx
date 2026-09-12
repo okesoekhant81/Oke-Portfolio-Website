@@ -1,9 +1,12 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 import Reveal from './Reveal'
 import RichText from './RichText'
 import { headingLeading, italicIfLatin } from '../lib/dictionaries'
+
+const MotionImage = motion.create(Image)
 
 export default function Hero({ name, body, badgePrefix, badgeEmphasis, image, locale = 'en' }) {
   return (
@@ -34,9 +37,12 @@ export default function Hero({ name, body, badgePrefix, badgeEmphasis, image, lo
         </Reveal>
 
         <Reveal delay={0.15} className="mx-auto sm:mx-0 sm:shrink-0">
-          <motion.img
+          <MotionImage
             src={image}
             alt={`Portrait of ${name}`}
+            width={480}
+            height={856}
+            priority
             whileHover={{ scale: 1.04, rotate: -0.5 }}
             transition={{ type: 'spring', stiffness: 260, damping: 22, mass: 0.7 }}
             className="h-auto w-56 sm:w-44 md:w-52 lg:w-60"
