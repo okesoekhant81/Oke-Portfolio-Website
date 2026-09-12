@@ -4,6 +4,7 @@ import NavMenu from '../../components/NavMenu'
 import Reveal from '../../components/Reveal'
 import { getPosts } from '../../lib/content/posts'
 import { getHomepageContent } from '../../lib/content/homepage'
+import { getAnalytics } from '../../lib/content/analytics'
 import { getLocale } from '../../lib/i18n'
 import { localizeHomepageContent, localizePost } from '../../lib/localizeContent'
 import { getDictionary, headingLeading, italicIfLatin } from '../../lib/dictionaries'
@@ -34,10 +35,15 @@ function chunk(items, size) {
 }
 
 export default async function BlogIndex() {
-  const [rawPosts, rawContent, locale] = await Promise.all([getPosts(), getHomepageContent(), getLocale()])
+  const [rawPosts, rawContent, locale, { postViews }] = await Promise.all([
+    getPosts(),
+    getHomepageContent(),
+    getLocale(),
+    getAnalytics(),
+  ])
   const dict = getDictionary(locale)
   const content = localizeHomepageContent(rawContent, locale)
-  const posts = rawPosts.map((post) => localizePost(post, locale))
+  const posts = rawPosts.map((post) => ({ ...localizePost(post, locale), views: postViews[post.slug] || 0 }))
   const groups = chunk(posts, 4)
 
   return (

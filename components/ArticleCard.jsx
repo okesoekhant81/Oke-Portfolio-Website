@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import Reveal from './Reveal'
+import ViewCount from './ViewCount'
 import { getDictionary, headingLeading, italicIfLatin } from '../lib/dictionaries'
 
 function formatDate(dateString, dateLocale) {
@@ -49,7 +50,15 @@ export default function ArticleCard({ post, variant = 'square', delay = 0, class
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 p-4 lg:p-6">
-          {date && <p className={`font-display text-[10px] text-white/70 lg:text-xs ${italicIfLatin(locale)}`}>{date}</p>}
+          {(date || post.views) && (
+            <p
+              className={`flex items-center gap-1.5 font-display text-[10px] text-white/70 lg:text-xs ${italicIfLatin(locale)}`}
+            >
+              {date && <span>{date}</span>}
+              {date && post.views ? <span aria-hidden="true">&middot;</span> : null}
+              <ViewCount count={post.views} />
+            </p>
+          )}
           <h3
             className={
               variant === 'featured'

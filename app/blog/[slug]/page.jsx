@@ -6,9 +6,10 @@ import Contact from '../../../components/Contact'
 import NavMenu from '../../../components/NavMenu'
 import Reveal from '../../../components/Reveal'
 import RichText from '../../../components/RichText'
+import ViewCount from '../../../components/ViewCount'
 import { getPost, getPosts } from '../../../lib/content/posts'
 import { getHomepageContent } from '../../../lib/content/homepage'
-import { recordView } from '../../../lib/content/analytics'
+import { getAnalytics, recordView } from '../../../lib/content/analytics'
 import { getLocale } from '../../../lib/i18n'
 import { localizeHomepageContent, localizePost } from '../../../lib/localizeContent'
 import { getDictionary, headingGap, headingLeading, italicIfLatin } from '../../../lib/dictionaries'
@@ -37,11 +38,12 @@ export async function generateMetadata({ params }) {
 
 export default async function BlogPost({ params }) {
   const { slug } = await params
-  const [rawPost, allPosts, rawContent, locale] = await Promise.all([
+  const [rawPost, allPosts, rawContent, locale, { postViews }] = await Promise.all([
     getPost(slug),
     getPosts(),
     getHomepageContent(),
     getLocale(),
+    getAnalytics(),
   ])
   const dict = getDictionary(locale)
 
@@ -50,7 +52,7 @@ export default async function BlogPost({ params }) {
   // Deferred past the response so a slow Blob write never delays the page.
   after(() => recordView(slug))
 
-  const post = localizePost(rawPost, locale)
+  const post = { ...localizePost(rawPost, locale), views: postViews[slug] || 0 }
   const content = localizeHomepageContent(rawContent, locale)
 
   // Recency-only, capped at four, no filtering by topic or tags — kept
@@ -58,7 +60,7 @@ export default async function BlogPost({ params }) {
   const relatedPosts = allPosts
     .filter((p) => p.slug !== post.slug)
     .slice(0, 4)
-    .map((related) => localizePost(related, locale))
+    .map((related) => ({ ...localizePost(related, locale), views: postViews[related.slug] || 0 }))
 
   const articleJsonLd = {
     '@context': 'https://schema.org',
@@ -95,13 +97,21 @@ export default async function BlogPost({ params }) {
         </Reveal>
 
         <Reveal delay={0.1}>
-          {post.publishedAt && (
-            <p className={`mt-6 font-display text-xs text-muted dark:text-neutral-400 ${italicIfLatin(locale)}`}>
-              {new Date(post.publishedAt).toLocaleDateString(dict.locale.dateLocale, {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}
+          {(post.publishedAt || post.views) && (
+            <p
+              className={`mt-6 flex items-center gap-1.5 font-display text-xs text-muted dark:text-neutral-400 ${italicIfLatin(locale)}`}
+            >
+              {post.publishedAt && (
+                <span>
+                  {new Date(post.publishedAt).toLocaleDateString(dict.locale.dateLocale, {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </span>
+              )}
+              {post.publishedAt && post.views ? <span aria-hidden="true">&middot;</span> : null}
+              <ViewCount count={post.views} />
             </p>
           )}
 
