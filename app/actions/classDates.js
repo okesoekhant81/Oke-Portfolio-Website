@@ -55,3 +55,13 @@ export async function updateClassDateFeeAction(formData) {
   revalidatePath('/admin/classes')
   revalidatePath('/admin/classes/[id]', 'page')
 }
+
+export async function updateClassDateLabelAction(formData) {
+  const id = formData.get('id')?.toString()
+  if (!id) return
+
+  await updateClassDate(id, { label: formData.get('label')?.toString().trim().slice(0, 100) ?? '' })
+  revalidatePath('/admin/classes')
+  revalidatePath('/admin/classes/[id]', 'page')
+  revalidatePath('/workshop')
+}

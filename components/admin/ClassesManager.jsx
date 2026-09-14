@@ -7,6 +7,7 @@ import {
   deleteClassDateAction,
   updateClassDateStatusAction,
   updateClassDateFeeAction,
+  updateClassDateLabelAction,
 } from '../../app/actions/classDates'
 
 function formatDate(dateStr) {
@@ -103,6 +104,70 @@ function FeeEditor({ id, defaultFee }) {
   )
 }
 
+function LabelEditor({ id, label }) {
+  const [editing, setEditing] = useState(false)
+  const [value, setValue] = useState(label || '')
+  const [saving, setSaving] = useState(false)
+  const [, startTransition] = useTransition()
+
+  function handleSave() {
+    setSaving(true)
+    const formData = new FormData()
+    formData.set('id', id)
+    formData.set('label', value)
+    startTransition(async () => {
+      try {
+        await updateClassDateLabelAction(formData)
+        setEditing(false)
+      } finally {
+        setSaving(false)
+      }
+    })
+  }
+
+  if (!editing) {
+    return (
+      <span className="inline-flex items-center gap-1.5">
+        {label && <span className="text-neutral-400">— {label}</span>}
+        <button
+          type="button"
+          onClick={() => setEditing(true)}
+          className="text-xs text-neutral-400 hover:text-brand"
+        >
+          {label ? 'Edit' : 'Add label'}
+        </button>
+      </span>
+    )
+  }
+
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        placeholder="e.g. Weekend batch"
+        autoFocus
+        className="w-40 rounded-md border border-neutral-300 px-2 py-0.5 text-xs outline-none focus:border-brand"
+      />
+      <button type="button" onClick={handleSave} disabled={saving} className="font-medium text-brand hover:underline disabled:opacity-60">
+        {saving ? '…' : 'Save'}
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          setValue(label || '')
+          setEditing(false)
+        }}
+        disabled={saving}
+        className="text-neutral-400 hover:text-ink"
+      >
+        Cancel
+      </button>
+    </span>
+  )
+}
+
 // Renders straight from the `dates`/`students` props rather than keeping a
 // local copy — a successful add/delete/edit calls revalidatePath, which
 // refreshes these props from the server automatically, so there's nothing
@@ -149,11 +214,11 @@ export default function ClassesManager({ dates, students }) {
                 className={`rounded-lg border border-neutral-100 px-3 py-3 ${deletingId === d.id ? 'opacity-40' : ''}`}
               >
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                  <span className="text-sm">
+                  <span className="flex items-center gap-2 text-sm">
                     <Link href={`/admin/classes/${d.id}`} className="font-medium text-ink hover:text-brand">
                       {formatDate(d.date)}
                     </Link>
-                    {d.label && <span className="ml-2 text-neutral-400">— {d.label}</span>}
+                    <LabelEditor id={d.id} label={d.label} />
                   </span>
                   <span className="flex items-center gap-2">
                     <StatusSelect id={d.id} status={d.status} />
