@@ -219,6 +219,22 @@ export default function WorkshopContentForm({ content }) {
           ))}
         </Section>
 
+        <Section title="Payment">
+          <p className="text-xs text-neutral-400">
+            Leave the QR code blank to keep registration payment-free — once set, the registration form shows this QR
+            code and asks registrants to upload proof of payment.
+          </p>
+          <ImageField label="Payment QR code" name="paymentQrImage" defaultValue={content.paymentQrImage} />
+          <TextArea
+            label="Payment instructions (account name, number, amount, etc.)"
+            name="paymentInstructions"
+            defaultValue={content.paymentInstructions}
+            nameMy="paymentInstructionsMy"
+            defaultValueMy={content.paymentInstructionsMy}
+            rows={3}
+          />
+        </Section>
+
         <SaveBar locked={locked} onEdit={() => setLocked(false)} onCancel={handleCancel} pending={pending} state={state} />
         </form>
       </LockContext.Provider>

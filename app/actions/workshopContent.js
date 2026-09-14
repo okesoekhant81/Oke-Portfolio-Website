@@ -62,6 +62,10 @@ export async function saveWorkshop(prevState, formData) {
     faqHeading: get('faqHeading'),
     faqHeadingMy: get('faqHeadingMy'),
     faqs,
+
+    paymentQrImage: get('paymentQrImage'),
+    paymentInstructions: get('paymentInstructions'),
+    paymentInstructionsMy: get('paymentInstructionsMy'),
   }
 
   try {
