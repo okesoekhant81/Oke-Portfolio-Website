@@ -3,10 +3,13 @@
 import { revalidatePath } from 'next/cache'
 import { addInquiry, deleteInquiry, deleteInquiries, setInquiryStatus, setInquiriesStatus } from '../../lib/content/inquiries'
 import { getClassDates } from '../../lib/content/classDates'
+import { getStudents } from '../../lib/content/students'
 import { checkSubmissionLimit, recordSubmission } from '../../lib/submissionLimits'
 import { clientIp } from '../../lib/clientIp'
 import { notifyNewInquiry } from '../../lib/notify'
+import { sendRegistrationConfirmation } from '../../lib/registrantEmail'
 import { logActivity } from '../../lib/activityLog'
+import { getLocale } from '../../lib/i18n'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -55,6 +58,10 @@ export async function submitInquiryAction(prevState, formData) {
   if (!phone) return { error: 'Please enter your phone number.' }
 
   const classDate = get('classDate').slice(0, MAX_LENGTHS.classDate)
+  // Recomputed here rather than trusted from the client — the form guesses
+  // at isFull from whatever headcount it rendered with, which can already
+  // be stale by the time this submission lands.
+  let waitlisted = false
   if (classDate) {
     // The registration form only ever offers 'upcoming' dates as options,
     // but that's a client-side filter — re-checked here since nothing
@@ -65,7 +72,20 @@ export async function submitInquiryAction(prevState, formData) {
     if (matchedClass && matchedClass.status && matchedClass.status !== 'upcoming') {
       return { error: 'That class is no longer open for registration. Please choose another date.' }
     }
+    if (matchedClass?.capacity) {
+      const registered = (await getStudents()).filter((s) => s.classDate === classDate).length
+      waitlisted = registered >= matchedClass.capacity
+    }
   }
+
+  // Only ever a URL our own upload endpoint just generated (a Blob URL) —
+  // trusted as a plain string this far, but a client could still put any
+  // text in the hidden field, so anything other than a real https:// URL
+  // is dropped rather than stored and later rendered as a link in admin.
+  const paymentProofUrlRaw = get('paymentProofUrl')
+  const paymentProofUrl = paymentProofUrlRaw.startsWith('https://') ? paymentProofUrlRaw.slice(0, 500) : ''
+
+  const locale = await getLocale()
 
   let record
   try {
@@ -79,14 +99,18 @@ export async function submitInquiryAction(prevState, formData) {
       classDate,
       hearAbout: get('hearAbout').slice(0, MAX_LENGTHS.hearAbout),
       message: get('message').slice(0, MAX_LENGTHS.message),
+      locale,
+      waitlisted,
+      paymentProofUrl,
     })
   } catch (err) {
     return { error: err.message || 'Could not submit. Please try again.' }
   }
 
   await notifyNewInquiry(record)
+  await sendRegistrationConfirmation(record, locale)
   revalidatePath('/admin/inquiries')
-  return { success: true }
+  return { success: true, waitlisted }
 }
 
 // Both of the below rely on only being reachable through a form on
