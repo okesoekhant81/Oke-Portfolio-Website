@@ -1,5 +1,7 @@
 import Link from 'next/link'
+import { cookies } from 'next/headers'
 import { logout } from '../../app/actions/auth'
+import { SESSION_COOKIE, getSessionAdminName } from '../../lib/auth'
 
 // Grouped into a handful of dropdowns rather than one flat list — with a
 // dozen-plus admin pages now, a flat list wraps across several lines on a
@@ -33,6 +35,8 @@ const GROUPS = [
       { href: '/admin/subscribers', label: 'Subscribers' },
       { href: '/admin/backup', label: 'Backup' },
       { href: '/admin/activity', label: 'Activity' },
+      { href: '/admin/trash', label: 'Trash' },
+      { href: '/admin/team', label: 'Team' },
     ],
   },
 ]
@@ -89,7 +93,10 @@ function NavGroup({ group, active }) {
   )
 }
 
-export default function AdminNav({ active }) {
+export default async function AdminNav({ active }) {
+  const token = (await cookies()).get(SESSION_COOKIE)?.value
+  const adminName = await getSessionAdminName(token)
+
   return (
     <header className="border-b border-neutral-200 bg-white">
       <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-6 py-4">
@@ -100,6 +107,7 @@ export default function AdminNav({ active }) {
           ))}
         </nav>
         <div className="flex items-center gap-3 sm:gap-4">
+          {adminName && <span className="whitespace-nowrap text-xs text-neutral-400">Signed in as {adminName}</span>}
           <Link href="/" target="_blank" className="whitespace-nowrap text-xs text-neutral-400 hover:text-neutral-600">
             View site ↗
           </Link>

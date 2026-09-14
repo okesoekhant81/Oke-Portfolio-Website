@@ -14,7 +14,18 @@ export default function LoginPage() {
         </h1>
         <p className="mt-1 text-sm text-neutral-500">Sign in to edit the site.</p>
 
-        <label className="mt-6 block text-xs font-medium text-neutral-600" htmlFor="password">
+        <label className="mt-6 block text-xs font-medium text-neutral-600" htmlFor="email">
+          Email <span className="font-normal text-neutral-400">(team members only — owner leaves this blank)</span>
+        </label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          className="mt-2 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-brand"
+        />
+
+        <label className="mt-4 block text-xs font-medium text-neutral-600" htmlFor="password">
           Password
         </label>
         <input
