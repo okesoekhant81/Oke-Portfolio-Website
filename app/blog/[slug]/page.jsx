@@ -4,13 +4,15 @@ import Image from 'next/image'
 import Link from 'next/link'
 import ArticleCard from '../../../components/ArticleCard'
 import Contact from '../../../components/Contact'
+import LikeButton from '../../../components/LikeButton'
 import NavMenu from '../../../components/NavMenu'
 import Reveal from '../../../components/Reveal'
 import RichText from '../../../components/RichText'
+import ShareButton from '../../../components/ShareButton'
 import ViewCount from '../../../components/ViewCount'
 import { getPost, getPosts } from '../../../lib/content/posts'
 import { getHomepageContent } from '../../../lib/content/homepage'
-import { getAnalytics, recordView } from '../../../lib/content/analytics'
+import { getAnalytics, getPostLikes, recordView } from '../../../lib/content/analytics'
 import { getLocale } from '../../../lib/i18n'
 import { localizeHomepageContent, localizePost } from '../../../lib/localizeContent'
 import { getDictionary, headingGap, headingLeading, italicIfLatin } from '../../../lib/dictionaries'
@@ -39,12 +41,13 @@ export async function generateMetadata({ params }) {
 
 export default async function BlogPost({ params }) {
   const { slug } = await params
-  const [rawPost, allPosts, rawContent, locale, { postViews }] = await Promise.all([
+  const [rawPost, allPosts, rawContent, locale, { postViews }, postLikes] = await Promise.all([
     getPost(slug),
     getPosts(),
     getHomepageContent(),
     getLocale(),
     getAnalytics(),
+    getPostLikes(),
   ])
   const dict = getDictionary(locale)
 
@@ -132,6 +135,11 @@ export default async function BlogPost({ params }) {
             locale={locale}
             className="text-sm leading-relaxed text-ink sm:text-base dark:text-neutral-100"
           />
+
+          <div className="mt-8 flex items-center gap-3">
+            <LikeButton slug={post.slug} initialCount={postLikes[post.slug] || 0} locale={locale} />
+            <ShareButton url={`${SITE_URL}/blog/${post.slug}`} title={post.title} locale={locale} />
+          </div>
         </Reveal>
 
         {relatedPosts.length > 0 && (
