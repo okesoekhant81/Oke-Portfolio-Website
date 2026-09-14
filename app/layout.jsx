@@ -10,7 +10,6 @@ import '@fontsource/noto-serif-myanmar/400.css'
 import '@fontsource/noto-serif-myanmar/700.css'
 import CookieConsent from '../components/CookieConsent'
 import GoogleAnalytics from '../components/GoogleAnalytics'
-import WhatsAppButton from '../components/WhatsAppButton'
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from '../lib/site'
 
 export const metadata = {
@@ -85,7 +84,6 @@ export default function RootLayout({ children }) {
         {children}
         <CookieConsent />
         <GoogleAnalytics />
-        <WhatsAppButton />
       </body>
     </html>
   )

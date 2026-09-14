@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { AnimatePresence, motion } from 'framer-motion'
 import ThemeToggle from './ThemeToggle'
 import LocaleToggle from './LocaleToggle'
+import WhatsAppButton from './WhatsAppButton'
 import { getDictionary, headingLeading, italicIfLatin } from '../lib/dictionaries'
 
 const EASE = [0.16, 1, 0.3, 1]
@@ -35,6 +36,7 @@ export default function NavMenu({ locale = 'en' }) {
       <div className="fixed right-5 bottom-5 z-50 flex flex-col items-center gap-2 sm:right-8 sm:bottom-8">
         <ThemeToggle />
         <LocaleToggle locale={locale} />
+        <WhatsAppButton />
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}

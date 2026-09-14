@@ -3,6 +3,7 @@
 import { useActionState, useState, useTransition } from 'react'
 import {
   addTestimonialAction,
+  updateTestimonialAction,
   deleteTestimonialAction,
   reorderTestimonialAction,
 } from '../../app/actions/testimonials'
@@ -18,7 +19,14 @@ function ReorderButtons({ id, disabled }) {
     const formData = new FormData()
     formData.set('id', id)
     formData.set('direction', direction)
-    startTransition(() => reorderTestimonialAction(formData))
+    startTransition(async () => {
+      try {
+        await reorderTestimonialAction(formData)
+      } catch {
+        // Low-stakes, no local state to roll back — a failed reorder just
+        // means the list doesn't change; the buttons stay usable to retry.
+      }
+    })
   }
 
   return (
@@ -47,27 +55,112 @@ function ReorderButtons({ id, disabled }) {
 
 function DeleteButton({ id, name }) {
   const [deleting, setDeleting] = useState(false)
+  const [error, setError] = useState(false)
   const [, startTransition] = useTransition()
 
   function handleDelete() {
     if (!confirm(`Delete the testimonial from "${name}"?`)) return
     setDeleting(true)
+    setError(false)
     const formData = new FormData()
     formData.set('id', id)
     startTransition(async () => {
-      await deleteTestimonialAction(formData)
+      try {
+        await deleteTestimonialAction(formData)
+      } catch {
+        setError(true)
+      } finally {
+        setDeleting(false)
+      }
     })
   }
 
   return (
-    <button
-      type="button"
-      onClick={handleDelete}
-      disabled={deleting}
-      className="text-xs text-neutral-400 hover:text-red-600 disabled:opacity-60"
-    >
-      {deleting ? 'Deleting…' : 'Delete'}
-    </button>
+    <span className="flex flex-col items-end gap-1">
+      <button
+        type="button"
+        onClick={handleDelete}
+        disabled={deleting}
+        className="text-xs text-neutral-400 hover:text-red-600 disabled:opacity-60"
+      >
+        {deleting ? 'Deleting…' : 'Delete'}
+      </button>
+      {error && <span className="text-xs text-red-600">Couldn&rsquo;t delete</span>}
+    </span>
+  )
+}
+
+function TestimonialItem({ testimonial, isFirst }) {
+  const [editing, setEditing] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState(null)
+  const [, startTransition] = useTransition()
+
+  function handleSave(formData) {
+    formData.set('id', testimonial.id)
+    setSaving(true)
+    setError(null)
+    startTransition(async () => {
+      const result = await updateTestimonialAction(formData)
+      setSaving(false)
+      if (result?.error) setError(result.error)
+      else setEditing(false)
+    })
+  }
+
+  if (!editing) {
+    return (
+      <li className="flex items-start gap-3 rounded-lg border border-neutral-100 p-3">
+        <ReorderButtons id={testimonial.id} disabled={isFirst} />
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold text-ink">
+            {testimonial.name}
+            {testimonial.role && <span className="font-normal text-neutral-400"> — {testimonial.role}</span>}
+          </p>
+          <p className="mt-1 text-sm text-neutral-600">&ldquo;{testimonial.quote}&rdquo;</p>
+        </div>
+        <div className="flex shrink-0 flex-col items-end gap-1.5">
+          <button type="button" onClick={() => setEditing(true)} className="text-xs text-neutral-400 hover:text-brand">
+            Edit
+          </button>
+          <DeleteButton id={testimonial.id} name={testimonial.name} />
+        </div>
+      </li>
+    )
+  }
+
+  return (
+    <li className="rounded-lg border border-brand/30 bg-brand/5 p-3">
+      <form action={handleSave} className="space-y-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <input name="name" required defaultValue={testimonial.name} placeholder="Name" className={inputClass} />
+          <input name="role" defaultValue={testimonial.role} placeholder="Role / business (optional)" className={inputClass} />
+        </div>
+        <textarea name="quote" required rows={3} defaultValue={testimonial.quote} placeholder="Quote" className={`w-full ${inputClass}`} />
+        <ImageField label="Photo (optional)" name="photo" defaultValue={testimonial.photo} />
+        <div className="flex items-center gap-3">
+          <button
+            type="submit"
+            disabled={saving}
+            className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-white transition-opacity disabled:opacity-60"
+          >
+            {saving ? 'Saving…' : 'Save'}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setEditing(false)
+              setError(null)
+            }}
+            disabled={saving}
+            className="text-sm text-neutral-500 hover:text-ink"
+          >
+            Cancel
+          </button>
+          {error && <span className="text-sm text-red-600">{error}</span>}
+        </div>
+      </form>
+    </li>
   )
 }
 
@@ -90,17 +183,7 @@ export default function TestimonialsManager({ testimonials }) {
           {testimonials.length > 0 && (
             <ul className="mt-4 space-y-3">
               {testimonials.map((t, i) => (
-                <li key={t.id} className="flex items-start gap-3 rounded-lg border border-neutral-100 p-3">
-                  <ReorderButtons id={t.id} disabled={i === 0} />
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-ink">
-                      {t.name}
-                      {t.role && <span className="font-normal text-neutral-400"> — {t.role}</span>}
-                    </p>
-                    <p className="mt-1 text-sm text-neutral-600">&ldquo;{t.quote}&rdquo;</p>
-                  </div>
-                  <DeleteButton id={t.id} name={t.name} />
-                </li>
+                <TestimonialItem key={t.id} testimonial={t} isFirst={i === 0} />
               ))}
             </ul>
           )}
