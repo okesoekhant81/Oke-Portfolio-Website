@@ -1,46 +1,49 @@
 'use client'
 
-import { useActionState, useState } from 'react'
+import { useActionState, useEffect, useState } from 'react'
 import { savePostAction } from '../../app/actions/posts'
+import { LanguageTabs, LockContext } from './ContentFormFields'
 import ImageField from './ImageField'
+import SaveBar from './SaveBar'
 
 function toDateInputValue(iso) {
   if (!iso) return new Date().toISOString().slice(0, 10)
   return new Date(iso).toISOString().slice(0, 10)
 }
 
-function LanguageTabs({ value, onChange }) {
-  return (
-    <div className="flex gap-2">
-      {[
-        { key: 'en', label: 'English' },
-        { key: 'my', label: 'မြန်မာ' },
-      ].map((tab) => (
-        <button
-          key={tab.key}
-          type="button"
-          onClick={() => onChange(tab.key)}
-          className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-            value === tab.key ? 'bg-brand text-white' : 'bg-neutral-100 text-neutral-600 hover:text-ink'
-          }`}
-        >
-          {tab.label}
-        </button>
-      ))}
-      <p className="ml-auto self-center text-xs text-neutral-400">
-        {value === 'en' ? 'Editing English' : 'Editing Myanmar — blank fields fall back to English on the site'}
-      </p>
-    </div>
-  )
-}
+const fieldBase = 'mt-1 w-full rounded-md border px-3 py-2 text-sm outline-none transition-colors duration-200'
+const fieldEditable = 'border-neutral-300 focus:border-brand'
+const fieldLocked = 'border-neutral-200 bg-neutral-50 text-neutral-500 cursor-default'
 
 export default function PostForm({ post }) {
   const [state, formAction, pending] = useActionState(savePostAction, null)
   const [formLocale, setFormLocale] = useState('en')
   const isEditing = Boolean(post)
+  // A new post has nothing to protect from accidental edits — it opens
+  // straight into edit mode. Editing an existing one opens read-only, same
+  // as the homepage/workshop content forms, and relocks itself after a
+  // successful save.
+  const [locked, setLocked] = useState(isEditing)
+  const [formKey, setFormKey] = useState(0)
+  const fieldClass = (extra = '') => `${fieldBase} ${locked ? fieldLocked : fieldEditable} ${extra}`
+
+  useEffect(() => {
+    if (state?.success) setLocked(true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state?.savedAt])
+
+  function handleCancel() {
+    setFormKey((k) => k + 1)
+    setLocked(true)
+  }
 
   return (
-    <form action={formAction} className="mt-6 space-y-4 rounded-xl border border-neutral-200 bg-white p-6">
+    <LockContext.Provider value={locked}>
+    <form
+      key={formKey}
+      action={formAction}
+      className="mt-6 space-y-4 rounded-xl border border-neutral-200 bg-white p-6"
+    >
       {isEditing && <input type="hidden" name="previousSlug" value={post.slug} />}
 
       <LanguageTabs value={formLocale} onChange={setFormLocale} />
@@ -51,17 +54,17 @@ export default function PostForm({ post }) {
           name="title"
           defaultValue={post?.title}
           required
-          className={`mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-brand ${
-            formLocale !== 'en' ? 'hidden' : ''
-          }`}
+          readOnly={locked}
+          tabIndex={locked ? -1 : 0}
+          className={fieldClass(formLocale !== 'en' ? 'hidden' : '')}
         />
         <input
           name="titleMy"
           defaultValue={post?.titleMy}
+          readOnly={locked}
+          tabIndex={locked ? -1 : 0}
           placeholder="မြန်မာလို ခေါင်းစဉ်..."
-          className={`mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-brand ${
-            formLocale !== 'my' ? 'hidden' : ''
-          }`}
+          className={fieldClass(formLocale !== 'my' ? 'hidden' : '')}
         />
       </div>
 
@@ -72,8 +75,10 @@ export default function PostForm({ post }) {
         <input
           name="slug"
           defaultValue={post?.slug}
+          readOnly={locked}
+          tabIndex={locked ? -1 : 0}
           placeholder="my-article-title"
-          className="mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-brand"
+          className={fieldClass()}
         />
       </div>
 
@@ -83,18 +88,18 @@ export default function PostForm({ post }) {
           name="excerpt"
           defaultValue={post?.excerpt}
           rows={2}
-          className={`mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-brand ${
-            formLocale !== 'en' ? 'hidden' : ''
-          }`}
+          readOnly={locked}
+          tabIndex={locked ? -1 : 0}
+          className={fieldClass(formLocale !== 'en' ? 'hidden' : '')}
         />
         <textarea
           name="excerptMy"
           defaultValue={post?.excerptMy}
           rows={2}
+          readOnly={locked}
+          tabIndex={locked ? -1 : 0}
           placeholder="မြန်မာလို အကျဉ်းချုပ်..."
-          className={`mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-brand ${
-            formLocale !== 'my' ? 'hidden' : ''
-          }`}
+          className={fieldClass(formLocale !== 'my' ? 'hidden' : '')}
         />
       </div>
 
@@ -104,7 +109,9 @@ export default function PostForm({ post }) {
           type="date"
           name="publishedAt"
           defaultValue={toDateInputValue(post?.publishedAt)}
-          className="mt-1 rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-brand"
+          readOnly={locked}
+          tabIndex={locked ? -1 : 0}
+          className={fieldClass('sm:w-auto')}
         />
       </div>
 
@@ -121,30 +128,30 @@ export default function PostForm({ post }) {
           name="body"
           defaultValue={post?.body}
           rows={16}
-          className={`mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 font-mono text-sm outline-none focus:border-brand ${
-            formLocale !== 'en' ? 'hidden' : ''
-          }`}
+          readOnly={locked}
+          tabIndex={locked ? -1 : 0}
+          className={fieldClass(`font-mono ${formLocale !== 'en' ? 'hidden' : ''}`)}
         />
         <textarea
           name="bodyMy"
           defaultValue={post?.bodyMy}
           rows={16}
+          readOnly={locked}
+          tabIndex={locked ? -1 : 0}
           placeholder="မြန်မာလို ဆောင်းပါးအကြောင်းအရာ..."
-          className={`mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 font-mono text-sm outline-none focus:border-brand ${
-            formLocale !== 'my' ? 'hidden' : ''
-          }`}
+          className={fieldClass(`font-mono ${formLocale !== 'my' ? 'hidden' : ''}`)}
         />
       </div>
 
-      {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
-
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded-md bg-brand px-5 py-2 text-sm font-medium text-white transition-opacity disabled:opacity-60"
-      >
-        {pending ? 'Saving…' : isEditing ? 'Save changes' : 'Publish article'}
-      </button>
+      <SaveBar
+        locked={locked}
+        onEdit={() => setLocked(false)}
+        onCancel={handleCancel}
+        pending={pending}
+        state={state}
+        saveLabel={isEditing ? 'Save changes' : 'Publish article'}
+      />
     </form>
+    </LockContext.Provider>
   )
 }

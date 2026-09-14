@@ -1,6 +1,7 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useContext, useRef, useState } from 'react'
+import { LockContext } from './ContentFormFields'
 
 function formatKb(bytes) {
   return `${Math.max(1, Math.round(bytes / 1024))}KB`
@@ -39,6 +40,7 @@ function uploadWithProgress(file, onProgress) {
 }
 
 export default function ImageField({ name, label, defaultValue }) {
+  const locked = useContext(LockContext)
   const [url, setUrl] = useState(defaultValue || '')
   const [phase, setPhase] = useState('idle') // idle | uploading | optimizing | done | error
   const [percent, setPercent] = useState(0)
@@ -80,7 +82,14 @@ export default function ImageField({ name, label, defaultValue }) {
           </div>
         )}
         <div className="min-w-0 flex-1">
-          <input ref={inputRef} type="file" accept="image/*" onChange={handleFileChange} className="text-xs" />
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            disabled={locked}
+            className="text-xs disabled:cursor-default disabled:opacity-50"
+          />
 
           {(phase === 'uploading' || phase === 'optimizing') && (
             <div className="mt-2 max-w-48">
