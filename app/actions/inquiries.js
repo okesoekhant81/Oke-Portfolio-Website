@@ -67,6 +67,7 @@ export async function submitInquiryAction(prevState, formData) {
     return { error: err.message || 'Could not submit. Please try again.' }
   }
 
+  revalidatePath('/admin/inquiries')
   return { success: true }
 }
 
