@@ -11,6 +11,7 @@ import { getInquiries } from '../../lib/content/inquiries'
 import { getSubscribers } from '../../lib/content/newsletter'
 import { getAnalytics, getPostLikes } from '../../lib/content/analytics'
 import { readJsonRaw } from '../../lib/blobStore'
+import { allContentPaths } from '../../lib/contentPaths'
 
 // Everything the admin panel manages, gathered into one snapshot — a plain
 // data export, not a restore mechanism (there's no matching "import" on
@@ -59,43 +60,13 @@ export async function getFullBackupAction() {
   }
 }
 
-// Every fixed content pathname this app stores in Vercel Blob (see the
-// PATH/INDEX_PATH constants across lib/content/*.js, lib/activityLog.js and
-// lib/content/newsletter.js). Excludes lib/submissionLimits.js and
-// lib/loginAttempts.js — those are short-lived, IP-keyed rate-limit
-// counters with no lasting business value and no fixed list of pathnames.
-const FIXED_PATHS = [
-  'content/homepage.json',
-  'content/about.json',
-  'content/workshop.json',
-  'content/testimonials.json',
-  'content/workshop-dates.json',
-  'content/students.json',
-  'content/inquiries.json',
-  'content/newsletter-subscribers.json',
-  'content/admin-users.json',
-  'content/activity-log.json',
-  'content/analytics/post-views.json',
-  'content/analytics/daily-views.json',
-  'content/analytics/post-likes.json',
-  'content/posts-index.json',
-]
-
 // A byte-exact dump of every blob this app manages, read straight from
 // storage with no business logic (no soft-delete filtering, no draft/
 // publish filtering) applied — unlike getFullBackupAction above, which goes
 // through the same filtered getters the app itself uses. Meant as a backup
 // safety net, not something this app ever reads back in.
 export async function getRawStorageSnapshotAction() {
-  const indexText = await readJsonRaw('content/posts-index.json')
-  let slugs = []
-  try {
-    slugs = indexText ? JSON.parse(indexText) : []
-  } catch {
-    slugs = []
-  }
-  const paths = [...FIXED_PATHS, ...slugs.map((slug) => `content/posts/${slug}.json`)]
-
+  const paths = await allContentPaths()
   const entries = await Promise.all(paths.map(async (pathname) => [pathname, await readJsonRaw(pathname)]))
   const snapshot = Object.fromEntries(entries.filter(([, text]) => text !== null))
   return { exportedAt: new Date().toISOString(), pathCount: paths.length, snapshot }
