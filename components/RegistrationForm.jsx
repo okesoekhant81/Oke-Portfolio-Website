@@ -33,6 +33,17 @@ export default function RegistrationForm({ locale = 'en' }) {
     message: '',
   })
   const activeInputRef = useRef(null)
+  // A honeypot real visitors never see (bots that fill every input they
+  // find will fill it) and the mount time (real completion, even fast, has
+  // a floor a scripted POST doesn't) — both checked server-side in
+  // submitInquiryAction, never enforced here, since a client-side-only
+  // check is trivial for a bot to just skip.
+  const honeypotRef = useRef(null)
+  // Lazy initializer, not `useRef(Date.now())` — the latter calls Date.now()
+  // directly in the render body on every render (React only keeps the
+  // first result, but still evaluates the impure call each time); the
+  // function form only ever runs once, on mount.
+  const [startedAt] = useState(() => Date.now())
 
   function update(field, value) {
     setValues((v) => ({ ...v, [field]: value }))
@@ -55,10 +66,26 @@ export default function RegistrationForm({ locale = 'en' }) {
     goNext()
   }
 
+  // Steps 0-2's inputs each stop Enter themselves (above) before it can
+  // reach the browser's native "Enter submits the form" behavior. Step 4's
+  // fields don't — nothing there needs Enter to *do* anything, but without
+  // a handler the browser still submits the whole form the instant Enter
+  // is pressed in the business/role inputs, mid-fill, well before the user
+  // meant to. This is the backstop for every input that isn't one of the
+  // per-step Enter handlers above: newlines in the message textarea and
+  // clicking the actual submit button both still work as normal.
+  function handleFormKeyDown(e) {
+    if (e.key !== 'Enter') return
+    if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'BUTTON') return
+    e.preventDefault()
+  }
+
   function handleSubmit(e) {
     e.preventDefault()
     const formData = new FormData()
     Object.entries(values).forEach(([key, value]) => formData.set(key, value))
+    formData.set('website', honeypotRef.current?.value || '')
+    formData.set('formStartedAt', String(startedAt))
     dispatch(formData)
   }
 
@@ -115,7 +142,15 @@ export default function RegistrationForm({ locale = 'en' }) {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} onKeyDown={handleFormKeyDown}>
+      {/* Honeypot: invisible and unreachable by tab or screen reader for a
+          real visitor, but present in the DOM for a bot that fills every
+          field it finds. */}
+      <div aria-hidden="true" className="absolute -left-[9999px] top-0 h-0 w-0 overflow-hidden">
+        <label htmlFor="website">Website</label>
+        <input ref={honeypotRef} id="website" name="website" type="text" tabIndex={-1} autoComplete="off" />
+      </div>
+
       <div className="mb-5">
         <p className="text-xs text-muted dark:text-neutral-400">
           {dict.workshop.formStep} {step + 1} / {TOTAL_STEPS}

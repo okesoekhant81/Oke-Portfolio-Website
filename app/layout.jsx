@@ -8,6 +8,7 @@ import '@fontsource/noto-sans-myanmar/400.css'
 import '@fontsource/noto-sans-myanmar/700.css'
 import '@fontsource/noto-serif-myanmar/400.css'
 import '@fontsource/noto-serif-myanmar/700.css'
+import CookieConsent from '../components/CookieConsent'
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from '../lib/site'
 
 export const metadata = {
@@ -77,7 +78,10 @@ export default function RootLayout({ children }) {
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <CookieConsent />
+      </body>
     </html>
   )
 }

@@ -1,9 +1,11 @@
+import Link from 'next/link'
 import Reveal from './Reveal'
 import RichText from './RichText'
 import SocialIcons from './SocialIcons'
-import { headingGap, headingLeading, italicIfLatin } from '../lib/dictionaries'
+import { getDictionary, headingGap, headingLeading, italicIfLatin } from '../lib/dictionaries'
 
 export default function Contact({ line1, line2, body, cta, email, copyright, tagline, locale = 'en' }) {
+  const dict = getDictionary(locale)
   return (
     <footer id="contact" className="bg-white px-6 py-14 text-ink sm:px-12 sm:py-16 md:px-16 dark:bg-ink dark:text-neutral-100">
       <Reveal className="mx-auto max-w-3xl">
@@ -26,6 +28,12 @@ export default function Contact({ line1, line2, body, cta, email, copyright, tag
 
         <p className="mt-6 text-xs text-muted dark:text-neutral-400">{copyright}</p>
         <p className={`mt-1 font-display text-xs font-bold text-muted dark:text-neutral-400 ${italicIfLatin(locale)}`}>{tagline}</p>
+        <Link
+          href="/privacy"
+          className="mt-3 inline-block text-xs text-muted underline decoration-muted/40 underline-offset-4 transition-colors duration-300 hover:text-brand dark:text-neutral-400 dark:hover:text-white"
+        >
+          {dict.privacy.metaTitle}
+        </Link>
       </Reveal>
     </footer>
   )

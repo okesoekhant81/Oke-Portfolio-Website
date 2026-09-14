@@ -1,14 +1,10 @@
 'use server'
 
-import { cookies, headers } from 'next/headers'
+import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { SESSION_COOKIE, SESSION_MAX_AGE_MS, createSessionToken } from '../../lib/auth'
 import { checkLockout, recordFailedAttempt, clearFailedAttempts } from '../../lib/loginAttempts'
-
-async function clientIp() {
-  const headerList = await headers()
-  return headerList.get('x-forwarded-for')?.split(',')[0]?.trim() || headerList.get('x-real-ip') || 'unknown'
-}
+import { clientIp } from '../../lib/clientIp'
 
 export async function login(prevState, formData) {
   const password = formData.get('password')
