@@ -3,18 +3,24 @@
 import { revalidatePath } from 'next/cache'
 import { addClassDate, updateClassDate, deleteClassDate } from '../../lib/content/classDates'
 
+function clampFee(value) {
+  const n = Number(value)
+  if (!Number.isFinite(n) || n < 0) return 0
+  return Math.round(n)
+}
+
 export async function addClassDateAction(prevState, formData) {
   const date = formData.get('date')?.toString().trim() ?? ''
   const label = formData.get('label')?.toString().trim().slice(0, 100) ?? ''
   if (!date) return { error: 'Pick a date.' }
 
   try {
-    await addClassDate({ date, label })
+    await addClassDate({ date, label, defaultFee: clampFee(formData.get('defaultFee')) })
   } catch (err) {
     return { error: err.message || 'Could not add. Please try again.' }
   }
 
-  revalidatePath('/admin/workshop')
+  revalidatePath('/admin/classes')
   revalidatePath('/workshop')
   return { success: true, savedAt: Date.now() }
 }
@@ -24,7 +30,7 @@ export async function deleteClassDateAction(formData) {
   if (!id) return
 
   await deleteClassDate(id)
-  revalidatePath('/admin/workshop')
+  revalidatePath('/admin/classes')
   revalidatePath('/workshop')
 }
 
@@ -36,7 +42,16 @@ export async function updateClassDateStatusAction(formData) {
   if (!id || !VALID_STATUSES.includes(status)) return
 
   await updateClassDate(id, { status })
-  revalidatePath('/admin/workshop')
-  revalidatePath(`/admin/classes/${id}`)
+  revalidatePath('/admin/classes')
+  revalidatePath('/admin/classes/[id]', 'page')
   revalidatePath('/admin/students')
+}
+
+export async function updateClassDateFeeAction(formData) {
+  const id = formData.get('id')?.toString()
+  if (!id) return
+
+  await updateClassDate(id, { defaultFee: clampFee(formData.get('defaultFee')) })
+  revalidatePath('/admin/classes')
+  revalidatePath('/admin/classes/[id]', 'page')
 }

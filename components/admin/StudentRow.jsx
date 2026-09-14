@@ -61,9 +61,13 @@ function ClassSelect({ student, classDates }) {
   )
 }
 
-function PaymentEditor({ student }) {
+function PaymentEditor({ student, suggestedFee }) {
   const [status, setStatus] = useState(student.paymentStatus || 'unpaid')
-  const [amount, setAmount] = useState(String(student.amountPaid ?? 0))
+  // No amount recorded yet — start the input at the class's usual rate
+  // (e.g. its early-bird price) instead of 0, since that's what almost
+  // every student actually pays; still just a starting value; it isn't
+  // saved as "paid" until the admin picks a status and hits Save.
+  const [amount, setAmount] = useState(String(student.amountPaid || suggestedFee || 0))
   const [note, setNote] = useState(student.paymentNote || '')
   const [savingNote, setSavingNote] = useState(false)
   const [, startTransition] = useTransition()
@@ -257,6 +261,7 @@ export default function StudentRow({ student, classDates }) {
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState(false)
   const [, startTransition] = useTransition()
+  const assignedClass = classDates.find((d) => d.date === student.classDate)
 
   function handleDelete() {
     if (!confirm(`Remove ${student.name} from the roster? This can't be undone.`)) return
@@ -297,7 +302,7 @@ export default function StudentRow({ student, classDates }) {
       </div>
 
       <div className="mt-3">
-        <PaymentEditor student={student} />
+        <PaymentEditor student={student} suggestedFee={assignedClass?.defaultFee} />
       </div>
 
       <AttendancePanel student={student} />
