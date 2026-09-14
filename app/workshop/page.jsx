@@ -74,6 +74,15 @@ export default async function WorkshopPage() {
     return d.toLocaleDateString(dict.locale.dateLocale, { year: 'numeric', month: 'long', day: 'numeric' })
   }
 
+  // Only approved testimonials with an actual star rating count toward the
+  // aggregate — a pending submission or a legacy row saved before ratings
+  // existed shouldn't silently drag the average down or inflate the count.
+  const ratedTestimonials = testimonials.filter((t) => t.status !== 'pending' && t.quote && t.rating)
+  const averageRating =
+    ratedTestimonials.length > 0
+      ? ratedTestimonials.reduce((sum, t) => sum + t.rating, 0) / ratedTestimonials.length
+      : 0
+
   const courseJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Course',
@@ -89,6 +98,22 @@ export default async function WorkshopPage() {
         '@type': 'CourseInstance',
         courseMode: 'Onsite',
         startDate: d.date,
+      })),
+    }),
+    // Same rule as above — real admin-approved reviews only, skipped
+    // entirely rather than emitting an aggregateRating with reviewCount: 0,
+    // which search engines and AI answer engines would treat as a claim.
+    ...(ratedTestimonials.length > 0 && {
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: Number(averageRating.toFixed(1)),
+        reviewCount: ratedTestimonials.length,
+      },
+      review: ratedTestimonials.map((t) => ({
+        '@type': 'Review',
+        author: { '@type': 'Person', name: t.name },
+        reviewRating: { '@type': 'Rating', ratingValue: t.rating, bestRating: 5, worstRating: 1 },
+        reviewBody: t.quote,
       })),
     }),
   }

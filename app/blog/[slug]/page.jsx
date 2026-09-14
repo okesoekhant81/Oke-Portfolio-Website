@@ -82,6 +82,7 @@ export default async function BlogPost({ params }) {
     publisher: { '@type': 'Person', name: SITE_NAME, url: SITE_URL },
     mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/blog/${slug}` },
     inLanguage: locale,
+    ...(post.tags?.length > 0 && { keywords: post.tags.join(', ') }),
   }
 
   return (
