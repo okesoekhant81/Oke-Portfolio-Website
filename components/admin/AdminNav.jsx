@@ -11,6 +11,9 @@ export default function AdminNav({ active }) {
     { href: '/admin/testimonials', label: 'Testimonials' },
     { href: '/admin/posts', label: 'Articles' },
     { href: '/admin/inquiries', label: 'Inquiries' },
+    { href: '/admin/subscribers', label: 'Subscribers' },
+    { href: '/admin/backup', label: 'Backup' },
+    { href: '/admin/activity', label: 'Activity' },
     { href: '/admin/students', label: 'Students' },
   ]
 
