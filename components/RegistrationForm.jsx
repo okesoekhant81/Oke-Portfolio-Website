@@ -60,14 +60,11 @@ function CopyRow({ label, value, copyLabel, copiedLabel }) {
 export default function RegistrationForm({ locale = 'en', classDates = [], paymentMethods = [] }) {
   const dict = getDictionary(locale)
   const [state, dispatch, pending] = useActionState(submitInquiryAction, null)
-  const steps = [
-    ...(classDates.length > 0 ? ['classDate'] : []),
-    'name',
-    'email',
-    'phone',
-    'optional',
-    ...(paymentMethods.length > 0 ? ['payment'] : []),
-  ]
+  // Payment lives inside the 'optional' step below rather than as its own
+  // step — capped at 5 steps total this way regardless of how many payment
+  // methods (or future optional bits) get added, instead of the step count
+  // creeping up every time a new optional feature joins the form.
+  const steps = [...(classDates.length > 0 ? ['classDate'] : []), 'name', 'email', 'phone', 'optional']
   const TOTAL_STEPS = steps.length
   const [proofUrl, setProofUrl] = useState('')
   const [proofUploadState, setProofUploadState] = useState('idle')
@@ -407,68 +404,68 @@ export default function RegistrationForm({ locale = 'en', classDates = [], payme
                     className={inputClass}
                   />
                 </div>
-              </div>
-            )}
 
-            {currentStepKey === 'payment' && (
-              <div className="space-y-3">
-                {isWaitlist && (
-                  <p className="rounded-md bg-neutral-100 px-3 py-2 text-xs text-muted dark:bg-white/5 dark:text-neutral-400">
-                    {dict.workshop.formWaitlistNote}
-                  </p>
-                )}
-                <p className={`font-display text-sm font-bold text-ink ${italicIfLatin(locale)}`}>
-                  {dict.workshop.formPaymentHeading}
-                </p>
-                <div className="space-y-3">
-                  {paymentMethods.map((m, i) => (
-                    <div key={i} className="rounded-lg border border-neutral-200 p-3 dark:border-neutral-700">
-                      <p className="text-sm font-semibold text-ink dark:text-neutral-100">{m.name}</p>
-                      <div className="mt-1.5 space-y-1">
-                        <CopyRow
-                          label={dict.workshop.formPaymentAccountName}
-                          value={m.accountName}
-                          copyLabel={dict.workshop.formPaymentCopy}
-                          copiedLabel={dict.workshop.formPaymentCopied}
-                        />
-                        <CopyRow
-                          label={dict.workshop.formPaymentAccountNumber}
-                          value={m.accountNumber}
-                          copyLabel={dict.workshop.formPaymentCopy}
-                          copiedLabel={dict.workshop.formPaymentCopied}
-                        />
-                      </div>
-                      {m.note && <p className="mt-2 text-xs text-muted dark:text-neutral-400">{m.note}</p>}
-                      {m.qrImage && (
-                        <img
-                          src={m.qrImage}
-                          alt={`${m.name} QR code`}
-                          className="mt-2 h-32 w-32 rounded-lg border border-neutral-200 object-contain dark:border-neutral-700"
-                        />
+                {paymentMethods.length > 0 && (
+                  <div className="space-y-3 border-t border-neutral-100 pt-4 dark:border-neutral-800">
+                    {isWaitlist && (
+                      <p className="rounded-md bg-neutral-100 px-3 py-2 text-xs text-muted dark:bg-white/5 dark:text-neutral-400">
+                        {dict.workshop.formWaitlistNote}
+                      </p>
+                    )}
+                    <p className={`font-display text-sm font-bold text-ink ${italicIfLatin(locale)}`}>
+                      {dict.workshop.formPaymentHeading}
+                    </p>
+                    <div className="space-y-3">
+                      {paymentMethods.map((m, i) => (
+                        <div key={i} className="rounded-lg border border-neutral-200 p-3 dark:border-neutral-700">
+                          <p className="text-sm font-semibold text-ink dark:text-neutral-100">{m.name}</p>
+                          <div className="mt-1.5 space-y-1">
+                            <CopyRow
+                              label={dict.workshop.formPaymentAccountName}
+                              value={m.accountName}
+                              copyLabel={dict.workshop.formPaymentCopy}
+                              copiedLabel={dict.workshop.formPaymentCopied}
+                            />
+                            <CopyRow
+                              label={dict.workshop.formPaymentAccountNumber}
+                              value={m.accountNumber}
+                              copyLabel={dict.workshop.formPaymentCopy}
+                              copiedLabel={dict.workshop.formPaymentCopied}
+                            />
+                          </div>
+                          {m.note && <p className="mt-2 text-xs text-muted dark:text-neutral-400">{m.note}</p>}
+                          {m.qrImage && (
+                            <img
+                              src={m.qrImage}
+                              alt={`${m.name} QR code`}
+                              className="mt-2 h-32 w-32 rounded-lg border border-neutral-200 object-contain dark:border-neutral-700"
+                            />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    <div>
+                      <label className={labelClass} htmlFor="paymentProof">
+                        {dict.workshop.formPaymentUpload}
+                      </label>
+                      <input
+                        id="paymentProof"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleProofUpload}
+                        className="mt-1 block text-sm text-muted file:mr-3 file:rounded-full file:border-0 file:bg-brand/10 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-brand dark:text-neutral-400"
+                      />
+                      {proofUploadState === 'uploading' && (
+                        <p className="mt-1 text-xs text-muted dark:text-neutral-400">{dict.workshop.formPaymentUploading}</p>
+                      )}
+                      {proofUploadState === 'done' && <p className="mt-1 text-xs text-brand">{dict.workshop.formPaymentUploaded}</p>}
+                      {proofUploadState === 'error' && (
+                        <p className="mt-1 text-xs text-red-600 dark:text-red-400">{dict.workshop.formPaymentUploadError}</p>
                       )}
                     </div>
-                  ))}
-                </div>
-                <div>
-                  <label className={labelClass} htmlFor="paymentProof">
-                    {dict.workshop.formPaymentUpload}
-                  </label>
-                  <input
-                    id="paymentProof"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleProofUpload}
-                    className="mt-1 block text-sm text-muted file:mr-3 file:rounded-full file:border-0 file:bg-brand/10 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-brand dark:text-neutral-400"
-                  />
-                  {proofUploadState === 'uploading' && (
-                    <p className="mt-1 text-xs text-muted dark:text-neutral-400">{dict.workshop.formPaymentUploading}</p>
-                  )}
-                  {proofUploadState === 'done' && <p className="mt-1 text-xs text-brand">{dict.workshop.formPaymentUploaded}</p>}
-                  {proofUploadState === 'error' && (
-                    <p className="mt-1 text-xs text-red-600 dark:text-red-400">{dict.workshop.formPaymentUploadError}</p>
-                  )}
-                </div>
-                <p className="text-xs text-muted dark:text-neutral-400">{dict.workshop.formPaymentSkipHint}</p>
+                    <p className="text-xs text-muted dark:text-neutral-400">{dict.workshop.formPaymentSkipHint}</p>
+                  </div>
+                )}
               </div>
             )}
           </motion.div>

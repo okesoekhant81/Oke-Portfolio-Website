@@ -8,12 +8,33 @@ import { createContext, useContext } from 'react'
 export const FormLocaleContext = createContext('en')
 export const LockContext = createContext(false)
 
-export function Section({ title, children }) {
+// Collapsed by default — the same zero-JS <details>/<summary> disclosure
+// already used for AdminNav's dropdowns and the public site's
+// WorkshopOutline/FAQAccordion, applied here so a content form with many
+// sections (Workshop's is now 8) opens as a scannable list of headings
+// instead of one long always-expanded scroll. A closed section's inputs
+// stay mounted and still submit with the form — same as a hidden bilingual
+// field in Field/TextArea below — so nothing is lost by collapsing it.
+export function Section({ title, children, defaultOpen = false }) {
   return (
-    <fieldset className="mt-8 min-w-0 rounded-xl border border-neutral-200 bg-white p-6">
-      <legend className="px-1 font-display text-base font-bold italic text-brand">{title}</legend>
+    <details open={defaultOpen} className="group mt-4 min-w-0 rounded-xl border border-neutral-200 bg-white p-6">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 font-display text-base font-bold italic text-brand [&::-webkit-details-marker]:hidden">
+        {title}
+        <svg
+          viewBox="0 0 24 24"
+          className="h-4 w-4 shrink-0 text-neutral-400 transition-transform duration-200 group-open:rotate-180"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </summary>
       <div className="mt-4 space-y-4">{children}</div>
-    </fieldset>
+    </details>
   )
 }
 

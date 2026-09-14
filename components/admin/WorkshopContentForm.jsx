@@ -28,7 +28,7 @@ export default function WorkshopContentForm({ content }) {
         <form key={formKey} action={formAction}>
         <LanguageTabs value={formLocale} onChange={setFormLocale} />
 
-        <Section title="Hero">
+        <Section title="Hero" defaultOpen>
           <ImageField label="Cover photo" name="heroImage" defaultValue={content.heroImage} />
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field

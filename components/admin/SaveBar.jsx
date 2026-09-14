@@ -23,7 +23,12 @@ export default function SaveBar({ locked, onEdit, onCancel, pending, state, edit
   }, [state?.savedAt])
 
   return (
-    <div className="sticky bottom-4 z-10 mt-8">
+    // Not sticky-positioned — collapsible Sections (see ContentFormFields.jsx)
+    // can make the page shorter than the viewport, and a sticky bottom-4
+    // element sticks at that offset from the *viewport* bottom regardless of
+    // how short the document actually is, which then overlaps whatever
+    // collapsed sections come after it in the flow instead of trailing them.
+    <div className="z-10 mt-8">
       <AnimatePresence mode="wait" initial={false}>
         {showSuccess ? (
           <motion.div

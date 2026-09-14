@@ -32,7 +32,7 @@ export default function HomepageForm({ content }) {
         <form key={formKey} action={formAction}>
         <LanguageTabs value={formLocale} onChange={setFormLocale} />
 
-        <Section title="Hero">
+        <Section title="Hero" defaultOpen>
           <Field label="Name (e.g. Oke)" name="heroName" defaultValue={content.heroName} />
           <TextArea
             label="Intro"
