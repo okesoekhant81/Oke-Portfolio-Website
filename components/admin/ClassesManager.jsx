@@ -7,6 +7,7 @@ import {
   deleteClassDateAction,
   updateClassDateStatusAction,
   updateClassDateFeeAction,
+  updateClassDateCapacityAction,
   updateClassDateLabelAction,
 } from '../../app/actions/classDates'
 
@@ -90,6 +91,54 @@ function FeeEditor({ id, defaultFee }) {
         className="w-24 rounded-md border border-neutral-300 px-2 py-0.5 text-xs outline-none focus:border-brand"
       />
       <span className="text-neutral-400">MMK</span>
+      {dirty && (
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={saving}
+          className="font-medium text-brand hover:underline disabled:opacity-60"
+        >
+          {saving ? '…' : 'Save'}
+        </button>
+      )}
+    </span>
+  )
+}
+
+// 0 means unlimited — the registration form only shows seats-left/waitlist
+// once this is set above 0.
+function CapacityEditor({ id, capacity }) {
+  const [value, setValue] = useState(String(capacity || 0))
+  const [saving, setSaving] = useState(false)
+  const [, startTransition] = useTransition()
+  const dirty = value !== String(capacity || 0)
+
+  function handleSave() {
+    setSaving(true)
+    const formData = new FormData()
+    formData.set('id', id)
+    formData.set('capacity', value)
+    startTransition(async () => {
+      try {
+        await updateClassDateCapacityAction(formData)
+      } finally {
+        setSaving(false)
+      }
+    })
+  }
+
+  return (
+    <span className="flex items-center gap-1.5">
+      <span className="text-neutral-400">Capacity:</span>
+      <input
+        type="number"
+        min="0"
+        step="1"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        className="w-16 rounded-md border border-neutral-300 px-2 py-0.5 text-xs outline-none focus:border-brand"
+      />
+      <span className="text-neutral-400">(0 = unlimited)</span>
       {dirty && (
         <button
           type="button"
@@ -237,8 +286,16 @@ export default function ClassesManager({ dates, students }) {
                   <Link href={`/admin/classes/${d.id}`} className="hover:text-brand">
                     {classStudents.length} student{classStudents.length === 1 ? '' : 's'}
                   </Link>
+                  {d.capacity > 0 && (
+                    <span className={classStudents.length >= d.capacity ? 'font-medium text-brand' : ''}>
+                      {classStudents.length >= d.capacity
+                        ? 'Full'
+                        : `${d.capacity - classStudents.length} seat${d.capacity - classStudents.length === 1 ? '' : 's'} left`}
+                    </span>
+                  )}
                   <span>{revenue.toLocaleString()} MMK collected</span>
                   <FeeEditor id={d.id} defaultFee={d.defaultFee} />
+                  <CapacityEditor id={d.id} capacity={d.capacity} />
                 </div>
               </li>
             )
@@ -277,6 +334,17 @@ export default function ClassesManager({ dates, students }) {
             step="1"
             placeholder="e.g. 150000"
             className="mt-1 w-32 rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-brand"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-neutral-600">Capacity</label>
+          <input
+            type="number"
+            name="capacity"
+            min="0"
+            step="1"
+            placeholder="0 = unlimited"
+            className="mt-1 w-28 rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-brand"
           />
         </div>
         <button

@@ -16,7 +16,12 @@ export async function addClassDateAction(prevState, formData) {
   if (!date) return { error: 'Pick a date.' }
 
   try {
-    await addClassDate({ date, label, defaultFee: clampFee(formData.get('defaultFee')) })
+    await addClassDate({
+      date,
+      label,
+      defaultFee: clampFee(formData.get('defaultFee')),
+      capacity: clampFee(formData.get('capacity')),
+    })
   } catch (err) {
     return { error: err.message || 'Could not add. Please try again.' }
   }
@@ -58,6 +63,16 @@ export async function updateClassDateFeeAction(formData) {
   await updateClassDate(id, { defaultFee: clampFee(formData.get('defaultFee')) })
   revalidatePath('/admin/classes')
   revalidatePath('/admin/classes/[id]', 'page')
+}
+
+export async function updateClassDateCapacityAction(formData) {
+  const id = formData.get('id')?.toString()
+  if (!id) return
+
+  await updateClassDate(id, { capacity: clampFee(formData.get('capacity')) })
+  revalidatePath('/admin/classes')
+  revalidatePath('/admin/classes/[id]', 'page')
+  revalidatePath('/workshop')
 }
 
 export async function updateClassDateLabelAction(formData) {

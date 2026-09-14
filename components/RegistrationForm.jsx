@@ -26,12 +26,20 @@ function formatClassDate(dateStr, dateLocale) {
 // exists when the admin has actually added upcoming class dates — with
 // none configured, the form just skips straight to Name, same shape as
 // before this existed.
-export default function RegistrationForm({ locale = 'en', classDates = [] }) {
+export default function RegistrationForm({ locale = 'en', classDates = [], paymentQrImage = '', paymentInstructions = '' }) {
   const dict = getDictionary(locale)
   const [state, dispatch, pending] = useActionState(submitInquiryAction, null)
-  const steps =
-    classDates.length > 0 ? ['classDate', 'name', 'email', 'phone', 'optional'] : ['name', 'email', 'phone', 'optional']
+  const steps = [
+    ...(classDates.length > 0 ? ['classDate'] : []),
+    'name',
+    'email',
+    'phone',
+    'optional',
+    ...(paymentQrImage ? ['payment'] : []),
+  ]
   const TOTAL_STEPS = steps.length
+  const [proofUrl, setProofUrl] = useState('')
+  const [proofUploadState, setProofUploadState] = useState('idle')
   const [step, setStep] = useState(0)
   const [direction, setDirection] = useState(1)
   const [values, setValues] = useState({
@@ -59,9 +67,29 @@ export default function RegistrationForm({ locale = 'en', classDates = [] }) {
   const [startedAt] = useState(() => Date.now())
 
   const currentStepKey = steps[step]
+  const selectedClass = classDates.find((d) => d.date === values.classDate)
+  const isWaitlist = Boolean(selectedClass?.isFull)
 
   function update(field, value) {
     setValues((v) => ({ ...v, [field]: value }))
+  }
+
+  async function handleProofUpload(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setProofUploadState('uploading')
+    try {
+      const formData = new FormData()
+      formData.set('file', file)
+      const res = await fetch('/api/upload-payment-proof', { method: 'POST', body: formData })
+      const data = await res.json()
+      if (!res.ok || !data.url) throw new Error(data.error || 'Upload failed')
+      setProofUrl(data.url)
+      setProofUploadState('done')
+    } catch {
+      setProofUploadState('error')
+    }
   }
 
   function goNext() {
@@ -97,6 +125,7 @@ export default function RegistrationForm({ locale = 'en', classDates = [] }) {
     Object.entries(values).forEach(([key, value]) => formData.set(key, value))
     formData.set('website', honeypotRef.current?.value || '')
     formData.set('formStartedAt', String(startedAt))
+    formData.set('paymentProofUrl', proofUrl)
     dispatch(formData)
   }
 
@@ -138,7 +167,7 @@ export default function RegistrationForm({ locale = 'en', classDates = [] }) {
           transition={{ duration: 0.35, delay: 0.3, ease: EASE }}
           className={`mt-4 font-display text-lg font-bold text-brand ${italicIfLatin(locale)}`}
         >
-          {dict.workshop.formSuccessTitle}
+          {state.waitlisted ? dict.workshop.formWaitlistSuccessTitle : dict.workshop.formSuccessTitle}
         </motion.p>
         <motion.p
           initial={{ opacity: 0, y: 6 }}
@@ -146,7 +175,7 @@ export default function RegistrationForm({ locale = 'en', classDates = [] }) {
           transition={{ duration: 0.35, delay: 0.38, ease: EASE }}
           className="mt-2 text-sm text-muted dark:text-neutral-400"
         >
-          {dict.workshop.formSuccessBody}
+          {state.waitlisted ? dict.workshop.formWaitlistSuccessBody : dict.workshop.formSuccessBody}
         </motion.p>
       </motion.div>
     )
@@ -206,6 +235,7 @@ export default function RegistrationForm({ locale = 'en', classDates = [] }) {
                     <option key={d.id} value={d.date}>
                       {formatClassDate(d.date, dict.locale.dateLocale)}
                       {d.label ? ` — ${d.label}` : ''}
+                      {d.seatsLeft !== undefined && ` (${d.isFull ? dict.workshop.formFull : `${d.seatsLeft} ${dict.workshop.formSeatsLeft}`})`}
                     </option>
                   ))}
                 </select>
@@ -348,6 +378,45 @@ export default function RegistrationForm({ locale = 'en', classDates = [] }) {
                 </div>
               </div>
             )}
+
+            {currentStepKey === 'payment' && (
+              <div className="space-y-3">
+                {isWaitlist && (
+                  <p className="rounded-md bg-neutral-100 px-3 py-2 text-xs text-muted dark:bg-white/5 dark:text-neutral-400">
+                    {dict.workshop.formWaitlistNote}
+                  </p>
+                )}
+                <p className={`font-display text-sm font-bold text-ink ${italicIfLatin(locale)}`}>
+                  {dict.workshop.formPaymentHeading}
+                </p>
+                {paymentInstructions && (
+                  <p className="whitespace-pre-line text-sm text-muted dark:text-neutral-400">{paymentInstructions}</p>
+                )}
+                {paymentQrImage && (
+                  <img src={paymentQrImage} alt="Payment QR code" className="h-48 w-48 rounded-lg border border-neutral-200 object-contain dark:border-neutral-700" />
+                )}
+                <div>
+                  <label className={labelClass} htmlFor="paymentProof">
+                    {dict.workshop.formPaymentUpload}
+                  </label>
+                  <input
+                    id="paymentProof"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleProofUpload}
+                    className="mt-1 block text-sm text-muted file:mr-3 file:rounded-full file:border-0 file:bg-brand/10 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-brand dark:text-neutral-400"
+                  />
+                  {proofUploadState === 'uploading' && (
+                    <p className="mt-1 text-xs text-muted dark:text-neutral-400">{dict.workshop.formPaymentUploading}</p>
+                  )}
+                  {proofUploadState === 'done' && <p className="mt-1 text-xs text-brand">{dict.workshop.formPaymentUploaded}</p>}
+                  {proofUploadState === 'error' && (
+                    <p className="mt-1 text-xs text-red-600 dark:text-red-400">{dict.workshop.formPaymentUploadError}</p>
+                  )}
+                </div>
+                <p className="text-xs text-muted dark:text-neutral-400">{dict.workshop.formPaymentSkipHint}</p>
+              </div>
+            )}
           </motion.div>
         </AnimatePresence>
       </div>
@@ -388,7 +457,7 @@ export default function RegistrationForm({ locale = 'en', classDates = [] }) {
             transition={{ type: 'spring', stiffness: 350, damping: 22, mass: 0.6 }}
             className="rounded-full bg-brand px-6 py-2.5 text-sm font-medium text-white disabled:opacity-60"
           >
-            {pending ? dict.workshop.formSubmitting : dict.workshop.formSubmit}
+            {pending ? dict.workshop.formSubmitting : isWaitlist ? dict.workshop.formWaitlistSubmit : dict.workshop.formSubmit}
           </motion.button>
         )}
       </div>

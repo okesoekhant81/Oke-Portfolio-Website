@@ -66,7 +66,16 @@ export default async function WorkshopPage() {
   // many seats a headcount would still say are free. Missing/legacy
   // status is treated as upcoming (open), matching the fallback used
   // everywhere else a class's status is displayed.
-  const registrableClassDates = classDates.filter((d) => !d.status || d.status === 'upcoming')
+  // capacity of 0 means unlimited — seatsLeft/isFull are left undefined in
+  // that case rather than computed as Infinity, so the form can tell "no
+  // cap set" apart from "cap set but nobody's registered yet".
+  const registrableClassDates = classDates
+    .filter((d) => !d.status || d.status === 'upcoming')
+    .map((d) => {
+      if (!d.capacity) return d
+      const registered = students.filter((s) => s.classDate === d.date).length
+      return { ...d, seatsLeft: Math.max(d.capacity - registered, 0), isFull: registered >= d.capacity }
+    })
 
   function formatClassDate(dateStr) {
     const d = new Date(`${dateStr}T00:00:00`)
@@ -262,7 +271,12 @@ export default async function WorkshopPage() {
             </h2>
             <p className="mt-2 text-sm text-muted dark:text-neutral-400">{content.ctaBody}</p>
             <div className="mt-6">
-              <RegistrationForm locale={locale} classDates={registrableClassDates} />
+              <RegistrationForm
+                locale={locale}
+                classDates={registrableClassDates}
+                paymentQrImage={content.paymentQrImage}
+                paymentInstructions={content.paymentInstructions}
+              />
             </div>
           </div>
         </Reveal>

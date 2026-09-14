@@ -52,6 +52,7 @@ function exportInquiries(inquiries) {
     { label: 'Class date', value: (i) => i.classDate },
     { label: 'Participants', value: (i) => i.participants },
     { label: 'Heard via', value: (i) => HEAR_ABOUT_LABELS[i.hearAbout] || i.hearAbout },
+    { label: 'Waitlisted', value: (i) => (i.waitlisted ? 'Yes' : '') },
     { label: 'Status', value: (i) => i.status },
     { label: 'Submitted at', value: (i) => i.submittedAt },
     { label: 'Message', value: (i) => i.message },
@@ -245,7 +246,14 @@ export default function InquiriesList({ inquiries }) {
                       className="mt-1.5"
                     />
                     <div>
-                      <p className="font-display text-base font-bold text-ink">{inquiry.name}</p>
+                      <p className="flex items-center gap-2 font-display text-base font-bold text-ink">
+                        {inquiry.name}
+                        {inquiry.waitlisted && (
+                          <span className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-700">
+                            Waitlist
+                          </span>
+                        )}
+                      </p>
                       <p className="text-xs text-neutral-400">
                         {new Date(inquiry.submittedAt).toLocaleString(undefined, {
                           year: 'numeric',
@@ -268,6 +276,19 @@ export default function InquiriesList({ inquiries }) {
                   <DetailRow label="Role" value={inquiry.role} />
                   <DetailRow label="Participants" value={inquiry.participants} />
                   <DetailRow label="Heard via" value={HEAR_ABOUT_LABELS[inquiry.hearAbout] || inquiry.hearAbout} />
+                  {inquiry.paymentProofUrl && (
+                    <div>
+                      <p className="text-[10px] tracking-wide text-neutral-400 uppercase">Payment proof</p>
+                      <a
+                        href={inquiry.paymentProofUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-0.5 block text-sm text-brand hover:underline"
+                      >
+                        View screenshot ↗
+                      </a>
+                    </div>
+                  )}
                 </div>
 
                 {inquiry.message && (
