@@ -83,6 +83,13 @@ export async function saveWorkshop(prevState, formData) {
     sessionPlatformMy: get('sessionPlatformMy'),
     sessionLanguage: get('sessionLanguage'),
     sessionLanguageMy: get('sessionLanguageMy'),
+
+    paymentConfirmedSubject: get('paymentConfirmedSubject'),
+    paymentConfirmedSubjectMy: get('paymentConfirmedSubjectMy'),
+    paymentConfirmedBody: get('paymentConfirmedBody'),
+    paymentConfirmedBodyMy: get('paymentConfirmedBodyMy'),
+    paymentConfirmedSignature: get('paymentConfirmedSignature'),
+    paymentConfirmedSignatureMy: get('paymentConfirmedSignatureMy'),
   }
 
   try {

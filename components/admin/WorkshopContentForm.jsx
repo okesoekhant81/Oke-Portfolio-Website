@@ -280,6 +280,28 @@ export default function WorkshopContentForm({ content }) {
               defaultValueMy={content.sessionLanguageMy}
             />
           </div>
+          <Field
+            label="Email subject"
+            name="paymentConfirmedSubject"
+            defaultValue={content.paymentConfirmedSubject}
+            nameMy="paymentConfirmedSubjectMy"
+            defaultValueMy={content.paymentConfirmedSubjectMy}
+          />
+          <TextArea
+            label="Email message — shown below the Workshop Details (date/time/location)"
+            name="paymentConfirmedBody"
+            defaultValue={content.paymentConfirmedBody}
+            nameMy="paymentConfirmedBodyMy"
+            defaultValueMy={content.paymentConfirmedBodyMy}
+            rows={3}
+          />
+          <Field
+            label="Signature (under your name)"
+            name="paymentConfirmedSignature"
+            defaultValue={content.paymentConfirmedSignature}
+            nameMy="paymentConfirmedSignatureMy"
+            defaultValueMy={content.paymentConfirmedSignatureMy}
+          />
         </Section>
 
         <SaveBar locked={locked} onEdit={() => setLocked(false)} onCancel={handleCancel} pending={pending} state={state} />
