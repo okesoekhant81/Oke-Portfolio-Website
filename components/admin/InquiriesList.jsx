@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import InquiryStatusSelect from './InquiryStatusSelect'
 import { deleteInquiryAction } from '../../app/actions/inquiries'
+import { convertInquiryToStudentAction } from '../../app/actions/students'
 
 function DetailRow({ label, value }) {
   if (!value) return null
@@ -39,6 +40,8 @@ export default function InquiriesList({ inquiries }) {
   const [items, setItems] = useState(inquiries)
   const [deletingId, setDeletingId] = useState(null)
   const [deleteError, setDeleteError] = useState(null)
+  const [convertingId, setConvertingId] = useState(null)
+  const [convertError, setConvertError] = useState(null)
   const [, startTransition] = useTransition()
 
   function handleDelete(inquiry) {
@@ -55,6 +58,27 @@ export default function InquiriesList({ inquiries }) {
         setDeleteError(inquiry.id)
       } finally {
         setDeletingId(null)
+      }
+    })
+  }
+
+  function handleConvert(inquiry) {
+    setConvertingId(inquiry.id)
+    setConvertError(null)
+    const formData = new FormData()
+    formData.set('inquiryId', inquiry.id)
+    startTransition(async () => {
+      try {
+        const result = await convertInquiryToStudentAction(formData)
+        if (result?.error) {
+          setConvertError(inquiry.id)
+        } else if (result?.studentId) {
+          setItems((prev) => prev.map((item) => (item.id === inquiry.id ? { ...item, studentId: result.studentId } : item)))
+        }
+      } catch {
+        setConvertError(inquiry.id)
+      } finally {
+        setConvertingId(null)
       }
     })
   }
@@ -112,6 +136,23 @@ export default function InquiriesList({ inquiries }) {
             )}
 
             <div className="mt-4 flex items-center justify-end gap-3 border-t border-neutral-100 pt-3">
+              {convertError === inquiry.id && (
+                <span className="text-xs text-red-600">Couldn&rsquo;t convert — try again.</span>
+              )}
+              {inquiry.studentId ? (
+                <a href="/admin/students" className="text-xs font-medium text-green-700 hover:underline">
+                  ✓ On roster
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => handleConvert(inquiry)}
+                  disabled={convertingId === inquiry.id}
+                  className="text-xs font-medium text-brand hover:underline disabled:opacity-60"
+                >
+                  {convertingId === inquiry.id ? 'Converting…' : 'Convert to student'}
+                </button>
+              )}
               {deleteError === inquiry.id && (
                 <span className="text-xs text-red-600">Couldn&rsquo;t delete — try again.</span>
               )}

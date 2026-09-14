@@ -8,6 +8,7 @@ export default function AdminNav({ active }) {
     { href: '/admin/workshop', label: 'Workshop' },
     { href: '/admin/posts', label: 'Articles' },
     { href: '/admin/inquiries', label: 'Inquiries' },
+    { href: '/admin/students', label: 'Students' },
   ]
 
   return (
