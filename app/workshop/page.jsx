@@ -109,11 +109,19 @@ export default async function WorkshopPage() {
               <p className="text-xs text-muted dark:text-neutral-400">{content.audienceLabel}</p>
               <p className="mt-1 text-sm font-semibold text-ink dark:text-neutral-100">{content.audience}</p>
             </div>
-            <div>
+            <div
+              className={
+                content.promoPrice
+                  ? '-m-2 rounded-lg border border-brand/30 bg-brand/5 p-2 dark:border-brand/40 dark:bg-brand/10'
+                  : ''
+              }
+            >
               <p className="text-xs text-muted dark:text-neutral-400">{content.priceLabel}</p>
               {content.promoPrice ? (
                 <p className="mt-1 flex flex-wrap items-baseline gap-2">
-                  <span className="text-sm font-semibold text-brand">{content.promoPrice}</span>
+                  <span className={`font-display text-xl font-bold text-brand sm:text-2xl ${italicIfLatin(locale)}`}>
+                    {content.promoPrice}
+                  </span>
                   <span className="text-xs text-muted line-through dark:text-neutral-500">{content.price}</span>
                 </p>
               ) : (

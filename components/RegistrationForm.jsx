@@ -81,23 +81,18 @@ export default function RegistrationForm({ locale = 'en', classDates = [] }) {
     goNext()
   }
 
-  // Steps other than the last one stop Enter themselves (above) before it
-  // can reach the browser's native "Enter submits the form" behavior. The
-  // final, bundled step's fields don't — nothing there needs Enter to *do*
-  // anything, but without a handler the browser still submits the whole
-  // form the instant Enter is pressed in the business/role inputs, mid-fill,
-  // well before the user meant to. This is the backstop for every input
-  // that isn't one of the per-step Enter handlers above: newlines in the
-  // message textarea and clicking the actual submit button both still work
-  // as normal.
-  function handleFormKeyDown(e) {
-    if (e.key !== 'Enter') return
-    if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'BUTTON') return
-    e.preventDefault()
-  }
-
-  function handleSubmit(e) {
-    e.preventDefault()
+  // The actual submit control below is type="button", not type="submit" —
+  // on purpose. A previous version used type="submit" and tried to stop
+  // Enter from triggering it via a keydown handler, which worked for a
+  // real keyboard's Enter key but not reliably for every mobile keyboard's
+  // "Go"/"Done" action key, which can trigger a form's native implicit
+  // submission without going through a JS-visible Enter keydown at all —
+  // landing on the last (optional-fields) step, whatever was typed so far,
+  // with no chance to actually see or finish that step. With no
+  // type="submit" element anywhere in the form, there is nothing for the
+  // browser to implicitly activate — submission only ever happens through
+  // this function, called directly from the button's onClick.
+  function submitForm() {
     const formData = new FormData()
     Object.entries(values).forEach(([key, value]) => formData.set(key, value))
     formData.set('website', honeypotRef.current?.value || '')
@@ -158,7 +153,7 @@ export default function RegistrationForm({ locale = 'en', classDates = [] }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} onKeyDown={handleFormKeyDown}>
+    <form onSubmit={(e) => e.preventDefault()}>
       {/* Honeypot: invisible and unreachable by tab or screen reader for a
           real visitor, but present in the DOM for a bot that fills every
           field it finds. */}
@@ -385,7 +380,8 @@ export default function RegistrationForm({ locale = 'en', classDates = [] }) {
           </motion.button>
         ) : (
           <motion.button
-            type="submit"
+            type="button"
+            onClick={submitForm}
             disabled={pending}
             whileHover={pending ? {} : { scale: 1.04, boxShadow: '0 10px 25px -8px rgba(232,54,6,0.55)' }}
             whileTap={pending ? {} : { scale: 0.97 }}
