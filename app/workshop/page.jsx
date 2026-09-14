@@ -51,7 +51,17 @@ export default async function WorkshopPage() {
     name: `${content.heroTitle} ${content.heroSubtitle}`,
     description: content.intro.split('\n')[0],
     provider: { '@type': 'Person', name: SITE_NAME, url: SITE_URL },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/workshop` },
     inLanguage: locale,
+    // Real admin-managed dates, when there are any — not fabricated, and
+    // skipped entirely rather than guessed at when the list is empty.
+    ...(classDates.length > 0 && {
+      hasCourseInstance: classDates.map((d) => ({
+        '@type': 'CourseInstance',
+        courseMode: 'Onsite',
+        startDate: d.date,
+      })),
+    }),
   }
 
   return (

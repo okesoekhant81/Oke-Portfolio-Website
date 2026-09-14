@@ -74,6 +74,8 @@ export default async function BlogPost({ params }) {
     image: post.coverImageUrl ? [post.coverImageUrl] : undefined,
     datePublished: post.publishedAt,
     author: { '@type': 'Person', name: SITE_NAME, url: SITE_URL },
+    publisher: { '@type': 'Person', name: SITE_NAME, url: SITE_URL },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/blog/${slug}` },
     inLanguage: locale,
   }
 

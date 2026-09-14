@@ -34,6 +34,7 @@ function buildPersonJsonLd(locale) {
       'Business Growth',
     ],
     sameAs: SOCIAL_LINKS,
+    mainEntityOfPage: { '@type': 'WebPage', '@id': SITE_URL },
     inLanguage: locale,
   }
 }
