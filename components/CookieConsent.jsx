@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { AnimatePresence, motion } from 'framer-motion'
 import { LOCALE_COOKIE, DEFAULT_LOCALE, LOCALES, getDictionary } from '../lib/dictionaries'
+import { CONSENT_COOKIE, CONSENT_EVENT } from './GoogleAnalytics'
 
-const CONSENT_COOKIE = 'cookie_consent'
 const EASE = [0.16, 1, 0.3, 1]
 
 function readCookie(name) {
@@ -13,12 +13,11 @@ function readCookie(name) {
   return match ? decodeURIComponent(match[1]) : null
 }
 
-// Every cookie this site sets is essential (admin session, language
-// preference, this notice's own dismissal) — none of them are analytics,
-// advertising, or third-party tracking. So this is a one-button notice
-// rather than an Accept/Reject choice: there's nothing optional to opt out
-// of, and offering a "Reject" that doesn't actually change any behavior
-// would be misleading rather than helpful.
+// Everything else this site sets (admin session, language preference,
+// this notice's own choice) is essential — Google Analytics is the one
+// actual optional cookie, so Accept/Decline is a real choice here, not
+// just a "Got it": Decline genuinely stops it from loading
+// (see GoogleAnalytics.jsx), rather than a button that changes nothing.
 export default function CookieConsent() {
   const [mounted, setMounted] = useState(false)
   const [visible, setVisible] = useState(false)
@@ -31,12 +30,17 @@ export default function CookieConsent() {
     if (window.location.pathname.startsWith('/admin')) return
     const storedLocale = readCookie(LOCALE_COOKIE)
     setLocale(LOCALES.includes(storedLocale) ? storedLocale : DEFAULT_LOCALE)
-    setVisible(!readCookie(CONSENT_COOKIE))
+    // Only 'accepted'/'declined' count as answered — an earlier visit's
+    // dismissal of the previous single-button version of this banner
+    // (stored as '1') predates there being an actual Accept/Decline
+    // choice to make, so it doesn't count as one.
+    setVisible(!['accepted', 'declined'].includes(readCookie(CONSENT_COOKIE)))
     setMounted(true)
   }, [])
 
-  function dismiss() {
-    document.cookie = `${CONSENT_COOKIE}=1; path=/; max-age=${60 * 60 * 24 * 365}`
+  function choose(value) {
+    document.cookie = `${CONSENT_COOKIE}=${value}; path=/; max-age=${60 * 60 * 24 * 365}`
+    document.dispatchEvent(new CustomEvent(CONSENT_EVENT, { detail: value }))
     setVisible(false)
   }
 
@@ -63,13 +67,22 @@ export default function CookieConsent() {
                 {dict.cookieConsent.learnMore}
               </Link>
             </p>
-            <button
-              type="button"
-              onClick={dismiss}
-              className="shrink-0 rounded-full bg-brand px-5 py-2 text-xs font-medium text-white sm:text-sm"
-            >
-              {dict.cookieConsent.accept}
-            </button>
+            <div className="flex shrink-0 items-center gap-2">
+              <button
+                type="button"
+                onClick={() => choose('declined')}
+                className="rounded-full border border-neutral-300 px-4 py-2 text-xs text-ink transition-colors duration-300 hover:border-brand hover:text-brand sm:text-sm dark:border-neutral-700 dark:text-neutral-100"
+              >
+                {dict.cookieConsent.decline}
+              </button>
+              <button
+                type="button"
+                onClick={() => choose('accepted')}
+                className="rounded-full bg-brand px-5 py-2 text-xs font-medium text-white sm:text-sm"
+              >
+                {dict.cookieConsent.accept}
+              </button>
+            </div>
           </div>
         </motion.div>
       )}

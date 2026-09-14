@@ -9,6 +9,7 @@ import '@fontsource/noto-sans-myanmar/700.css'
 import '@fontsource/noto-serif-myanmar/400.css'
 import '@fontsource/noto-serif-myanmar/700.css'
 import CookieConsent from '../components/CookieConsent'
+import GoogleAnalytics from '../components/GoogleAnalytics'
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from '../lib/site'
 
 export const metadata = {
@@ -81,6 +82,7 @@ export default function RootLayout({ children }) {
       <body>
         {children}
         <CookieConsent />
+        <GoogleAnalytics />
       </body>
     </html>
   )
