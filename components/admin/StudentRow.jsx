@@ -63,14 +63,16 @@ function ClassSelect({ student, classDates }) {
 
 function PaymentEditor({ student }) {
   const [status, setStatus] = useState(student.paymentStatus || 'unpaid')
+  const [amount, setAmount] = useState(String(student.amountPaid ?? 0))
   const [note, setNote] = useState(student.paymentNote || '')
   const [savingNote, setSavingNote] = useState(false)
   const [, startTransition] = useTransition()
 
-  function save(nextStatus, nextNote) {
+  function save(nextStatus, nextAmount, nextNote) {
     const formData = new FormData()
     formData.set('id', student.id)
     formData.set('paymentStatus', nextStatus)
+    formData.set('amountPaid', nextAmount)
     formData.set('paymentNote', nextNote)
     return updateStudentPaymentAction(formData)
   }
@@ -81,20 +83,20 @@ function PaymentEditor({ student }) {
     setStatus(next)
     startTransition(async () => {
       try {
-        await save(next, note)
+        await save(next, amount, note)
       } catch {
         setStatus(previous)
       }
     })
   }
 
-  function handleSaveNote() {
+  function handleSaveDetails() {
     setSavingNote(true)
     startTransition(async () => {
       try {
-        await save(status, note)
+        await save(status, amount, note)
       } catch {
-        // Nothing destructive happened — the typed note just stays put so
+        // Nothing destructive happened — the typed values just stay put so
         // the admin can hit Save again.
       } finally {
         setSavingNote(false)
@@ -102,7 +104,7 @@ function PaymentEditor({ student }) {
     })
   }
 
-  const noteDirty = note !== (student.paymentNote || '')
+  const dirty = amount !== String(student.amountPaid ?? 0) || note !== (student.paymentNote || '')
 
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -116,15 +118,24 @@ function PaymentEditor({ student }) {
         <option value="paid">Paid</option>
       </select>
       <input
+        type="number"
+        min="0"
+        step="1"
+        value={amount}
+        onChange={(e) => setAmount(e.target.value)}
+        placeholder="Amount paid"
+        className="w-28 rounded-md border border-neutral-300 px-2 py-1 text-xs outline-none focus:border-brand"
+      />
+      <input
         value={note}
         onChange={(e) => setNote(e.target.value)}
-        placeholder="Payment note — amount, method, date…"
+        placeholder="Payment note — method, date…"
         className="min-w-0 flex-1 rounded-md border border-neutral-300 px-2 py-1 text-xs outline-none focus:border-brand"
       />
-      {noteDirty && (
+      {dirty && (
         <button
           type="button"
-          onClick={handleSaveNote}
+          onClick={handleSaveDetails}
           disabled={savingNote}
           className="shrink-0 text-xs font-medium text-brand hover:underline disabled:opacity-60"
         >

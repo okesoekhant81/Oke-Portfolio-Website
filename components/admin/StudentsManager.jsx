@@ -1,6 +1,7 @@
 'use client'
 
 import { useActionState } from 'react'
+import Link from 'next/link'
 import { addStudentAction } from '../../app/actions/students'
 import StudentRow from './StudentRow'
 
@@ -12,6 +13,14 @@ function formatDate(dateStr) {
 
 const inputClass = 'rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-brand'
 
+const STATUS_STYLES = {
+  upcoming: 'border-neutral-300 bg-neutral-100 text-neutral-600',
+  'in-progress': 'border-brand/40 bg-brand/10 text-brand',
+  completed: 'border-green-300 bg-green-50 text-green-700',
+}
+
+const STATUS_LABELS = { upcoming: 'Upcoming', 'in-progress': 'In progress', completed: 'Completed' }
+
 // Grouped by class date rather than one flat list — the whole point of
 // this page is "who's in which class," so that grouping should be the
 // default view rather than something the admin has to filter into.
@@ -21,6 +30,8 @@ export default function StudentsManager({ students, classDates }) {
   const validDates = new Set(classDates.map((d) => d.date))
   const groups = classDates.map((d) => ({
     key: d.date,
+    id: d.id,
+    status: d.status || 'upcoming',
     label: `${formatDate(d.date)}${d.label ? ` — ${d.label}` : ''}`,
     students: students.filter((s) => s.classDate === d.date),
   }))
@@ -74,9 +85,19 @@ export default function StudentsManager({ students, classDates }) {
         <div className="mt-6 space-y-8">
           {groups.map((group) => (
             <div key={group.key}>
-              <p className="text-xs font-semibold tracking-wide text-neutral-400 uppercase">
-                {group.label} · {group.students.length}
-              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <Link
+                  href={`/admin/classes/${group.id}`}
+                  className="text-xs font-semibold tracking-wide text-neutral-500 uppercase hover:text-brand"
+                >
+                  {group.label} · {group.students.length}
+                </Link>
+                <span
+                  className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${STATUS_STYLES[group.status] || STATUS_STYLES.upcoming}`}
+                >
+                  {STATUS_LABELS[group.status] || 'Upcoming'}
+                </span>
+              </div>
               {group.students.length > 0 ? (
                 <div className="mt-3 space-y-3">
                   {group.students.map((s) => (

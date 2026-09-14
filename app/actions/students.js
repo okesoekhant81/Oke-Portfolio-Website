@@ -5,12 +5,19 @@ import {
   addStudent,
   updateStudent,
   deleteStudent,
-  addAttendanceEntry,
+  setAttendance,
   deleteAttendanceEntry,
+  setAttendanceForClass,
 } from '../../lib/content/students'
 import { getInquiry, markInquiryConverted } from '../../lib/content/inquiries'
 
 const MAX_LENGTHS = { name: 200, email: 200, phone: 60, business: 200, role: 120, paymentNote: 500, note: 500 }
+
+function clampAmount(value) {
+  const n = Number(value)
+  if (!Number.isFinite(n) || n < 0) return 0
+  return Math.round(n)
+}
 
 export async function addStudentAction(prevState, formData) {
   const get = (name) => formData.get(name)?.toString().trim() ?? ''
@@ -79,8 +86,10 @@ export async function updateStudentPaymentAction(formData) {
   await updateStudent(id, {
     paymentStatus: formData.get('paymentStatus')?.toString() || 'unpaid',
     paymentNote: formData.get('paymentNote')?.toString().trim().slice(0, MAX_LENGTHS.paymentNote) ?? '',
+    amountPaid: clampAmount(formData.get('amountPaid')),
   })
   revalidatePath('/admin/students')
+  revalidatePath('/admin/classes/[id]', 'page')
 }
 
 export async function deleteStudentAction(formData) {
@@ -95,14 +104,14 @@ export async function addAttendanceAction(formData) {
   const date = formData.get('date')?.toString()
   if (!studentId || !date) return
 
-  const entry = {
-    id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
+  await setAttendance(
+    studentId,
     date,
-    present: formData.get('present')?.toString() === 'true',
-    note: formData.get('note')?.toString().trim().slice(0, MAX_LENGTHS.note) ?? '',
-  }
-  await addAttendanceEntry(studentId, entry)
+    formData.get('present')?.toString() === 'true',
+    formData.get('note')?.toString().trim().slice(0, MAX_LENGTHS.note) ?? ''
+  )
   revalidatePath('/admin/students')
+  revalidatePath('/admin/classes/[id]', 'page')
 }
 
 export async function deleteAttendanceAction(formData) {
@@ -111,4 +120,31 @@ export async function deleteAttendanceAction(formData) {
   if (!studentId || !entryId) return
   await deleteAttendanceEntry(studentId, entryId)
   revalidatePath('/admin/students')
+  revalidatePath('/admin/classes/[id]', 'page')
+}
+
+// Attendance for a whole class, one session date at a time — records is
+// [{ studentId, present, note }] for every student shown on the class
+// page's attendance sheet at save time.
+export async function saveClassAttendanceAction(formData) {
+  const classId = formData.get('classId')?.toString()
+  const date = formData.get('date')?.toString()
+  const studentIds = formData.getAll('studentId').map((v) => v.toString())
+  if (!classId || !date || studentIds.length === 0) return { error: 'Nothing to save.' }
+
+  const records = studentIds.map((studentId) => ({
+    studentId,
+    present: formData.get(`present-${studentId}`)?.toString() === 'true',
+    note: '',
+  }))
+
+  try {
+    await setAttendanceForClass(date, records)
+  } catch (err) {
+    return { error: err.message || 'Could not save attendance. Please try again.' }
+  }
+
+  revalidatePath('/admin/students')
+  revalidatePath('/admin/classes/[id]', 'page')
+  return { success: true, savedAt: Date.now() }
 }

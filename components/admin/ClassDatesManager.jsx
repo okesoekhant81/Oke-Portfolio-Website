@@ -1,12 +1,52 @@
 'use client'
 
 import { useActionState, useState, useTransition } from 'react'
-import { addClassDateAction, deleteClassDateAction } from '../../app/actions/classDates'
+import Link from 'next/link'
+import { addClassDateAction, deleteClassDateAction, updateClassDateStatusAction } from '../../app/actions/classDates'
 
 function formatDate(dateStr) {
   const d = new Date(`${dateStr}T00:00:00`)
   if (Number.isNaN(d.getTime())) return dateStr
   return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+}
+
+const STATUS_STYLES = {
+  upcoming: 'border-neutral-300 bg-neutral-100 text-neutral-600',
+  'in-progress': 'border-brand/40 bg-brand/10 text-brand',
+  completed: 'border-green-300 bg-green-50 text-green-700',
+}
+
+function StatusSelect({ id, status }) {
+  const [current, setCurrent] = useState(status || 'upcoming')
+  const [, startTransition] = useTransition()
+
+  function handleChange(e) {
+    const previous = current
+    const next = e.target.value
+    setCurrent(next)
+    const formData = new FormData()
+    formData.set('id', id)
+    formData.set('status', next)
+    startTransition(async () => {
+      try {
+        await updateClassDateStatusAction(formData)
+      } catch {
+        setCurrent(previous)
+      }
+    })
+  }
+
+  return (
+    <select
+      value={current}
+      onChange={handleChange}
+      className={`rounded-full border px-2 py-0.5 text-xs font-medium outline-none ${STATUS_STYLES[current] || STATUS_STYLES.upcoming}`}
+    >
+      <option value="upcoming">Upcoming</option>
+      <option value="in-progress">In progress</option>
+      <option value="completed">Completed</option>
+    </select>
+  )
 }
 
 // Renders straight from the `dates` prop rather than keeping a local copy —
@@ -53,10 +93,13 @@ export default function ClassDatesManager({ dates }) {
               }`}
             >
               <span>
-                <span className="font-medium text-ink">{formatDate(d.date)}</span>
+                <Link href={`/admin/classes/${d.id}`} className="font-medium text-ink hover:text-brand">
+                  {formatDate(d.date)}
+                </Link>
                 {d.label && <span className="ml-2 text-neutral-400">— {d.label}</span>}
               </span>
               <span className="flex items-center gap-2">
+                <StatusSelect id={d.id} status={d.status} />
                 {deleteError === d.id && <span className="text-xs text-red-600">Couldn&rsquo;t delete</span>}
                 <button
                   type="button"

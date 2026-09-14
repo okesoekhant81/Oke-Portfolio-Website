@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { addClassDate, deleteClassDate } from '../../lib/content/classDates'
+import { addClassDate, updateClassDate, deleteClassDate } from '../../lib/content/classDates'
 
 export async function addClassDateAction(prevState, formData) {
   const date = formData.get('date')?.toString().trim() ?? ''
@@ -26,4 +26,17 @@ export async function deleteClassDateAction(formData) {
   await deleteClassDate(id)
   revalidatePath('/admin/workshop')
   revalidatePath('/workshop')
+}
+
+const VALID_STATUSES = ['upcoming', 'in-progress', 'completed']
+
+export async function updateClassDateStatusAction(formData) {
+  const id = formData.get('id')?.toString()
+  const status = formData.get('status')?.toString()
+  if (!id || !VALID_STATUSES.includes(status)) return
+
+  await updateClassDate(id, { status })
+  revalidatePath('/admin/workshop')
+  revalidatePath(`/admin/classes/${id}`)
+  revalidatePath('/admin/students')
 }
