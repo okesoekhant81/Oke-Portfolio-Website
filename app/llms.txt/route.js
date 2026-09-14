@@ -30,6 +30,15 @@ export async function GET() {
     .map((f) => `- Q: ${f.question}\n  A: ${f.answer}`)
     .join('\n')
 
+  const workshopFacts = [workshop.format, workshop.duration, workshop.price].filter(Boolean).join(', ')
+  const workshopMode = [
+    workshop.sessionPlatform && `run via ${workshop.sessionPlatform}`,
+    workshop.sessionLanguage && `in ${workshop.sessionLanguage}`,
+  ]
+    .filter(Boolean)
+    .join(' ')
+  const workshopSummary = [workshopFacts, workshopMode].filter(Boolean).join(', ')
+
   const approvedTestimonials = (testimonials || []).filter((t) => t.status !== 'pending' && t.quote)
   const testimonialLines = approvedTestimonials.length
     ? approvedTestimonials
@@ -59,7 +68,7 @@ ${testimonialLines}
 
 - [Home](${SITE_URL}): Services, background, and current work.
 - [About](${SITE_URL}/about): Achievements, experience, and skills.
-- [Workshop](${SITE_URL}/workshop): The LGS strategic workshop for Myanmar SME owners — outline, pricing, and registration.
+- [Workshop](${SITE_URL}/workshop): The LGS strategic workshop for Myanmar SME owners${workshopSummary ? ` — ${workshopSummary}` : ''}.
 - [Articles](${SITE_URL}/blog): Writing on brand strategy, marketing, and growth.
 
 ## Workshop FAQ

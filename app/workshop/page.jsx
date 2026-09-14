@@ -103,9 +103,13 @@ export default async function WorkshopPage() {
     // Real admin-managed dates, when there are any — not fabricated, and
     // skipped entirely rather than guessed at when the list is empty.
     ...(classDates.length > 0 && {
+      // A class with a Meet link is actually run online, not in person —
+      // hardcoding 'Onsite' regardless stopped being accurate once classes
+      // could carry their own meetingLink (see lib/content/classDates.js).
       hasCourseInstance: classDates.map((d) => ({
         '@type': 'CourseInstance',
-        courseMode: 'Onsite',
+        courseMode: d.meetingLink ? 'Online' : 'Onsite',
+        ...(d.meetingLink && { location: { '@type': 'VirtualLocation', url: d.meetingLink } }),
         startDate: d.date,
       })),
     }),
