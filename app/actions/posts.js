@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { savePost, deletePost } from '../../lib/content/posts'
+import { savePost, deletePost, restorePost, permanentlyDeletePost } from '../../lib/content/posts'
 import { slugify } from '../../lib/slugify'
 import { logActivity } from '../../lib/activityLog'
 
@@ -60,4 +60,28 @@ export async function deletePostAction(formData) {
   revalidatePath(`/blog/${slug}`)
   revalidatePath('/admin/posts')
   revalidatePath('/sitemap.xml')
+}
+
+export async function restorePostAction(formData) {
+  const slug = formData.get('slug')?.toString()
+  if (!slug) return
+
+  await restorePost(slug)
+
+  await logActivity('Article restored', slug)
+  revalidatePath('/blog')
+  revalidatePath(`/blog/${slug}`)
+  revalidatePath('/admin/posts')
+  revalidatePath('/admin/trash')
+  revalidatePath('/sitemap.xml')
+}
+
+export async function permanentlyDeletePostAction(formData) {
+  const slug = formData.get('slug')?.toString()
+  if (!slug) return
+
+  await permanentlyDeletePost(slug)
+
+  await logActivity('Article permanently deleted', slug)
+  revalidatePath('/admin/trash')
 }

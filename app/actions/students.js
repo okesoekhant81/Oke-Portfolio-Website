@@ -5,6 +5,8 @@ import {
   addStudent,
   updateStudent,
   deleteStudent,
+  restoreStudent,
+  permanentlyDeleteStudent,
   setAttendance,
   deleteAttendanceEntry,
   setAttendanceForClass,
@@ -64,6 +66,8 @@ export async function convertInquiryToStudentAction(formData) {
       role: inquiry.role,
       classDate: inquiry.classDate || '',
       sourceInquiryId: inquiry.id,
+      locale: inquiry.locale || 'en',
+      paymentProofUrl: inquiry.paymentProofUrl || '',
     })
     await markInquiryConverted(inquiry.id, student.id)
   } catch (err) {
@@ -128,6 +132,23 @@ export async function deleteStudentAction(formData) {
   await deleteStudent(id)
   await logActivity('Student deleted', id)
   revalidatePath('/admin/students')
+}
+
+export async function restoreStudentAction(formData) {
+  const id = formData.get('id')?.toString()
+  if (!id) return
+  await restoreStudent(id)
+  await logActivity('Student restored', id)
+  revalidatePath('/admin/students')
+  revalidatePath('/admin/trash')
+}
+
+export async function permanentlyDeleteStudentAction(formData) {
+  const id = formData.get('id')?.toString()
+  if (!id) return
+  await permanentlyDeleteStudent(id)
+  await logActivity('Student permanently deleted', id)
+  revalidatePath('/admin/trash')
 }
 
 export async function addAttendanceAction(formData) {

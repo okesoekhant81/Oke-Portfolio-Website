@@ -1,7 +1,14 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { addTestimonial, updateTestimonial, deleteTestimonial, reorderTestimonial } from '../../lib/content/testimonials'
+import {
+  addTestimonial,
+  updateTestimonial,
+  deleteTestimonial,
+  restoreTestimonial,
+  permanentlyDeleteTestimonial,
+  reorderTestimonial,
+} from '../../lib/content/testimonials'
 import { checkSubmissionLimit, recordSubmission } from '../../lib/submissionLimits'
 import { clientIp } from '../../lib/clientIp'
 import { logActivity } from '../../lib/activityLog'
@@ -136,6 +143,25 @@ export async function deleteTestimonialAction(formData) {
   await deleteTestimonial(id)
   await logActivity('Testimonial deleted', id)
   revalidateAll()
+}
+
+export async function restoreTestimonialAction(formData) {
+  const id = formData.get('id')?.toString()
+  if (!id) return
+
+  await restoreTestimonial(id)
+  await logActivity('Testimonial restored', id)
+  revalidatePath('/admin/trash')
+  revalidateAll()
+}
+
+export async function permanentlyDeleteTestimonialAction(formData) {
+  const id = formData.get('id')?.toString()
+  if (!id) return
+
+  await permanentlyDeleteTestimonial(id)
+  await logActivity('Testimonial permanently deleted', id)
+  revalidatePath('/admin/trash')
 }
 
 export async function reorderTestimonialAction(formData) {
