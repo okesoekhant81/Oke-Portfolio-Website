@@ -249,6 +249,44 @@ export default function HomepageForm({ content }) {
           />
         </Section>
 
+        <Section title="Workshop popup">
+          <p className="text-xs text-neutral-500">
+            A small popup that appears once per visit on the homepage, promoting the workshop.
+          </p>
+          <label className="flex items-center gap-2 text-sm text-ink">
+            <input
+              type="checkbox"
+              name="promoEnabled"
+              defaultChecked={content.promoEnabled}
+              disabled={locked}
+              className="size-4 accent-brand"
+            />
+            Show this popup on the homepage
+          </label>
+          <Field
+            label="Heading"
+            name="promoHeading"
+            defaultValue={content.promoHeading}
+            nameMy="promoHeadingMy"
+            defaultValueMy={content.promoHeadingMy}
+          />
+          <TextArea
+            label="Body"
+            name="promoBody"
+            defaultValue={content.promoBody}
+            nameMy="promoBodyMy"
+            defaultValueMy={content.promoBodyMy}
+            rows={3}
+          />
+          <Field
+            label="Button text"
+            name="promoCta"
+            defaultValue={content.promoCta}
+            nameMy="promoCtaMy"
+            defaultValueMy={content.promoCtaMy}
+          />
+        </Section>
+
         <Section title="About Me">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field

@@ -8,6 +8,7 @@ import Workshop from '../components/Workshop'
 import AboutMe from '../components/AboutMe'
 import LatestArticles from '../components/LatestArticles'
 import Contact from '../components/Contact'
+import WorkshopPromoPopup from '../components/WorkshopPromoPopup'
 import { getHomepageContent } from '../lib/content/homepage'
 import { getPosts } from '../lib/content/posts'
 import { getAnalytics } from '../lib/content/analytics'
@@ -55,6 +56,13 @@ export default async function Home() {
   return (
     <main>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }} />
+      <WorkshopPromoPopup
+        enabled={content.promoEnabled}
+        heading={content.promoHeading}
+        body={content.promoBody}
+        cta={content.promoCta}
+        locale={locale}
+      />
       <NavMenu locale={locale} />
       <Hero
         name={content.heroName}

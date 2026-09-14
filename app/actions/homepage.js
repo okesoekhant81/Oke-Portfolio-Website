@@ -73,6 +73,14 @@ export async function saveHomepage(prevState, formData) {
     workshopRole: get('workshopRole'),
     workshopRoleMy: get('workshopRoleMy'),
 
+    promoEnabled: formData.get('promoEnabled') === 'on',
+    promoHeading: get('promoHeading'),
+    promoHeadingMy: get('promoHeadingMy'),
+    promoBody: get('promoBody'),
+    promoBodyMy: get('promoBodyMy'),
+    promoCta: get('promoCta'),
+    promoCtaMy: get('promoCtaMy'),
+
     aboutLine1: get('aboutLine1'),
     aboutLine1My: get('aboutLine1My'),
     aboutLine2: get('aboutLine2'),
