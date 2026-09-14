@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { addInquiry, deleteInquiry, deleteInquiries, setInquiryStatus, setInquiriesStatus } from '../../lib/content/inquiries'
 import { getClassDates } from '../../lib/content/classDates'
 import { getStudents } from '../../lib/content/students'
+import { getWorkshopContent } from '../../lib/content/workshop'
 import { checkSubmissionLimit, recordSubmission } from '../../lib/submissionLimits'
 import { clientIp } from '../../lib/clientIp'
 import { notifyNewInquiry } from '../../lib/notify'
@@ -84,6 +85,17 @@ export async function submitInquiryAction(prevState, formData) {
   const paymentProofUrlRaw = get('paymentProofUrl')
   const paymentProofUrl = paymentProofUrlRaw.startsWith('https://') ? paymentProofUrlRaw.slice(0, 500) : ''
 
+  // Re-checked here rather than trusted from the client, same reasoning as
+  // the capacity/waitlist check above — not required for a waitlist entry,
+  // since that isn't a confirmed seat yet.
+  if (!waitlisted) {
+    const workshop = await getWorkshopContent()
+    const paymentRequired = workshop.paymentMethods.some((m) => m.name)
+    if (paymentRequired && !paymentProofUrl) {
+      return { error: 'Please upload your payment screenshot before submitting.' }
+    }
+  }
+
   const locale = await getLocale()
 
   let record
@@ -112,7 +124,7 @@ export async function submitInquiryAction(prevState, formData) {
   // registered, go check" ping.
   await notifyNewInquiry(record)
   revalidatePath('/admin/inquiries')
-  return { success: true, waitlisted }
+  return { success: true, waitlisted, registrationId: record.id.toUpperCase() }
 }
 
 // Both of the below rely on only being reachable through a form on

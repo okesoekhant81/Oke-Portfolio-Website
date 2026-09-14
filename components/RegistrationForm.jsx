@@ -35,7 +35,8 @@ function CopyRow({ label, value, copyLabel, copiedLabel }) {
   return (
     <div className="flex items-center justify-between gap-3 text-sm">
       <span className="min-w-0 truncate text-muted dark:text-neutral-400">
-        {label}: <span className="font-medium text-ink dark:text-neutral-100">{value}</span>
+        {label && `${label}: `}
+        <span className="font-medium text-ink dark:text-neutral-100">{value}</span>
       </span>
       <button
         type="button"
@@ -97,6 +98,11 @@ export default function RegistrationForm({ locale = 'en', classDates = [], payme
   const currentStepKey = steps[step]
   const selectedClass = classDates.find((d) => d.date === values.classDate)
   const isWaitlist = Boolean(selectedClass?.isFull)
+  // Payment proof isn't required for a waitlist entry — that isn't a
+  // confirmed seat yet, so asking someone to pay before they even know
+  // they're getting in doesn't make sense.
+  const paymentRequired = paymentMethods.length > 0 && !isWaitlist
+  const [proofMissingError, setProofMissingError] = useState(false)
 
   function update(field, value) {
     setValues((v) => ({ ...v, [field]: value }))
@@ -115,6 +121,7 @@ export default function RegistrationForm({ locale = 'en', classDates = [], payme
       if (!res.ok || !data.url) throw new Error(data.error || 'Upload failed')
       setProofUrl(data.url)
       setProofUploadState('done')
+      setProofMissingError(false)
     } catch {
       setProofUploadState('error')
     }
@@ -149,6 +156,10 @@ export default function RegistrationForm({ locale = 'en', classDates = [], payme
   // browser to implicitly activate — submission only ever happens through
   // this function, called directly from the button's onClick.
   function submitForm() {
+    if (paymentRequired && !proofUrl) {
+      setProofMissingError(true)
+      return
+    }
     const formData = new FormData()
     Object.entries(values).forEach(([key, value]) => formData.set(key, value))
     formData.set('website', honeypotRef.current?.value || '')
@@ -203,8 +214,29 @@ export default function RegistrationForm({ locale = 'en', classDates = [], payme
           transition={{ duration: 0.35, delay: 0.38, ease: EASE }}
           className="mt-2 text-sm text-muted dark:text-neutral-400"
         >
-          {state.waitlisted ? dict.workshop.formWaitlistSuccessBody : dict.workshop.formSuccessBody}
+          {state.waitlisted
+            ? dict.workshop.formWaitlistSuccessBody
+            : paymentRequired
+              ? dict.workshop.formSuccessBodyPayment
+              : dict.workshop.formSuccessBody}
         </motion.p>
+        {state.registrationId && (
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, delay: 0.44, ease: EASE }}
+            className="mx-auto mt-5 max-w-xs rounded-lg border border-brand/20 bg-white p-3 dark:bg-white/5"
+          >
+            <p className="text-xs text-muted dark:text-neutral-400">{dict.workshop.formSuccessRegistrationId}</p>
+            <CopyRow
+              label=""
+              value={state.registrationId}
+              copyLabel={dict.workshop.formPaymentCopy}
+              copiedLabel={dict.workshop.formPaymentCopied}
+            />
+            <p className="mt-2 text-xs text-muted dark:text-neutral-400">{dict.workshop.formSuccessSaveHint}</p>
+          </motion.div>
+        )}
       </motion.div>
     )
   }
@@ -447,6 +479,7 @@ export default function RegistrationForm({ locale = 'en', classDates = [], payme
                     <div>
                       <label className={labelClass} htmlFor="paymentProof">
                         {dict.workshop.formPaymentUpload}
+                        {paymentRequired && <span className="text-brand"> *</span>}
                       </label>
                       <input
                         id="paymentProof"
@@ -462,8 +495,13 @@ export default function RegistrationForm({ locale = 'en', classDates = [], payme
                       {proofUploadState === 'error' && (
                         <p className="mt-1 text-xs text-red-600 dark:text-red-400">{dict.workshop.formPaymentUploadError}</p>
                       )}
+                      {proofMissingError && !proofUrl && (
+                        <p className="mt-1 text-xs text-red-600 dark:text-red-400">{dict.workshop.formPaymentMissingError}</p>
+                      )}
                     </div>
-                    <p className="text-xs text-muted dark:text-neutral-400">{dict.workshop.formPaymentSkipHint}</p>
+                    {paymentRequired && (
+                      <p className="text-xs text-muted dark:text-neutral-400">{dict.workshop.formPaymentRequiredHint}</p>
+                    )}
                   </div>
                 )}
               </div>
