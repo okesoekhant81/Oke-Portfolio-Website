@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import Link from 'next/link'
 import {
   updateStudentProfileAction,
   updateStudentClassAction,
@@ -450,6 +451,11 @@ export default function StudentRow({ student, classDates }) {
       <AttendancePanel student={student} />
 
       <div className="mt-3 flex items-center justify-end gap-3 border-t border-neutral-100 pt-3">
+        {assignedClass?.status === 'completed' && (
+          <Link href={`/admin/certificate/${student.id}`} className="text-xs text-brand hover:underline">
+            Certificate
+          </Link>
+        )}
         {deleteError && <span className="text-xs text-red-600">Couldn&rsquo;t remove — try again.</span>}
         <button
           type="button"
