@@ -10,6 +10,15 @@ function clampFee(value) {
   return Math.round(n)
 }
 
+// This ends up as a real <a href> in the payment-confirmed email (see
+// lib/registrantEmail.js) — even though only the admin can set it, keeping
+// it restricted to http(s) rules out a stray javascript: URL ever landing
+// in an email a registrant's client renders.
+function cleanUrl(value) {
+  const trimmed = value?.toString().trim().slice(0, 500) ?? ''
+  return /^https?:\/\//i.test(trimmed) ? trimmed : ''
+}
+
 export async function addClassDateAction(prevState, formData) {
   const date = formData.get('date')?.toString().trim() ?? ''
   const label = formData.get('label')?.toString().trim().slice(0, 100) ?? ''
@@ -20,6 +29,7 @@ export async function addClassDateAction(prevState, formData) {
       date,
       label,
       time: formData.get('time')?.toString().trim().slice(0, 60) ?? '',
+      meetingLink: cleanUrl(formData.get('meetingLink')),
       defaultFee: clampFee(formData.get('defaultFee')),
       capacity: clampFee(formData.get('capacity')),
     })
@@ -91,6 +101,15 @@ export async function updateClassDateTimeAction(formData) {
   if (!id) return
 
   await updateClassDate(id, { time: formData.get('time')?.toString().trim().slice(0, 60) ?? '' })
+  revalidatePath('/admin/classes')
+  revalidatePath('/admin/classes/[id]', 'page')
+}
+
+export async function updateClassDateMeetingLinkAction(formData) {
+  const id = formData.get('id')?.toString()
+  if (!id) return
+
+  await updateClassDate(id, { meetingLink: cleanUrl(formData.get('meetingLink')) })
   revalidatePath('/admin/classes')
   revalidatePath('/admin/classes/[id]', 'page')
 }

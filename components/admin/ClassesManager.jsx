@@ -10,6 +10,7 @@ import {
   updateClassDateCapacityAction,
   updateClassDateLabelAction,
   updateClassDateTimeAction,
+  updateClassDateMeetingLinkAction,
 } from '../../app/actions/classDates'
 
 function formatDate(dateStr) {
@@ -217,6 +218,74 @@ function TimeEditor({ id, time }) {
   )
 }
 
+// Only ever shown to a student once their payment is marked paid (see
+// lib/registrantEmail.js) — anything that isn't a real http(s) URL is
+// silently dropped server-side (see cleanUrl in app/actions/classDates.js),
+// so the input here is unvalidated on purpose; a bad paste just won't save.
+function MeetingLinkEditor({ id, meetingLink }) {
+  const [editing, setEditing] = useState(false)
+  const [value, setValue] = useState(meetingLink || '')
+  const [saving, setSaving] = useState(false)
+  const [, startTransition] = useTransition()
+
+  function handleSave() {
+    setSaving(true)
+    const formData = new FormData()
+    formData.set('id', id)
+    formData.set('meetingLink', value)
+    startTransition(async () => {
+      try {
+        await updateClassDateMeetingLinkAction(formData)
+        setEditing(false)
+      } finally {
+        setSaving(false)
+      }
+    })
+  }
+
+  if (!editing) {
+    return (
+      <span className="inline-flex items-center gap-1.5">
+        {meetingLink && (
+          <a href={meetingLink} target="_blank" rel="noreferrer" className="text-brand hover:underline">
+            Meet link
+          </a>
+        )}
+        <button type="button" onClick={() => setEditing(true)} className="text-xs text-neutral-400 hover:text-brand">
+          {meetingLink ? 'Edit meeting link' : 'Add meeting link'}
+        </button>
+      </span>
+    )
+  }
+
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <input
+        type="url"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        placeholder="https://meet.google.com/xxx-xxxx-xxx"
+        autoFocus
+        className="w-56 rounded-md border border-neutral-300 px-2 py-0.5 text-xs outline-none focus:border-brand"
+      />
+      <button type="button" onClick={handleSave} disabled={saving} className="font-medium text-brand hover:underline disabled:opacity-60">
+        {saving ? '…' : 'Save'}
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          setValue(meetingLink || '')
+          setEditing(false)
+        }}
+        disabled={saving}
+        className="text-neutral-400 hover:text-ink"
+      >
+        Cancel
+      </button>
+    </span>
+  )
+}
+
 function LabelEditor({ id, label }) {
   const [editing, setEditing] = useState(false)
   const [value, setValue] = useState(label || '')
@@ -361,6 +430,7 @@ export default function ClassesManager({ dates, students }) {
                   <span>{revenue.toLocaleString()} MMK collected</span>
                   <FeeEditor id={d.id} defaultFee={d.defaultFee} />
                   <CapacityEditor id={d.id} capacity={d.capacity} />
+                  <MeetingLinkEditor id={d.id} meetingLink={d.meetingLink} />
                 </div>
               </li>
             )
@@ -396,6 +466,15 @@ export default function ClassesManager({ dates, students }) {
             name="time"
             placeholder="e.g. 2:00 PM – 5:00 PM"
             className="mt-1 w-40 rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-brand"
+          />
+        </div>
+        <div className="min-w-[180px] flex-1">
+          <label className="block text-xs font-medium text-neutral-600">Meeting link (optional)</label>
+          <input
+            type="url"
+            name="meetingLink"
+            placeholder="https://meet.google.com/xxx-xxxx-xxx"
+            className="mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-brand"
           />
         </div>
         <div>
