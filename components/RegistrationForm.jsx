@@ -17,6 +17,37 @@ function formatClassDate(dateStr, dateLocale) {
   return d.toLocaleDateString(dateLocale, { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
+// A copy button next to the raw number is easier for a registrant than a
+// QR code they'd have to screenshot-and-crop or scan with a second device
+// — this is what actually gets pasted into their banking/wallet app, QR or
+// not, so it's shown regardless of whether a QR image was also uploaded.
+function CopyRow({ label, value, copyLabel, copiedLabel }) {
+  const [copied, setCopied] = useState(false)
+  if (!value) return null
+
+  function handleCopy() {
+    navigator.clipboard?.writeText(value).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    })
+  }
+
+  return (
+    <div className="flex items-center justify-between gap-3 text-sm">
+      <span className="min-w-0 truncate text-muted dark:text-neutral-400">
+        {label}: <span className="font-medium text-ink dark:text-neutral-100">{value}</span>
+      </span>
+      <button
+        type="button"
+        onClick={handleCopy}
+        className="shrink-0 rounded-full border border-neutral-300 px-2.5 py-1 text-xs text-ink transition-colors duration-300 hover:border-brand hover:text-brand dark:border-neutral-700 dark:text-neutral-100"
+      >
+        {copied ? copiedLabel : copyLabel}
+      </button>
+    </div>
+  )
+}
+
 // Required fields (name, email, phone) each get their own step — short
 // enough to stay well under the ~4-step point where research shows
 // abandonment climbs, while still giving the "one thing at a time" feel
@@ -26,7 +57,7 @@ function formatClassDate(dateStr, dateLocale) {
 // exists when the admin has actually added upcoming class dates — with
 // none configured, the form just skips straight to Name, same shape as
 // before this existed.
-export default function RegistrationForm({ locale = 'en', classDates = [], paymentQrImage = '', paymentInstructions = '' }) {
+export default function RegistrationForm({ locale = 'en', classDates = [], paymentMethods = [] }) {
   const dict = getDictionary(locale)
   const [state, dispatch, pending] = useActionState(submitInquiryAction, null)
   const steps = [
@@ -35,7 +66,7 @@ export default function RegistrationForm({ locale = 'en', classDates = [], payme
     'email',
     'phone',
     'optional',
-    ...(paymentQrImage ? ['payment'] : []),
+    ...(paymentMethods.length > 0 ? ['payment'] : []),
   ]
   const TOTAL_STEPS = steps.length
   const [proofUrl, setProofUrl] = useState('')
@@ -389,12 +420,35 @@ export default function RegistrationForm({ locale = 'en', classDates = [], payme
                 <p className={`font-display text-sm font-bold text-ink ${italicIfLatin(locale)}`}>
                   {dict.workshop.formPaymentHeading}
                 </p>
-                {paymentInstructions && (
-                  <p className="whitespace-pre-line text-sm text-muted dark:text-neutral-400">{paymentInstructions}</p>
-                )}
-                {paymentQrImage && (
-                  <img src={paymentQrImage} alt="Payment QR code" className="h-48 w-48 rounded-lg border border-neutral-200 object-contain dark:border-neutral-700" />
-                )}
+                <div className="space-y-3">
+                  {paymentMethods.map((m, i) => (
+                    <div key={i} className="rounded-lg border border-neutral-200 p-3 dark:border-neutral-700">
+                      <p className="text-sm font-semibold text-ink dark:text-neutral-100">{m.name}</p>
+                      <div className="mt-1.5 space-y-1">
+                        <CopyRow
+                          label={dict.workshop.formPaymentAccountName}
+                          value={m.accountName}
+                          copyLabel={dict.workshop.formPaymentCopy}
+                          copiedLabel={dict.workshop.formPaymentCopied}
+                        />
+                        <CopyRow
+                          label={dict.workshop.formPaymentAccountNumber}
+                          value={m.accountNumber}
+                          copyLabel={dict.workshop.formPaymentCopy}
+                          copiedLabel={dict.workshop.formPaymentCopied}
+                        />
+                      </div>
+                      {m.note && <p className="mt-2 text-xs text-muted dark:text-neutral-400">{m.note}</p>}
+                      {m.qrImage && (
+                        <img
+                          src={m.qrImage}
+                          alt={`${m.name} QR code`}
+                          className="mt-2 h-32 w-32 rounded-lg border border-neutral-200 object-contain dark:border-neutral-700"
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
                 <div>
                   <label className={labelClass} htmlFor="paymentProof">
                     {dict.workshop.formPaymentUpload}

@@ -274,8 +274,7 @@ export default async function WorkshopPage() {
               <RegistrationForm
                 locale={locale}
                 classDates={registrableClassDates}
-                paymentQrImage={content.paymentQrImage}
-                paymentInstructions={content.paymentInstructions}
+                paymentMethods={content.paymentMethods.filter((m) => m.name)}
               />
             </div>
           </div>

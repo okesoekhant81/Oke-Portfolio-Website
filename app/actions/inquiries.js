@@ -7,7 +7,6 @@ import { getStudents } from '../../lib/content/students'
 import { checkSubmissionLimit, recordSubmission } from '../../lib/submissionLimits'
 import { clientIp } from '../../lib/clientIp'
 import { notifyNewInquiry } from '../../lib/notify'
-import { sendRegistrationConfirmation } from '../../lib/registrantEmail'
 import { logActivity } from '../../lib/activityLog'
 import { getLocale } from '../../lib/i18n'
 
@@ -107,8 +106,11 @@ export async function submitInquiryAction(prevState, formData) {
     return { error: err.message || 'Could not submit. Please try again.' }
   }
 
+  // No confirmation email yet — that's sent once the admin actually marks
+  // payment as received (see updateStudentPaymentAction), not just because
+  // the form was submitted. This is only the admin-facing "someone
+  // registered, go check" ping.
   await notifyNewInquiry(record)
-  await sendRegistrationConfirmation(record, locale)
   revalidatePath('/admin/inquiries')
   return { success: true, waitlisted }
 }

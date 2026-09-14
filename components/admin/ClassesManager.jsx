@@ -9,6 +9,7 @@ import {
   updateClassDateFeeAction,
   updateClassDateCapacityAction,
   updateClassDateLabelAction,
+  updateClassDateTimeAction,
 } from '../../app/actions/classDates'
 
 function formatDate(dateStr) {
@@ -153,6 +154,69 @@ function CapacityEditor({ id, capacity }) {
   )
 }
 
+// Free text (e.g. "2:00 PM – 5:00 PM") — only ever shown back on the
+// registration-confirmed email (see lib/registrantEmail.js), not used for
+// any scheduling logic itself.
+function TimeEditor({ id, time }) {
+  const [editing, setEditing] = useState(false)
+  const [value, setValue] = useState(time || '')
+  const [saving, setSaving] = useState(false)
+  const [, startTransition] = useTransition()
+
+  function handleSave() {
+    setSaving(true)
+    const formData = new FormData()
+    formData.set('id', id)
+    formData.set('time', value)
+    startTransition(async () => {
+      try {
+        await updateClassDateTimeAction(formData)
+        setEditing(false)
+      } finally {
+        setSaving(false)
+      }
+    })
+  }
+
+  if (!editing) {
+    return (
+      <span className="inline-flex items-center gap-1.5">
+        {time && <span className="text-neutral-400">· {time}</span>}
+        <button type="button" onClick={() => setEditing(true)} className="text-xs text-neutral-400 hover:text-brand">
+          {time ? 'Edit time' : 'Add time'}
+        </button>
+      </span>
+    )
+  }
+
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        placeholder="e.g. 2:00 PM – 5:00 PM"
+        autoFocus
+        className="w-40 rounded-md border border-neutral-300 px-2 py-0.5 text-xs outline-none focus:border-brand"
+      />
+      <button type="button" onClick={handleSave} disabled={saving} className="font-medium text-brand hover:underline disabled:opacity-60">
+        {saving ? '…' : 'Save'}
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          setValue(time || '')
+          setEditing(false)
+        }}
+        disabled={saving}
+        className="text-neutral-400 hover:text-ink"
+      >
+        Cancel
+      </button>
+    </span>
+  )
+}
+
 function LabelEditor({ id, label }) {
   const [editing, setEditing] = useState(false)
   const [value, setValue] = useState(label || '')
@@ -268,6 +332,7 @@ export default function ClassesManager({ dates, students }) {
                       {formatDate(d.date)}
                     </Link>
                     <LabelEditor id={d.id} label={d.label} />
+                    <TimeEditor id={d.id} time={d.time} />
                   </span>
                   <span className="flex items-center gap-2">
                     <StatusSelect id={d.id} status={d.status} />
@@ -323,6 +388,14 @@ export default function ClassesManager({ dates, students }) {
             name="label"
             placeholder="e.g. Weekend batch"
             className="mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-brand"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-neutral-600">Time (optional)</label>
+          <input
+            name="time"
+            placeholder="e.g. 2:00 PM – 5:00 PM"
+            className="mt-1 w-40 rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-brand"
           />
         </div>
         <div>

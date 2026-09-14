@@ -10,8 +10,13 @@ import {
   setAttendance,
   deleteAttendanceEntry,
   setAttendanceForClass,
+  getStudent,
 } from '../../lib/content/students'
 import { getInquiry, markInquiryConverted } from '../../lib/content/inquiries'
+import { getClassDates } from '../../lib/content/classDates'
+import { getWorkshopContent } from '../../lib/content/workshop'
+import { localizeWorkshopContent } from '../../lib/localizeContent'
+import { sendRegistrationConfirmation } from '../../lib/registrantEmail'
 import { logActivity } from '../../lib/activityLog'
 
 const MAX_LENGTHS = { name: 200, email: 200, phone: 60, business: 200, role: 120, paymentNote: 500, note: 500 }
@@ -112,15 +117,34 @@ export async function updateStudentClassAction(formData) {
   revalidatePath('/admin/students')
 }
 
+// The registration-confirmed email (see lib/registrantEmail.js) fires from
+// here, not at registration time — only once the admin has actually
+// checked the payment themselves and marks it paid, and only on the
+// transition into 'paid' (re-saving an already-paid student, e.g. to
+// tweak amountPaid, doesn't re-send it).
 export async function updateStudentPaymentAction(formData) {
   const id = formData.get('id')?.toString()
   if (!id) return
+  const previous = await getStudent(id)
+  const paymentStatus = formData.get('paymentStatus')?.toString() || 'unpaid'
   const amountPaid = clampAmount(formData.get('amountPaid'))
   await updateStudent(id, {
-    paymentStatus: formData.get('paymentStatus')?.toString() || 'unpaid',
+    paymentStatus,
     paymentNote: formData.get('paymentNote')?.toString().trim().slice(0, MAX_LENGTHS.paymentNote) ?? '',
     amountPaid,
   })
+
+  if (previous && previous.paymentStatus !== 'paid' && paymentStatus === 'paid' && previous.classDate) {
+    const [classInfo, rawWorkshop] = await Promise.all([
+      getClassDates().then((dates) => dates.find((d) => d.date === previous.classDate)),
+      getWorkshopContent(),
+    ])
+    if (classInfo) {
+      const workshop = localizeWorkshopContent(rawWorkshop, previous.locale || 'en')
+      await sendRegistrationConfirmation(previous, classInfo, workshop, previous.locale || 'en')
+    }
+  }
+
   await logActivity('Student payment updated', `${id}: ${amountPaid} MMK`)
   revalidatePath('/admin/students')
   revalidatePath('/admin/classes/[id]', 'page')

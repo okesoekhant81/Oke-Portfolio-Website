@@ -19,6 +19,7 @@ export async function addClassDateAction(prevState, formData) {
     await addClassDate({
       date,
       label,
+      time: formData.get('time')?.toString().trim().slice(0, 60) ?? '',
       defaultFee: clampFee(formData.get('defaultFee')),
       capacity: clampFee(formData.get('capacity')),
     })
@@ -83,4 +84,13 @@ export async function updateClassDateLabelAction(formData) {
   revalidatePath('/admin/classes')
   revalidatePath('/admin/classes/[id]', 'page')
   revalidatePath('/workshop')
+}
+
+export async function updateClassDateTimeAction(formData) {
+  const id = formData.get('id')?.toString()
+  if (!id) return
+
+  await updateClassDate(id, { time: formData.get('time')?.toString().trim().slice(0, 60) ?? '' })
+  revalidatePath('/admin/classes')
+  revalidatePath('/admin/classes/[id]', 'page')
 }

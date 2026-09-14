@@ -21,6 +21,20 @@ export async function saveWorkshop(prevState, formData) {
     answerMy: get(`faq-${i}-answerMy`),
   }))
 
+  // Stored as fixed slots same as modules/faqs above — a blank name means
+  // "not filled in", filtered out wherever this is displayed (see
+  // RegistrationForm.jsx) rather than here, so a half-filled slot doesn't
+  // just silently vanish the next time the admin opens this form.
+  const paymentMethods = [0, 1, 2, 3].map((i) => ({
+    name: get(`payment-${i}-name`),
+    nameMy: get(`payment-${i}-nameMy`),
+    accountName: get(`payment-${i}-accountName`),
+    accountNumber: get(`payment-${i}-accountNumber`),
+    qrImage: get(`payment-${i}-qrImage`),
+    note: get(`payment-${i}-note`),
+    noteMy: get(`payment-${i}-noteMy`),
+  }))
+
   const data = {
     heroImage: get('heroImage'),
     heroTitle: get('heroTitle'),
@@ -63,9 +77,12 @@ export async function saveWorkshop(prevState, formData) {
     faqHeadingMy: get('faqHeadingMy'),
     faqs,
 
-    paymentQrImage: get('paymentQrImage'),
-    paymentInstructions: get('paymentInstructions'),
-    paymentInstructionsMy: get('paymentInstructionsMy'),
+    paymentMethods,
+
+    sessionPlatform: get('sessionPlatform'),
+    sessionPlatformMy: get('sessionPlatformMy'),
+    sessionLanguage: get('sessionLanguage'),
+    sessionLanguageMy: get('sessionLanguageMy'),
   }
 
   try {

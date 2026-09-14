@@ -219,20 +219,67 @@ export default function WorkshopContentForm({ content }) {
           ))}
         </Section>
 
-        <Section title="Payment">
+        <Section title="Payment Methods">
           <p className="text-xs text-neutral-400">
-            Leave the QR code blank to keep registration payment-free — once set, the registration form shows this QR
-            code and asks registrants to upload proof of payment.
+            Leave a method's Name blank to skip it — once at least one method has a name, the registration form shows
+            a payment step listing every filled-in method (account number with a copy button, QR code if you add
+            one) and asks registrants to upload proof of payment.
           </p>
-          <ImageField label="Payment QR code" name="paymentQrImage" defaultValue={content.paymentQrImage} />
-          <TextArea
-            label="Payment instructions (account name, number, amount, etc.)"
-            name="paymentInstructions"
-            defaultValue={content.paymentInstructions}
-            nameMy="paymentInstructionsMy"
-            defaultValueMy={content.paymentInstructionsMy}
-            rows={3}
-          />
+          {[0, 1, 2, 3].map((i) => {
+            const method = content.paymentMethods[i] || {}
+            return (
+              <div key={i} className="rounded-lg border border-neutral-100 p-4">
+                <p className="text-xs font-semibold text-neutral-400">
+                  Method {i + 1} <span className="font-normal">(leave Name blank to skip)</span>
+                </p>
+                <div className="mt-2 space-y-3">
+                  <Field
+                    label="Name (e.g. KBZPay, WavePay, Bank Transfer)"
+                    name={`payment-${i}-name`}
+                    defaultValue={method.name}
+                    nameMy={`payment-${i}-nameMy`}
+                    defaultValueMy={method.nameMy}
+                  />
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <Field label="Account name" name={`payment-${i}-accountName`} defaultValue={method.accountName} />
+                    <Field label="Account number" name={`payment-${i}-accountNumber`} defaultValue={method.accountNumber} />
+                  </div>
+                  <ImageField label="QR code (optional)" name={`payment-${i}-qrImage`} defaultValue={method.qrImage} />
+                  <TextArea
+                    label="Note (optional)"
+                    name={`payment-${i}-note`}
+                    defaultValue={method.note}
+                    nameMy={`payment-${i}-noteMy`}
+                    defaultValueMy={method.noteMy}
+                    rows={2}
+                  />
+                </div>
+              </div>
+            )
+          })}
+        </Section>
+
+        <Section title="Registration Email">
+          <p className="text-xs text-neutral-400">
+            Shown on the "registration confirmed" email a student gets once their payment is marked paid (see
+            Students) — the same for every class, so date and time come from the class itself instead.
+          </p>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field
+              label="Location / platform"
+              name="sessionPlatform"
+              defaultValue={content.sessionPlatform}
+              nameMy="sessionPlatformMy"
+              defaultValueMy={content.sessionPlatformMy}
+            />
+            <Field
+              label="Language"
+              name="sessionLanguage"
+              defaultValue={content.sessionLanguage}
+              nameMy="sessionLanguageMy"
+              defaultValueMy={content.sessionLanguageMy}
+            />
+          </div>
         </Section>
 
         <SaveBar locked={locked} onEdit={() => setLocked(false)} onCancel={handleCancel} pending={pending} state={state} />
