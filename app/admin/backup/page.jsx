@@ -1,6 +1,5 @@
 import AdminNav from '../../../components/admin/AdminNav'
 import BackupButton from '../../../components/admin/BackupButton'
-import StorageMigrationPanel from '../../../components/admin/StorageMigrationPanel'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,16 +16,6 @@ export default function BackupAdminPage() {
         </p>
         <div className="mt-6 rounded-xl border border-neutral-200 bg-white p-6">
           <BackupButton />
-        </div>
-
-        <h2 className="mt-10 font-display text-xl font-bold italic text-brand">Storage migration</h2>
-        <p className="mt-1 text-sm text-neutral-500">
-          One-time, two-step move to storage that isn&apos;t cached the same way — this is what fixes edits/deletes
-          sometimes taking a while (or a refresh) to show up. Nothing on the live site changes until both steps
-          below are done and a follow-up update switches the app over.
-        </p>
-        <div className="mt-6 rounded-xl border border-neutral-200 bg-white p-6">
-          <StorageMigrationPanel />
         </div>
       </div>
     </main>
