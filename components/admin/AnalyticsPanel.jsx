@@ -247,7 +247,7 @@ export default function AnalyticsPanel({ postViews, postLikes, daily, posts, cla
               {topPosts.map((post) => (
                 <div key={post.slug}>
                   <div className="flex items-center justify-between gap-4 text-sm">
-                    <p className="truncate text-ink">{post.title}</p>
+                    <p className="min-w-0 flex-1 truncate text-ink">{post.title}</p>
                     <div className="flex shrink-0 items-center gap-3 tabular-nums text-neutral-500">
                       <StatCount icon="eye" count={post.views} />
                       <StatCount icon="heart" count={post.likes} />
@@ -272,13 +272,13 @@ export default function AnalyticsPanel({ postViews, postLikes, daily, posts, cla
 
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             {revenueByClass.length > 0 && (
-              <div className="rounded-xl border border-neutral-200 bg-white p-5">
+              <div className="min-w-0 rounded-xl border border-neutral-200 bg-white p-5">
                 <p className="text-xs text-neutral-500">Revenue by class · {totalRevenue.toLocaleString()} MMK total</p>
                 <div className="mt-3 space-y-3">
                   {revenueByClass.map((c) => (
                     <div key={c.id}>
                       <div className="flex items-center justify-between gap-4 text-sm">
-                        <p className="truncate text-ink">{c.label}</p>
+                        <p className="min-w-0 flex-1 truncate text-ink">{c.label}</p>
                         <span className="shrink-0 tabular-nums text-neutral-500">{c.revenue.toLocaleString()} MMK</span>
                       </div>
                       <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-neutral-100">
@@ -294,13 +294,13 @@ export default function AnalyticsPanel({ postViews, postLikes, daily, posts, cla
             )}
 
             {sourceBreakdown.length > 0 && (
-              <div className="rounded-xl border border-neutral-200 bg-white p-5">
+              <div className="min-w-0 rounded-xl border border-neutral-200 bg-white p-5">
                 <p className="text-xs text-neutral-500">How inquiries heard about the workshop</p>
                 <div className="mt-3 space-y-3">
                   {sourceBreakdown.map((s) => (
                     <div key={s.key}>
                       <div className="flex items-center justify-between gap-4 text-sm">
-                        <p className="text-ink">{s.label}</p>
+                        <p className="min-w-0 flex-1 truncate text-ink">{s.label}</p>
                         <span className="shrink-0 tabular-nums text-neutral-500">{s.count}</span>
                       </div>
                       <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-neutral-100">
