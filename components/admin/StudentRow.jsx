@@ -150,35 +150,68 @@ function PaymentEditor({ student, suggestedFee }) {
   )
 }
 
+// Renders from local state, not straight from the `student.attendance`
+// prop — adding or removing an entry updates this list immediately
+// (optimistic) instead of waiting on the full save + revalidation round
+// trip, which is what made this feel slow. Failures roll the optimistic
+// change back and show a real error instead of the previous behavior,
+// which silently dropped the entry with no sign anything had gone wrong —
+// that mattered once taking attendance for a whole class one student at a
+// time meant a burst of these landing on the same file close together,
+// occasionally exhausting mutateJson's conflict retries.
 function AttendancePanel({ student }) {
   const [open, setOpen] = useState(false)
+  const [entries, setEntries] = useState(student.attendance || [])
   const [pending, startTransition] = useTransition()
   const [deletingId, setDeletingId] = useState(null)
-  const entries = student.attendance || []
+  const [addError, setAddError] = useState(null)
+  const [deleteError, setDeleteError] = useState(null)
 
   function handleAdd(e) {
     e.preventDefault()
     const form = e.currentTarget
     const formData = new FormData(form)
+    const date = formData.get('date')?.toString()
+    if (!date) return
+    const present = formData.get('present')?.toString() === 'true'
+    const note = formData.get('note')?.toString().trim() || ''
     formData.set('studentId', student.id)
+    setAddError(null)
+
+    const previous = entries
+    // Same upsert-by-date behavior as the server: replace any existing
+    // entry for this date rather than adding a second one for it.
+    setEntries((prev) => {
+      const idx = prev.findIndex((en) => en.date === date)
+      const optimistic = { id: idx >= 0 ? prev[idx].id : `pending-${Date.now()}`, date, present, note }
+      return idx >= 0 ? prev.map((en, i) => (i === idx ? optimistic : en)) : [...prev, optimistic]
+    })
+    form.reset()
+
     startTransition(async () => {
       try {
         await addAttendanceAction(formData)
-        form.reset()
       } catch {
-        // Leave the form filled in — nothing was lost, they can retry.
+        setEntries(previous)
+        setAddError(date)
       }
     })
   }
 
   function handleDelete(entryId) {
     setDeletingId(entryId)
+    setDeleteError(null)
+    const previous = entries
+    setEntries((prev) => prev.filter((en) => en.id !== entryId))
     const formData = new FormData()
     formData.set('studentId', student.id)
     formData.set('entryId', entryId)
     startTransition(async () => {
       try {
         await deleteAttendanceAction(formData)
+      } catch {
+        setEntries(previous)
+        setDeleteError(entryId)
       } finally {
         setDeletingId(null)
       }
@@ -209,6 +242,7 @@ function AttendancePanel({ student }) {
                         {entry.present ? 'Present' : 'Absent'}
                       </span>
                       {entry.note && <span className="text-neutral-400"> — {entry.note}</span>}
+                      {deleteError === entry.id && <span className="ml-1 text-red-600">Couldn&rsquo;t remove</span>}
                     </span>
                     <button
                       type="button"
@@ -248,9 +282,10 @@ function AttendancePanel({ student }) {
               disabled={pending}
               className="shrink-0 rounded-md bg-brand px-3 py-1 text-xs font-medium text-white disabled:opacity-60"
             >
-              {pending ? 'Adding…' : 'Add'}
+              Add
             </button>
           </form>
+          {addError && <p className="text-xs text-red-600">Couldn&rsquo;t save {formatDate(addError)} — try again.</p>}
         </div>
       )}
     </div>
