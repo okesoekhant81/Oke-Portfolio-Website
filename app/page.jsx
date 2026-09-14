@@ -16,6 +16,7 @@ import { getAnalytics } from '../lib/content/analytics'
 import { getLocale } from '../lib/i18n'
 import { localizeHomepageContent, localizePost, localizeTestimonials } from '../lib/localizeContent'
 import { SITE_URL, SITE_NAME, SOCIAL_LINKS } from '../lib/site'
+import { safeJsonLd } from '../lib/jsonLd'
 
 function buildPersonJsonLd(locale) {
   return {
@@ -58,7 +59,7 @@ export default async function Home() {
 
   return (
     <main>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(personJsonLd) }} />
       <NavMenu locale={locale} />
       <Hero
         name={content.heroName}

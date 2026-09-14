@@ -7,6 +7,7 @@ import { checkLockout, recordFailedAttempt, clearFailedAttempts } from '../../li
 import { clientIp } from '../../lib/clientIp'
 import { logActivity } from '../../lib/activityLog'
 import { verifyAdminCredentials } from '../../lib/content/adminUsers'
+import { safeStringEqual } from '../../lib/safeCompare'
 
 // Two ways in: the master ADMIN_PASSWORD (owner, works with any or no
 // email — it's the bootstrap credential and always keeps working even
@@ -21,6 +22,9 @@ export async function login(prevState, formData) {
   if (!process.env.ADMIN_PASSWORD) {
     return { error: 'ADMIN_PASSWORD is not set on the server yet.' }
   }
+  if (!process.env.ADMIN_SESSION_SECRET) {
+    return { error: 'ADMIN_SESSION_SECRET is not set on the server yet.' }
+  }
 
   const ip = await clientIp()
 
@@ -31,7 +35,7 @@ export async function login(prevState, formData) {
   }
 
   let adminName = null
-  if (password === process.env.ADMIN_PASSWORD) {
+  if (password && safeStringEqual(password, process.env.ADMIN_PASSWORD)) {
     adminName = 'Owner'
   } else if (email) {
     const user = await verifyAdminCredentials(email, password)

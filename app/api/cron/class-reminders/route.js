@@ -3,6 +3,7 @@ import { getClassDates } from '../../../../lib/content/classDates'
 import { getStudents } from '../../../../lib/content/students'
 import { notifyAdminClassReminder } from '../../../../lib/notify'
 import { sendClassReminder } from '../../../../lib/registrantEmail'
+import { safeStringEqual } from '../../../../lib/safeCompare'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,13 +17,16 @@ function tomorrowDateString() {
 // happening tomorrow and emails the admin plus each registered student a
 // reminder. Protected by CRON_SECRET so nobody who finds the URL can
 // trigger it themselves: Vercel sends `Authorization: Bearer $CRON_SECRET`
-// automatically on cron-invoked requests once that env var is set.
+// automatically on cron-invoked requests. Required, not optional — an
+// unset CRON_SECRET used to leave this endpoint wide open to anyone who
+// found the URL rather than failing closed.
 export async function GET(request) {
-  if (process.env.CRON_SECRET) {
-    const auth = request.headers.get('authorization')
-    if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+  if (!process.env.CRON_SECRET) {
+    return NextResponse.json({ error: 'CRON_SECRET is not set on the server.' }, { status: 500 })
+  }
+  const auth = request.headers.get('authorization') || ''
+  if (!safeStringEqual(auth, `Bearer ${process.env.CRON_SECRET}`)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   const tomorrow = tomorrowDateString()
