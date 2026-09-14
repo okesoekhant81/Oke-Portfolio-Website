@@ -73,6 +73,22 @@ export default function RootLayout({ children }) {
               "(function(){try{var t=localStorage.getItem('theme');var d=t?t==='dark':window.matchMedia('(prefers-color-scheme: dark)').matches;if(d)document.documentElement.classList.add('dark');}catch(e){}})();",
           }}
         />
+        {/* Same before-paint, cookie-only trick as the theme script above —
+            the locale cookie (see lib/dictionaries.js's LOCALE_COOKIE)
+            decides which language the page's own content renders in, but
+            <html lang> was left hardcoded to "en" regardless, which is
+            wrong for a My-locale visitor (screen readers, translation
+            prompts, and language detection all read this attribute).
+            Setting it here client-side keeps the root layout itself a
+            plain static component — see the comment below on why that
+            matters — rather than making every route (including /admin)
+            dynamic just to read one cookie server-side. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{var m=document.cookie.match(/(?:^|; )locale=([^;]+)/);if(m&&decodeURIComponent(m[1])==='my')document.documentElement.lang='my';}catch(e){}})();",
+          }}
+        />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link

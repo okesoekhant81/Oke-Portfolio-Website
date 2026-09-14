@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import AdminNav from '../../components/admin/AdminNav'
 import AnalyticsPanel from '../../components/admin/AnalyticsPanel'
+import PrintButton from '../../components/admin/PrintButton'
 import { isBlobConfigured } from '../../lib/blobStore'
 import { getAnalytics, getPostLikes } from '../../lib/content/analytics'
 import { getInquiries } from '../../lib/content/inquiries'
@@ -22,19 +23,26 @@ export default async function AdminDashboard() {
   const newInquiries = inquiries.filter((inquiry) => inquiry.status === 'new').length
 
   return (
-    <main className="min-h-screen bg-neutral-50">
-      <AdminNav active="/admin" />
+    <main className="min-h-screen bg-neutral-50 print:bg-white">
+      <div className="print:hidden">
+        <AdminNav active="/admin" />
+      </div>
       <div className="mx-auto max-w-4xl px-6 py-10">
-        <h1 className="font-display text-2xl font-bold italic text-brand">Dashboard</h1>
+        <div className="flex items-center justify-between gap-3">
+          <h1 className="font-display text-2xl font-bold italic text-brand">Dashboard</h1>
+          <div className="print:hidden">
+            <PrintButton label="Print analytics" />
+          </div>
+        </div>
 
         {!isBlobConfigured && (
-          <p className="mt-4 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          <p className="mt-4 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 print:hidden">
             Storage isn&rsquo;t connected yet — the site is showing bundled default content. Connect a Vercel Blob
             store in the Vercel dashboard, then redeploy, to start editing for real.
           </p>
         )}
 
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 print:hidden">
           <Link
             href="/admin/homepage"
             className="block rounded-xl border border-neutral-200 bg-white p-6 transition-shadow hover:shadow-md"
