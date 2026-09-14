@@ -14,6 +14,21 @@ function DetailRow({ label, value }) {
   )
 }
 
+function formatClassDate(dateStr) {
+  const d = new Date(`${dateStr}T00:00:00`)
+  if (Number.isNaN(d.getTime())) return dateStr
+  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+}
+
+const HEAR_ABOUT_LABELS = {
+  facebook: 'Facebook',
+  instagram: 'Instagram',
+  tiktok: 'TikTok',
+  referral: 'Friend or colleague',
+  search: 'Google search',
+  other: 'Other',
+}
+
 // Deleting used to be a plain form submit that waited on the full round
 // trip to Blob and the page refresh before anything visibly changed — with
 // no pending state in between, it was impossible to tell whether the click
@@ -82,9 +97,11 @@ export default function InquiriesList({ inquiries }) {
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
               <DetailRow label="Email" value={inquiry.email} />
               <DetailRow label="Phone" value={inquiry.phone} />
+              <DetailRow label="Class date" value={inquiry.classDate ? formatClassDate(inquiry.classDate) : null} />
               <DetailRow label="Business" value={inquiry.business} />
               <DetailRow label="Role" value={inquiry.role} />
               <DetailRow label="Participants" value={inquiry.participants} />
+              <DetailRow label="Heard via" value={HEAR_ABOUT_LABELS[inquiry.hearAbout] || inquiry.hearAbout} />
             </div>
 
             {inquiry.message && (

@@ -6,6 +6,7 @@ import RegistrationForm from '../../components/RegistrationForm'
 import Reveal from '../../components/Reveal'
 import RichText from '../../components/RichText'
 import WorkshopOutline from '../../components/WorkshopOutline'
+import { getClassDates } from '../../lib/content/classDates'
 import { getHomepageContent } from '../../lib/content/homepage'
 import { getWorkshopContent } from '../../lib/content/workshop'
 import { getLocale } from '../../lib/i18n'
@@ -34,10 +35,11 @@ export async function generateMetadata() {
 }
 
 export default async function WorkshopPage() {
-  const [rawContent, rawHomepage, locale] = await Promise.all([
+  const [rawContent, rawHomepage, locale, classDates] = await Promise.all([
     getWorkshopContent(),
     getHomepageContent(),
     getLocale(),
+    getClassDates(),
   ])
   const dict = getDictionary(locale)
   const content = localizeWorkshopContent(rawContent, locale)
@@ -94,7 +96,7 @@ export default async function WorkshopPage() {
         </Reveal>
 
         <Reveal delay={0.15}>
-          <div className="mt-8 grid grid-cols-1 gap-4 rounded-xl border border-neutral-200 p-5 dark:border-neutral-800 sm:grid-cols-3">
+          <div className="mt-8 grid grid-cols-1 gap-4 rounded-xl border border-neutral-200 p-5 dark:border-neutral-800 sm:grid-cols-2 lg:grid-cols-4">
             <div>
               <p className="text-xs text-muted dark:text-neutral-400">{content.formatLabel}</p>
               <p className="mt-1 text-sm font-semibold text-ink dark:text-neutral-100">{content.format}</p>
@@ -106,6 +108,17 @@ export default async function WorkshopPage() {
             <div>
               <p className="text-xs text-muted dark:text-neutral-400">{content.audienceLabel}</p>
               <p className="mt-1 text-sm font-semibold text-ink dark:text-neutral-100">{content.audience}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted dark:text-neutral-400">{content.priceLabel}</p>
+              {content.promoPrice ? (
+                <p className="mt-1 flex flex-wrap items-baseline gap-2">
+                  <span className="text-sm font-semibold text-brand">{content.promoPrice}</span>
+                  <span className="text-xs text-muted line-through dark:text-neutral-500">{content.price}</span>
+                </p>
+              ) : (
+                <p className="mt-1 text-sm font-semibold text-ink dark:text-neutral-100">{content.price}</p>
+              )}
             </div>
           </div>
         </Reveal>
@@ -130,7 +143,7 @@ export default async function WorkshopPage() {
             </h2>
             <p className="mt-2 text-sm text-muted dark:text-neutral-400">{content.ctaBody}</p>
             <div className="mt-6">
-              <RegistrationForm locale={locale} />
+              <RegistrationForm locale={locale} classDates={classDates} />
             </div>
           </div>
         </Reveal>

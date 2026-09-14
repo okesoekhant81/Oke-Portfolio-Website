@@ -1,11 +1,13 @@
 import AdminNav from '../../../components/admin/AdminNav'
+import ClassDatesManager from '../../../components/admin/ClassDatesManager'
 import WorkshopContentForm from '../../../components/admin/WorkshopContentForm'
+import { getClassDates } from '../../../lib/content/classDates'
 import { getWorkshopContent } from '../../../lib/content/workshop'
 
 export const dynamic = 'force-dynamic'
 
 export default async function WorkshopAdminPage() {
-  const content = await getWorkshopContent()
+  const [content, classDates] = await Promise.all([getWorkshopContent(), getClassDates()])
 
   return (
     <main className="min-h-screen bg-neutral-50">
@@ -18,6 +20,7 @@ export default async function WorkshopAdminPage() {
           <code className="rounded bg-neutral-200 px-1">*asterisks*</code> for emphasis or{' '}
           <code className="rounded bg-neutral-200 px-1">**double asterisks**</code> for bold.
         </p>
+        <ClassDatesManager dates={classDates} />
         <WorkshopContentForm content={content} />
       </div>
     </main>

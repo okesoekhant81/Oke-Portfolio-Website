@@ -35,6 +35,13 @@ export async function saveWorkshop(prevState, formData) {
     audience: get('audience'),
     audienceMy: get('audienceMy'),
 
+    priceLabel: get('priceLabel'),
+    priceLabelMy: get('priceLabelMy'),
+    price: get('price'),
+    priceMy: get('priceMy'),
+    promoPrice: get('promoPrice'),
+    promoPriceMy: get('promoPriceMy'),
+
     outlineHeading: get('outlineHeading'),
     outlineHeadingMy: get('outlineHeadingMy'),
     modules,

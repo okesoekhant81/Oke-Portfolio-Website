@@ -187,6 +187,32 @@ export default function WorkshopContentForm({ content }) {
           </div>
         </Section>
 
+        <Section title="Pricing">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field
+              label="Label"
+              name="priceLabel"
+              defaultValue={content.priceLabel}
+              nameMy="priceLabelMy"
+              defaultValueMy={content.priceLabelMy}
+            />
+            <Field
+              label="Regular price"
+              name="price"
+              defaultValue={content.price}
+              nameMy="priceMy"
+              defaultValueMy={content.priceMy}
+            />
+          </div>
+          <Field
+            label="Promo price — leave blank to hide the promo (shows the regular price struck through next to this one)"
+            name="promoPrice"
+            defaultValue={content.promoPrice}
+            nameMy="promoPriceMy"
+            defaultValueMy={content.promoPriceMy}
+          />
+        </Section>
+
         <Section title="Course Outline">
           <Field
             label="Section heading"

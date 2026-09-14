@@ -6,30 +6,43 @@ import { submitInquiryAction } from '../app/actions/inquiries'
 import { getDictionary, italicIfLatin } from '../lib/dictionaries'
 
 const EASE = [0.16, 1, 0.3, 1]
-const TOTAL_STEPS = 4
 
 const inputClass =
   'mt-1 w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-ink outline-none transition-colors duration-300 focus:border-brand dark:border-neutral-700 dark:bg-white/5 dark:text-neutral-100'
 const labelClass = 'block text-xs font-medium text-muted dark:text-neutral-400'
 
+function formatClassDate(dateStr, dateLocale) {
+  const d = new Date(`${dateStr}T00:00:00`)
+  if (Number.isNaN(d.getTime())) return dateStr
+  return d.toLocaleDateString(dateLocale, { year: 'numeric', month: 'long', day: 'numeric' })
+}
+
 // Required fields (name, email, phone) each get their own step — short
 // enough to stay well under the ~4-step point where research shows
 // abandonment climbs, while still giving the "one thing at a time" feel
-// that's easiest on mobile. The four optional fields are bundled into a
-// single last step instead of one each, since splitting fields nobody's
-// required to fill only adds taps without adding clarity.
-export default function RegistrationForm({ locale = 'en' }) {
+// that's easiest on mobile. The optional fields are bundled into a single
+// last step instead of one each, since splitting fields nobody's required
+// to fill only adds taps without adding clarity. The date-picker step only
+// exists when the admin has actually added upcoming class dates — with
+// none configured, the form just skips straight to Name, same shape as
+// before this existed.
+export default function RegistrationForm({ locale = 'en', classDates = [] }) {
   const dict = getDictionary(locale)
   const [state, dispatch, pending] = useActionState(submitInquiryAction, null)
+  const steps =
+    classDates.length > 0 ? ['classDate', 'name', 'email', 'phone', 'optional'] : ['name', 'email', 'phone', 'optional']
+  const TOTAL_STEPS = steps.length
   const [step, setStep] = useState(0)
   const [direction, setDirection] = useState(1)
   const [values, setValues] = useState({
+    classDate: '',
     name: '',
     email: '',
     phone: '',
     business: '',
     role: '',
     participants: '1',
+    hearAbout: '',
     message: '',
   })
   const activeInputRef = useRef(null)
@@ -44,6 +57,8 @@ export default function RegistrationForm({ locale = 'en' }) {
   // first result, but still evaluates the impure call each time); the
   // function form only ever runs once, on mount.
   const [startedAt] = useState(() => Date.now())
+
+  const currentStepKey = steps[step]
 
   function update(field, value) {
     setValues((v) => ({ ...v, [field]: value }))
@@ -66,14 +81,15 @@ export default function RegistrationForm({ locale = 'en' }) {
     goNext()
   }
 
-  // Steps 0-2's inputs each stop Enter themselves (above) before it can
-  // reach the browser's native "Enter submits the form" behavior. Step 4's
-  // fields don't — nothing there needs Enter to *do* anything, but without
-  // a handler the browser still submits the whole form the instant Enter
-  // is pressed in the business/role inputs, mid-fill, well before the user
-  // meant to. This is the backstop for every input that isn't one of the
-  // per-step Enter handlers above: newlines in the message textarea and
-  // clicking the actual submit button both still work as normal.
+  // Steps other than the last one stop Enter themselves (above) before it
+  // can reach the browser's native "Enter submits the form" behavior. The
+  // final, bundled step's fields don't — nothing there needs Enter to *do*
+  // anything, but without a handler the browser still submits the whole
+  // form the instant Enter is pressed in the business/role inputs, mid-fill,
+  // well before the user meant to. This is the backstop for every input
+  // that isn't one of the per-step Enter handlers above: newlines in the
+  // message textarea and clicking the actual submit button both still work
+  // as normal.
   function handleFormKeyDown(e) {
     if (e.key !== 'Enter') return
     if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'BUTTON') return
@@ -174,7 +190,34 @@ export default function RegistrationForm({ locale = 'en' }) {
             exit={{ opacity: 0, x: direction * -28 }}
             transition={{ duration: 0.32, ease: EASE }}
           >
-            {step === 0 && (
+            {currentStepKey === 'classDate' && (
+              <div>
+                <label className={labelClass} htmlFor="classDate">
+                  {dict.workshop.formClassDate}
+                </label>
+                <select
+                  ref={activeInputRef}
+                  id="classDate"
+                  required
+                  autoFocus
+                  value={values.classDate}
+                  onChange={(e) => update('classDate', e.target.value)}
+                  className={inputClass}
+                >
+                  <option value="" disabled>
+                    {dict.workshop.formClassDatePick}
+                  </option>
+                  {classDates.map((d) => (
+                    <option key={d.id} value={d.date}>
+                      {formatClassDate(d.date, dict.locale.dateLocale)}
+                      {d.label ? ` — ${d.label}` : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {currentStepKey === 'name' && (
               <div>
                 <label className={labelClass} htmlFor="name">
                   {dict.workshop.formName}
@@ -193,7 +236,7 @@ export default function RegistrationForm({ locale = 'en' }) {
               </div>
             )}
 
-            {step === 1 && (
+            {currentStepKey === 'email' && (
               <div>
                 <label className={labelClass} htmlFor="email">
                   {dict.workshop.formEmail}
@@ -214,7 +257,7 @@ export default function RegistrationForm({ locale = 'en' }) {
               </div>
             )}
 
-            {step === 2 && (
+            {currentStepKey === 'phone' && (
               <div>
                 <label className={labelClass} htmlFor="phone">
                   {dict.workshop.formPhone}
@@ -235,7 +278,7 @@ export default function RegistrationForm({ locale = 'en' }) {
               </div>
             )}
 
-            {step === 3 && (
+            {currentStepKey === 'optional' && (
               <div className="space-y-4">
                 <p className="text-xs text-muted dark:text-neutral-400">{dict.workshop.formOptionalHint}</p>
                 <div>
@@ -275,6 +318,25 @@ export default function RegistrationForm({ locale = 'en' }) {
                     <option value="2">{dict.workshop.formParticipants2}</option>
                     <option value="3-5">{dict.workshop.formParticipants3to5}</option>
                     <option value="5+">{dict.workshop.formParticipants5plus}</option>
+                  </select>
+                </div>
+                <div>
+                  <label className={labelClass} htmlFor="hearAbout">
+                    {dict.workshop.formHearAbout}
+                  </label>
+                  <select
+                    id="hearAbout"
+                    value={values.hearAbout}
+                    onChange={(e) => update('hearAbout', e.target.value)}
+                    className={inputClass}
+                  >
+                    <option value="">{dict.workshop.formHearAboutPick}</option>
+                    <option value="facebook">{dict.workshop.formHearAboutFacebook}</option>
+                    <option value="instagram">{dict.workshop.formHearAboutInstagram}</option>
+                    <option value="tiktok">{dict.workshop.formHearAboutTiktok}</option>
+                    <option value="referral">{dict.workshop.formHearAboutReferral}</option>
+                    <option value="search">{dict.workshop.formHearAboutSearch}</option>
+                    <option value="other">{dict.workshop.formHearAboutOther}</option>
                   </select>
                 </div>
                 <div>

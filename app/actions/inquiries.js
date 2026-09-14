@@ -7,13 +7,13 @@ import { clientIp } from '../../lib/clientIp'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-// A real visitor moves through 4 steps (mount, then at least 3 clicks to
-// reach submit) — even with browser autofill doing the typing, that's not
-// physically doable in under this long. Anything faster skipped the UI
+// A real visitor moves through several steps (mount, then at least 3 clicks
+// to reach submit) — even with browser autofill doing the typing, that's
+// not physically doable in under this long. Anything faster skipped the UI
 // entirely, i.e. a script posting straight at the action.
 const MIN_FILL_MS = 600
 
-const MAX_LENGTHS = { name: 200, email: 200, phone: 60, business: 200, role: 120, message: 4000 }
+const MAX_LENGTHS = { name: 200, email: 200, phone: 60, business: 200, role: 120, message: 4000, classDate: 20, hearAbout: 20 }
 
 // Public — reachable from the unauthenticated /workshop registration form,
 // so it validates its own input rather than trusting the client, and
@@ -59,6 +59,8 @@ export async function submitInquiryAction(prevState, formData) {
       business: get('business').slice(0, MAX_LENGTHS.business),
       role: get('role').slice(0, MAX_LENGTHS.role),
       participants: get('participants'),
+      classDate: get('classDate').slice(0, MAX_LENGTHS.classDate),
+      hearAbout: get('hearAbout').slice(0, MAX_LENGTHS.hearAbout),
       message: get('message').slice(0, MAX_LENGTHS.message),
     })
   } catch (err) {
