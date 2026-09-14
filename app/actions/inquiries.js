@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { addInquiry, deleteInquiry, setInquiryStatus } from '../../lib/content/inquiries'
+import { getClassDates } from '../../lib/content/classDates'
 import { checkSubmissionLimit, recordSubmission } from '../../lib/submissionLimits'
 import { clientIp } from '../../lib/clientIp'
 
@@ -51,6 +52,19 @@ export async function submitInquiryAction(prevState, formData) {
   if (!email || !EMAIL_RE.test(email)) return { error: 'Please enter a valid email address.' }
   if (!phone) return { error: 'Please enter your phone number.' }
 
+  const classDate = get('classDate').slice(0, MAX_LENGTHS.classDate)
+  if (classDate) {
+    // The registration form only ever offers 'upcoming' dates as options,
+    // but that's a client-side filter — re-checked here since nothing
+    // stops a request from naming an in-progress or completed class
+    // directly. Missing/legacy status is treated as upcoming (open),
+    // same fallback used everywhere else a class's status is shown.
+    const matchedClass = (await getClassDates()).find((d) => d.date === classDate)
+    if (matchedClass && matchedClass.status && matchedClass.status !== 'upcoming') {
+      return { error: 'That class is no longer open for registration. Please choose another date.' }
+    }
+  }
+
   try {
     await addInquiry({
       name,
@@ -59,7 +73,7 @@ export async function submitInquiryAction(prevState, formData) {
       business: get('business').slice(0, MAX_LENGTHS.business),
       role: get('role').slice(0, MAX_LENGTHS.role),
       participants: get('participants'),
-      classDate: get('classDate').slice(0, MAX_LENGTHS.classDate),
+      classDate,
       hearAbout: get('hearAbout').slice(0, MAX_LENGTHS.hearAbout),
       message: get('message').slice(0, MAX_LENGTHS.message),
     })

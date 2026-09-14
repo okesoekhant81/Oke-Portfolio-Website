@@ -55,6 +55,14 @@ export default async function WorkshopPage() {
     .filter((d) => d.status !== 'completed' && d.date !== inProgressClass?.date)
     .sort((a, b) => a.date.localeCompare(b.date))[0]
 
+  // Only 'upcoming' classes are choosable in the registration form — once
+  // a class is in progress or completed, it's not something a new
+  // registration should be able to join through this form, no matter how
+  // many seats a headcount would still say are free. Missing/legacy
+  // status is treated as upcoming (open), matching the fallback used
+  // everywhere else a class's status is displayed.
+  const registrableClassDates = classDates.filter((d) => !d.status || d.status === 'upcoming')
+
   function formatClassDate(dateStr) {
     const d = new Date(`${dateStr}T00:00:00`)
     if (Number.isNaN(d.getTime())) return dateStr
@@ -204,7 +212,7 @@ export default async function WorkshopPage() {
             </h2>
             <p className="mt-2 text-sm text-muted dark:text-neutral-400">{content.ctaBody}</p>
             <div className="mt-6">
-              <RegistrationForm locale={locale} classDates={classDates} />
+              <RegistrationForm locale={locale} classDates={registrableClassDates} />
             </div>
           </div>
         </Reveal>
