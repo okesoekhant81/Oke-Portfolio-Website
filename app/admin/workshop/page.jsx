@@ -11,7 +11,7 @@ export default async function WorkshopAdminPage() {
     <main className="min-h-screen bg-neutral-50">
       <AdminNav active="/admin/workshop" />
       <div className="mx-auto max-w-3xl px-6 py-10">
-        <h1 className="text-2xl font-bold text-ink">Workshop page</h1>
+        <h1 className="font-display text-2xl font-bold italic text-brand">Workshop page</h1>
         <p className="mt-1 text-sm text-neutral-500">
           Edits the dedicated <code className="rounded bg-neutral-200 px-1">/workshop</code> page — cover photo,
           intro, course outline, pricing, and the registration form&rsquo;s heading and body. Wrap words in{' '}

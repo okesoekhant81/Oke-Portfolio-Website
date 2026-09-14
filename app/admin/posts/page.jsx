@@ -17,7 +17,7 @@ export default async function PostsAdminPage() {
           <h1 className="font-display text-2xl font-bold italic text-brand">Articles</h1>
           <Link
             href="/admin/posts/new"
-            className="rounded-full bg-brand px-5 py-2 text-xs font-medium text-white transition-opacity hover:opacity-90"
+            className="rounded-md bg-brand px-5 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
           >
             New article
           </Link>
