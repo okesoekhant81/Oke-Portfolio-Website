@@ -8,6 +8,7 @@ import RichText from '../../components/RichText'
 import WorkshopOutline from '../../components/WorkshopOutline'
 import { getClassDates } from '../../lib/content/classDates'
 import { getHomepageContent } from '../../lib/content/homepage'
+import { getStudents } from '../../lib/content/students'
 import { getWorkshopContent } from '../../lib/content/workshop'
 import { getLocale } from '../../lib/i18n'
 import { localizeHomepageContent, localizeWorkshopContent } from '../../lib/localizeContent'
@@ -35,15 +36,30 @@ export async function generateMetadata() {
 }
 
 export default async function WorkshopPage() {
-  const [rawContent, rawHomepage, locale, classDates] = await Promise.all([
+  const [rawContent, rawHomepage, locale, classDates, students] = await Promise.all([
     getWorkshopContent(),
     getHomepageContent(),
     getLocale(),
     getClassDates(),
+    getStudents(),
   ])
   const dict = getDictionary(locale)
   const content = localizeWorkshopContent(rawContent, locale)
   const homepage = localizeHomepageContent(rawHomepage, locale)
+
+  const inProgressClass = classDates.find((d) => d.status === 'in-progress')
+  const inProgressCount = inProgressClass
+    ? students.filter((s) => s.classDate === inProgressClass.date).length
+    : 0
+  const nextUpcoming = classDates
+    .filter((d) => d.status !== 'completed' && d.date !== inProgressClass?.date)
+    .sort((a, b) => a.date.localeCompare(b.date))[0]
+
+  function formatClassDate(dateStr) {
+    const d = new Date(`${dateStr}T00:00:00`)
+    if (Number.isNaN(d.getTime())) return dateStr
+    return d.toLocaleDateString(dict.locale.dateLocale, { year: 'numeric', month: 'long', day: 'numeric' })
+  }
 
   const courseJsonLd = {
     '@context': 'https://schema.org',
@@ -104,6 +120,33 @@ export default async function WorkshopPage() {
             className="text-sm leading-relaxed text-ink sm:text-base dark:text-neutral-100"
           />
         </Reveal>
+
+        {(inProgressClass || nextUpcoming) && (
+          <Reveal delay={0.12}>
+            <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {inProgressClass && (
+                <div className="rounded-xl border border-brand/30 bg-brand/5 p-4 dark:border-brand/40 dark:bg-brand/10">
+                  <p className="flex items-center gap-1.5 text-xs font-semibold text-brand">
+                    <span className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-brand" aria-hidden="true" />
+                    {dict.workshop.cohortActiveLabel}
+                  </p>
+                  <p className="mt-1 text-sm text-ink dark:text-neutral-100">
+                    <span className="font-bold">{inProgressCount}</span> {dict.workshop.cohortActiveBody}
+                  </p>
+                </div>
+              )}
+              {nextUpcoming && (
+                <div className="rounded-xl border border-neutral-200 p-4 dark:border-neutral-800">
+                  <p className="text-xs font-semibold text-muted dark:text-neutral-400">{dict.workshop.nextCohortLabel}</p>
+                  <p className="mt-1 text-sm font-semibold text-ink dark:text-neutral-100">
+                    {formatClassDate(nextUpcoming.date)}
+                    {nextUpcoming.label ? ` — ${nextUpcoming.label}` : ''}
+                  </p>
+                </div>
+              )}
+            </div>
+          </Reveal>
+        )}
 
         <Reveal delay={0.15}>
           <div className="mt-8 grid grid-cols-1 gap-4 rounded-xl border border-neutral-200 p-5 dark:border-neutral-800 sm:grid-cols-2 lg:grid-cols-4">
