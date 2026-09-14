@@ -3,12 +3,19 @@ import AdminNav from '../../components/admin/AdminNav'
 import AnalyticsPanel from '../../components/admin/AnalyticsPanel'
 import { isBlobConfigured } from '../../lib/blobStore'
 import { getAnalytics, getPostLikes } from '../../lib/content/analytics'
+import { getInquiries } from '../../lib/content/inquiries'
 import { getPosts } from '../../lib/content/posts'
 
 export const dynamic = 'force-dynamic'
 
 export default async function AdminDashboard() {
-  const [{ postViews, daily }, postLikes, posts] = await Promise.all([getAnalytics(), getPostLikes(), getPosts()])
+  const [{ postViews, daily }, postLikes, posts, inquiries] = await Promise.all([
+    getAnalytics(),
+    getPostLikes(),
+    getPosts(),
+    getInquiries(),
+  ])
+  const newInquiries = inquiries.filter((inquiry) => inquiry.status === 'new').length
 
   return (
     <main className="min-h-screen bg-neutral-50">
@@ -37,6 +44,27 @@ export default async function AdminDashboard() {
           >
             <h2 className="font-display text-lg font-bold italic text-brand">Articles</h2>
             <p className="mt-1 text-sm text-neutral-500">Write, edit, and publish blog posts.</p>
+          </Link>
+          <Link
+            href="/admin/workshop"
+            className="block rounded-xl border border-neutral-200 bg-white p-6 transition-shadow hover:shadow-md"
+          >
+            <h2 className="font-display text-lg font-bold italic text-ink">Workshop page</h2>
+            <p className="mt-1 text-sm text-neutral-500">Cover photo, intro, course outline, and registration CTA.</p>
+          </Link>
+          <Link
+            href="/admin/inquiries"
+            className="block rounded-xl border border-neutral-200 bg-white p-6 transition-shadow hover:shadow-md"
+          >
+            <div className="flex items-center gap-2">
+              <h2 className="font-display text-lg font-bold italic text-brand">Inquiries</h2>
+              {newInquiries > 0 && (
+                <span className="rounded-full bg-brand px-2 py-0.5 text-xs font-semibold text-white">
+                  {newInquiries} new
+                </span>
+              )}
+            </div>
+            <p className="mt-1 text-sm text-neutral-500">Workshop registrations submitted by visitors.</p>
           </Link>
         </div>
 
