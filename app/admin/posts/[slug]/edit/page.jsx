@@ -5,7 +5,7 @@ import { getPost } from '../../../../../lib/content/posts'
 
 export default async function EditPostPage({ params }) {
   const { slug } = await params
-  const post = await getPost(slug)
+  const post = await getPost(slug, { includeUnpublished: true })
 
   if (!post) notFound()
 

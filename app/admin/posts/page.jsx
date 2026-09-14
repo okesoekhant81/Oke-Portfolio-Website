@@ -6,7 +6,7 @@ import { getPosts } from '../../../lib/content/posts'
 export const dynamic = 'force-dynamic'
 
 export default async function PostsAdminPage() {
-  const posts = await getPosts()
+  const posts = await getPosts({ includeUnpublished: true })
 
   return (
     <main className="min-h-screen bg-neutral-50">

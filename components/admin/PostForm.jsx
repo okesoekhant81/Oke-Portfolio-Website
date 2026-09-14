@@ -103,16 +103,34 @@ export default function PostForm({ post }) {
         />
       </div>
 
-      <div>
-        <label className="block text-xs font-medium text-neutral-600">Published date</label>
-        <input
-          type="date"
-          name="publishedAt"
-          defaultValue={toDateInputValue(post?.publishedAt)}
-          readOnly={locked}
-          tabIndex={locked ? -1 : 0}
-          className={fieldClass('sm:w-auto')}
-        />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <label className="block text-xs font-medium text-neutral-600">Status</label>
+          <select
+            name="status"
+            defaultValue={post?.status === 'draft' ? 'draft' : 'published'}
+            disabled={locked}
+            tabIndex={locked ? -1 : 0}
+            className={fieldClass()}
+          >
+            <option value="published">Published</option>
+            <option value="draft">Draft</option>
+          </select>
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-neutral-600">
+            Published date{' '}
+            <span className="font-normal text-neutral-400">(a future date + Published = scheduled)</span>
+          </label>
+          <input
+            type="date"
+            name="publishedAt"
+            defaultValue={toDateInputValue(post?.publishedAt)}
+            readOnly={locked}
+            tabIndex={locked ? -1 : 0}
+            className={fieldClass()}
+          />
+        </div>
       </div>
 
       <ImageField label="Cover image" name="coverImageUrl" defaultValue={post?.coverImageUrl} />

@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { savePost, deletePost } from '../../lib/content/posts'
 import { slugify } from '../../lib/slugify'
+import { logActivity } from '../../lib/activityLog'
 
 export async function savePostAction(prevState, formData) {
   const get = (name) => formData.get(name)?.toString() ?? ''
@@ -29,6 +30,7 @@ export async function savePostAction(prevState, formData) {
     body: get('body'),
     bodyMy: get('bodyMy'),
     tags,
+    status: get('status') === 'draft' ? 'draft' : 'published',
   }
 
   try {
@@ -37,6 +39,7 @@ export async function savePostAction(prevState, formData) {
     return { error: err.message || 'Could not save. Please try again.' }
   }
 
+  await logActivity(previousSlug ? 'Article updated' : 'Article created', post.title)
   revalidatePath('/blog')
   revalidatePath(`/blog/${slug}`)
   if (previousSlug && previousSlug !== slug) revalidatePath(`/blog/${previousSlug}`)
@@ -52,6 +55,7 @@ export async function deletePostAction(formData) {
 
   await deletePost(slug)
 
+  await logActivity('Article deleted', slug)
   revalidatePath('/blog')
   revalidatePath(`/blog/${slug}`)
   revalidatePath('/admin/posts')
