@@ -5,6 +5,7 @@ export default function AdminNav({ active }) {
   const items = [
     { href: '/admin', label: 'Dashboard' },
     { href: '/admin/homepage', label: 'Homepage' },
+    { href: '/admin/about', label: 'About' },
     { href: '/admin/workshop', label: 'Workshop' },
     { href: '/admin/classes', label: 'Classes' },
     { href: '/admin/testimonials', label: 'Testimonials' },

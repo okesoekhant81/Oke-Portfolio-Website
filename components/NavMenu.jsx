@@ -18,7 +18,7 @@ export default function NavMenu({ locale = 'en' }) {
     { href: '/', label: dict.nav.home },
     { href: '/#services', label: dict.nav.services },
     { href: '/#work', label: dict.nav.work },
-    { href: '/#about', label: dict.nav.about },
+    { href: '/about', label: dict.nav.about },
     { href: '/blog', label: dict.nav.articles },
     { href: '/#contact', label: dict.nav.contact },
   ]
