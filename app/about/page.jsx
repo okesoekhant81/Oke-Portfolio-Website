@@ -8,7 +8,7 @@ import { getHomepageContent } from '../../lib/content/homepage'
 import { getLocale } from '../../lib/i18n'
 import { localizeAboutContent, localizeHomepageContent } from '../../lib/localizeContent'
 import { getDictionary, headingGap, headingLeading, italicIfLatin } from '../../lib/dictionaries'
-import { SITE_URL } from '../../lib/site'
+import { SITE_URL, SITE_NAME, SOCIAL_LINKS } from '../../lib/site'
 
 export async function generateMetadata() {
   const [rawContent, locale] = await Promise.all([getAboutContent(), getLocale()])
@@ -36,8 +36,29 @@ export default async function AboutPage() {
   const homepage = localizeHomepageContent(rawHomepage, locale)
   const skills = content.skills.split(',').map((s) => s.trim()).filter(Boolean)
 
+  // A richer Person entity than the homepage's — worksFor/knowsAbout draw
+  // straight from the same admin-managed experience/skills shown on the
+  // page, so search engines and AI answer engines have a structured
+  // version of the same facts, not just the prose.
+  const personJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: SITE_NAME,
+    url: `${SITE_URL}/about`,
+    jobTitle: content.roleLine,
+    description: content.intro.split('\n')[0],
+    ...(content.experience[0]?.company && {
+      worksFor: { '@type': 'Organization', name: content.experience[0].company },
+    }),
+    ...(skills.length > 0 && { knowsAbout: skills }),
+    sameAs: SOCIAL_LINKS,
+    mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/about` },
+    inLanguage: locale,
+  }
+
   return (
     <main className="dark:bg-ink">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }} />
       <NavMenu locale={locale} />
       <div className="mx-auto max-w-2xl px-6 pt-8 pb-14 sm:px-12 sm:pt-10 sm:pb-16 md:px-16 lg:max-w-3xl">
         <Link

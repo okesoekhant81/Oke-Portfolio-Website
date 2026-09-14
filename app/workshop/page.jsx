@@ -93,11 +93,27 @@ export default async function WorkshopPage() {
     }),
   }
 
+  // FAQPage is one of the schema types search engines and AI answer
+  // engines lift Q&A pairs from directly — skipped entirely (not an
+  // empty mainEntity array) when no FAQ has been filled in yet, same
+  // as hasCourseInstance above.
+  const answeredFaqs = content.faqs.filter((f) => f.question)
+  const faqJsonLd = answeredFaqs.length > 0 && {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: answeredFaqs.map((f) => ({
+      '@type': 'Question',
+      name: f.question,
+      acceptedAnswer: { '@type': 'Answer', text: f.answer },
+    })),
+  }
+
   return (
     <main className="dark:bg-ink">
       <NavMenu locale={locale} />
       <div className="mx-auto max-w-2xl px-6 pt-8 pb-14 sm:px-12 sm:pt-10 sm:pb-16 md:px-16 lg:max-w-3xl">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(courseJsonLd) }} />
+        {faqJsonLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />}
 
         <Link
           href="/"
