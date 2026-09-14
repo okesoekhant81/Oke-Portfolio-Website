@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { SESSION_COOKIE, SESSION_MAX_AGE_MS, createSessionToken } from '../../lib/auth'
 import { checkLockout, recordFailedAttempt, clearFailedAttempts } from '../../lib/loginAttempts'
 import { clientIp } from '../../lib/clientIp'
+import { logActivity } from '../../lib/activityLog'
 
 export async function login(prevState, formData) {
   const password = formData.get('password')
@@ -41,6 +42,7 @@ export async function login(prevState, formData) {
     maxAge: SESSION_MAX_AGE_MS / 1000,
   })
 
+  await logActivity('Admin login', ip)
   redirect('/admin')
 }
 

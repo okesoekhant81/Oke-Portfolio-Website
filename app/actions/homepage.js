@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { saveHomepageContent } from '../../lib/content/homepage'
+import { logActivity } from '../../lib/activityLog'
 
 export async function saveHomepage(prevState, formData) {
   const get = (name) => formData.get(name)?.toString() ?? ''
@@ -101,6 +102,7 @@ export async function saveHomepage(prevState, formData) {
     return { error: err.message || 'Could not save. Please try again.' }
   }
 
+  await logActivity('Homepage content saved')
   revalidatePath('/')
   revalidatePath('/admin/homepage')
 

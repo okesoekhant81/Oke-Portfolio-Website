@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { saveAboutContent } from '../../lib/content/about'
+import { logActivity } from '../../lib/activityLog'
 
 export async function saveAbout(prevState, formData) {
   const get = (name) => formData.get(name)?.toString() ?? ''
@@ -47,6 +48,7 @@ export async function saveAbout(prevState, formData) {
     return { error: err.message || 'Could not save. Please try again.' }
   }
 
+  await logActivity('About page saved')
   revalidatePath('/about')
   revalidatePath('/admin/about')
 

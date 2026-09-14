@@ -4,6 +4,7 @@ import { useActionState, useState, useTransition } from 'react'
 import {
   addTestimonialAction,
   updateTestimonialAction,
+  approveTestimonialAction,
   deleteTestimonialAction,
   reorderTestimonialAction,
 } from '../../app/actions/testimonials'
@@ -67,13 +68,13 @@ function ReorderButtons({ id, disabled }) {
   )
 }
 
-function DeleteButton({ id, name }) {
+function DeleteButton({ id, name, label = 'Delete', labelIng = 'Deleting', confirmText }) {
   const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState(false)
   const [, startTransition] = useTransition()
 
   function handleDelete() {
-    if (!confirm(`Delete the testimonial from "${name}"?`)) return
+    if (!confirm(confirmText || `Delete the testimonial from "${name}"?`)) return
     setDeleting(true)
     setError(false)
     const formData = new FormData()
@@ -97,10 +98,70 @@ function DeleteButton({ id, name }) {
         disabled={deleting}
         className="text-xs text-neutral-400 hover:text-red-600 disabled:opacity-60"
       >
-        {deleting ? 'Deleting…' : 'Delete'}
+        {deleting ? `${labelIng}…` : label}
       </button>
-      {error && <span className="text-xs text-red-600">Couldn&rsquo;t delete</span>}
+      {error && <span className="text-xs text-red-600">Couldn&rsquo;t {label.toLowerCase()}</span>}
     </span>
+  )
+}
+
+function ApproveButton({ id }) {
+  const [approving, setApproving] = useState(false)
+  const [error, setError] = useState(false)
+  const [, startTransition] = useTransition()
+
+  function handleApprove() {
+    setApproving(true)
+    setError(false)
+    const formData = new FormData()
+    formData.set('id', id)
+    startTransition(async () => {
+      try {
+        await approveTestimonialAction(formData)
+      } catch {
+        setError(true)
+        setApproving(false)
+      }
+    })
+  }
+
+  return (
+    <span className="flex flex-col items-end gap-1">
+      <button
+        type="button"
+        onClick={handleApprove}
+        disabled={approving}
+        className="rounded-md bg-brand px-3 py-1 text-xs font-medium text-white transition-opacity disabled:opacity-60"
+      >
+        {approving ? 'Approving…' : 'Approve'}
+      </button>
+      {error && <span className="text-xs text-red-600">Couldn&rsquo;t approve</span>}
+    </span>
+  )
+}
+
+function PendingItem({ testimonial }) {
+  return (
+    <li className="flex items-start gap-3 rounded-lg border border-brand/30 bg-brand/5 p-3">
+      <div className="min-w-0 flex-1">
+        <StarRating value={testimonial.rating ?? 5} size={14} />
+        <p className="mt-1 text-sm font-semibold text-ink">
+          {testimonial.name}
+          {testimonial.role && <span className="font-normal text-neutral-400"> — {testimonial.role}</span>}
+        </p>
+        <p className="mt-1 text-sm text-neutral-600">&ldquo;{testimonial.quote}&rdquo;</p>
+      </div>
+      <div className="flex shrink-0 flex-col items-end gap-1.5">
+        <ApproveButton id={testimonial.id} />
+        <DeleteButton
+          id={testimonial.id}
+          name={testimonial.name}
+          label="Reject"
+          labelIng="Rejecting"
+          confirmText={`Reject the testimonial from "${testimonial.name}"? This can't be undone.`}
+        />
+      </div>
+    </li>
   )
 }
 
@@ -197,9 +258,28 @@ export default function TestimonialsManager({ testimonials }) {
   const [state, formAction, pending] = useActionState(addTestimonialAction, null)
   const [formLocale, setFormLocale] = useState('en')
 
+  const pendingReview = testimonials.filter((t) => t.status === 'pending')
+  const approved = testimonials.filter((t) => t.status !== 'pending')
+
   return (
     <FormLocaleContext.Provider value={formLocale}>
       <LockContext.Provider value={false}>
+        {pendingReview.length > 0 && (
+          <div className="mt-6 rounded-xl border border-brand/40 bg-white p-6">
+            <p className="font-display text-base font-bold italic text-brand">
+              Pending review · {pendingReview.length}
+            </p>
+            <p className="mt-1 text-xs text-neutral-500">
+              Submitted through the public "Share your experience" form — invisible on the site until approved.
+            </p>
+            <ul className="mt-4 space-y-3">
+              {pendingReview.map((t) => (
+                <PendingItem key={t.id} testimonial={t} />
+              ))}
+            </ul>
+          </div>
+        )}
+
         <div className="mt-6 rounded-xl border border-neutral-200 bg-white p-6">
           <p className="font-display text-base font-bold italic text-brand">Testimonials</p>
           <p className="mt-1 text-xs text-neutral-500">
@@ -210,9 +290,9 @@ export default function TestimonialsManager({ testimonials }) {
             <LanguageTabs value={formLocale} onChange={setFormLocale} />
           </div>
 
-          {testimonials.length > 0 && (
+          {approved.length > 0 && (
             <ul className="mt-4 space-y-3">
-              {testimonials.map((t, i) => (
+              {approved.map((t, i) => (
                 <TestimonialItem key={t.id} testimonial={t} isFirst={i === 0} />
               ))}
             </ul>

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { saveWorkshopContent } from '../../lib/content/workshop'
+import { logActivity } from '../../lib/activityLog'
 
 export async function saveWorkshop(prevState, formData) {
   const get = (name) => formData.get(name)?.toString() ?? ''
@@ -69,6 +70,7 @@ export async function saveWorkshop(prevState, formData) {
     return { error: err.message || 'Could not save. Please try again.' }
   }
 
+  await logActivity('Workshop content saved')
   revalidatePath('/workshop')
   revalidatePath('/admin/workshop')
 

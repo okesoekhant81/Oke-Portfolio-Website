@@ -10,6 +10,7 @@ import {
   setAttendanceForClass,
 } from '../../lib/content/students'
 import { getInquiry, markInquiryConverted } from '../../lib/content/inquiries'
+import { logActivity } from '../../lib/activityLog'
 
 const MAX_LENGTHS = { name: 200, email: 200, phone: 60, business: 200, role: 120, paymentNote: 500, note: 500 }
 
@@ -37,6 +38,7 @@ export async function addStudentAction(prevState, formData) {
     return { error: err.message || 'Could not add. Please try again.' }
   }
 
+  await logActivity('Student added', name)
   revalidatePath('/admin/students')
   return { success: true, savedAt: Date.now() }
 }
@@ -68,6 +70,7 @@ export async function convertInquiryToStudentAction(formData) {
     return { error: err.message || 'Could not convert. Please try again.' }
   }
 
+  await logActivity('Inquiry converted to student', inquiry.name)
   revalidatePath('/admin/students')
   revalidatePath('/admin/inquiries')
   return { success: true, studentId: student.id }
@@ -92,6 +95,7 @@ export async function updateStudentProfileAction(formData) {
     business: get('business').slice(0, MAX_LENGTHS.business),
     role: get('role').slice(0, MAX_LENGTHS.role),
   })
+  await logActivity('Student profile updated', name)
   revalidatePath('/admin/students')
   revalidatePath('/admin/classes/[id]', 'page')
   return { success: true }
@@ -107,11 +111,13 @@ export async function updateStudentClassAction(formData) {
 export async function updateStudentPaymentAction(formData) {
   const id = formData.get('id')?.toString()
   if (!id) return
+  const amountPaid = clampAmount(formData.get('amountPaid'))
   await updateStudent(id, {
     paymentStatus: formData.get('paymentStatus')?.toString() || 'unpaid',
     paymentNote: formData.get('paymentNote')?.toString().trim().slice(0, MAX_LENGTHS.paymentNote) ?? '',
-    amountPaid: clampAmount(formData.get('amountPaid')),
+    amountPaid,
   })
+  await logActivity('Student payment updated', `${id}: ${amountPaid} MMK`)
   revalidatePath('/admin/students')
   revalidatePath('/admin/classes/[id]', 'page')
 }
@@ -120,6 +126,7 @@ export async function deleteStudentAction(formData) {
   const id = formData.get('id')?.toString()
   if (!id) return
   await deleteStudent(id)
+  await logActivity('Student deleted', id)
   revalidatePath('/admin/students')
 }
 

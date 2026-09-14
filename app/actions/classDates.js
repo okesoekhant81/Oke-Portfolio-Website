@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { addClassDate, updateClassDate, deleteClassDate } from '../../lib/content/classDates'
+import { logActivity } from '../../lib/activityLog'
 
 function clampFee(value) {
   const n = Number(value)
@@ -20,6 +21,7 @@ export async function addClassDateAction(prevState, formData) {
     return { error: err.message || 'Could not add. Please try again.' }
   }
 
+  await logActivity('Class added', date)
   revalidatePath('/admin/classes')
   revalidatePath('/workshop')
   return { success: true, savedAt: Date.now() }
@@ -30,6 +32,7 @@ export async function deleteClassDateAction(formData) {
   if (!id) return
 
   await deleteClassDate(id)
+  await logActivity('Class deleted', id)
   revalidatePath('/admin/classes')
   revalidatePath('/workshop')
 }
@@ -42,6 +45,7 @@ export async function updateClassDateStatusAction(formData) {
   if (!id || !VALID_STATUSES.includes(status)) return
 
   await updateClassDate(id, { status })
+  await logActivity('Class status changed', `${id} → ${status}`)
   revalidatePath('/admin/classes')
   revalidatePath('/admin/classes/[id]', 'page')
   revalidatePath('/admin/students')

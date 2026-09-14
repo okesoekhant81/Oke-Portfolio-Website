@@ -6,6 +6,7 @@ import { getClassDates } from '../../lib/content/classDates'
 import { checkSubmissionLimit, recordSubmission } from '../../lib/submissionLimits'
 import { clientIp } from '../../lib/clientIp'
 import { notifyNewInquiry } from '../../lib/notify'
+import { logActivity } from '../../lib/activityLog'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -38,12 +39,12 @@ export async function submitInquiryAction(prevState, formData) {
   if (Number.isFinite(startedAt) && Date.now() - startedAt < MIN_FILL_MS) return { success: true }
 
   const ip = await clientIp()
-  const { limited, retryAfterSeconds } = await checkSubmissionLimit(ip)
+  const { limited, retryAfterSeconds } = await checkSubmissionLimit('inquiry-submissions', ip)
   if (limited) {
     const minutes = Math.ceil(retryAfterSeconds / 60)
     return { error: `Too many submissions. Please try again in ${minutes} minute${minutes === 1 ? '' : 's'}.` }
   }
-  await recordSubmission(ip)
+  await recordSubmission('inquiry-submissions', ip)
 
   const name = get('name').slice(0, MAX_LENGTHS.name)
   const email = get('email').slice(0, MAX_LENGTHS.email)
@@ -104,6 +105,7 @@ export async function deleteInquiryAction(formData) {
   if (!id) return
 
   await deleteInquiry(id)
+  await logActivity('Inquiry deleted', id)
   revalidatePath('/admin/inquiries')
 }
 
@@ -112,6 +114,7 @@ export async function bulkDeleteInquiriesAction(formData) {
   if (ids.length === 0) return
 
   await deleteInquiries(ids)
+  await logActivity('Inquiries bulk-deleted', `${ids.length} inquiries`)
   revalidatePath('/admin/inquiries')
 }
 

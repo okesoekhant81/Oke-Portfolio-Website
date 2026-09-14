@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Reveal from './Reveal'
 import RichText from './RichText'
 import SocialIcons from './SocialIcons'
+import NewsletterForm from './NewsletterForm'
 import { getDictionary, headingGap, headingLeading, italicIfLatin } from '../lib/dictionaries'
 
 export default function Contact({ line1, line2, body, cta, email, copyright, tagline, locale = 'en' }) {
@@ -25,6 +26,8 @@ export default function Contact({ line1, line2, body, cta, email, copyright, tag
         </a>
 
         <SocialIcons className="mt-8" />
+
+        <NewsletterForm locale={locale} />
 
         <p className="mt-6 text-xs text-muted dark:text-neutral-400">{copyright}</p>
         <p className={`mt-1 font-display text-xs font-bold text-muted dark:text-neutral-400 ${italicIfLatin(locale)}`}>{tagline}</p>
