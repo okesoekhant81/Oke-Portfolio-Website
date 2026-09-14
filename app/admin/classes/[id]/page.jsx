@@ -4,6 +4,8 @@ import AdminNav from '../../../../components/admin/AdminNav'
 import AddStudentToClassForm from '../../../../components/admin/AddStudentToClassForm'
 import ClassAttendanceSheet from '../../../../components/admin/ClassAttendanceSheet'
 import StudentRow from '../../../../components/admin/StudentRow'
+import PrintRosterButton from '../../../../components/admin/PrintRosterButton'
+import PrintableRoster from '../../../../components/admin/PrintableRoster'
 import { getClassDate, getClassDates } from '../../../../lib/content/classDates'
 import { getStudents } from '../../../../lib/content/students'
 
@@ -24,18 +26,22 @@ export default async function ClassDetailPage({ params }) {
 
   const students = allStudents.filter((s) => s.classDate === classInfo.date)
   const totalRevenue = students.reduce((sum, s) => sum + (Number(s.amountPaid) || 0), 0)
+  const classLabel = `${formatDate(classInfo.date)}${classInfo.label ? ` — ${classInfo.label}` : ''}`
 
   return (
-    <main className="min-h-screen bg-neutral-50">
-      <AdminNav active="/admin/classes" />
-      <div className="mx-auto max-w-4xl px-6 py-10">
-        <Link href="/admin/classes" className="text-xs text-brand hover:underline">
-          ← All classes
-        </Link>
-        <h1 className="mt-2 font-display text-2xl font-bold italic text-brand">
-          {formatDate(classInfo.date)}
-          {classInfo.label ? ` — ${classInfo.label}` : ''}
-        </h1>
+    <main className="min-h-screen bg-neutral-50 print:bg-white">
+      <div className="print:hidden">
+        <AdminNav active="/admin/classes" />
+      </div>
+      <PrintableRoster classLabel={classLabel} students={students} />
+      <div className="mx-auto max-w-4xl px-6 py-10 print:hidden">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <Link href="/admin/classes" className="text-xs text-brand hover:underline">
+            ← All classes
+          </Link>
+          <PrintRosterButton />
+        </div>
+        <h1 className="mt-2 font-display text-2xl font-bold italic text-brand">{classLabel}</h1>
 
         <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
           <div className="rounded-xl border border-neutral-200 bg-white p-4">

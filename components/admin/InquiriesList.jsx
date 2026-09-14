@@ -2,7 +2,13 @@
 
 import { useState, useTransition } from 'react'
 import InquiryStatusSelect from './InquiryStatusSelect'
-import { deleteInquiryAction } from '../../app/actions/inquiries'
+import { useSearchFilter, SearchBar, FilterSelect } from './SearchFilterBar'
+import { toCsv, downloadCsv } from '../../lib/csv'
+import {
+  deleteInquiryAction,
+  bulkDeleteInquiriesAction,
+  bulkSetInquiryStatusAction,
+} from '../../app/actions/inquiries'
 import { convertInquiryToStudentAction } from '../../app/actions/students'
 
 function DetailRow({ label, value }) {
@@ -30,6 +36,29 @@ const HEAR_ABOUT_LABELS = {
   other: 'Other',
 }
 
+const STATUS_OPTIONS = [
+  { value: 'new', label: 'New' },
+  { value: 'contacted', label: 'Contacted' },
+  { value: 'enrolled', label: 'Enrolled' },
+]
+
+function exportInquiries(inquiries) {
+  const csv = toCsv(inquiries, [
+    { label: 'Name', value: (i) => i.name },
+    { label: 'Email', value: (i) => i.email },
+    { label: 'Phone', value: (i) => i.phone },
+    { label: 'Business', value: (i) => i.business },
+    { label: 'Role', value: (i) => i.role },
+    { label: 'Class date', value: (i) => i.classDate },
+    { label: 'Participants', value: (i) => i.participants },
+    { label: 'Heard via', value: (i) => HEAR_ABOUT_LABELS[i.hearAbout] || i.hearAbout },
+    { label: 'Status', value: (i) => i.status },
+    { label: 'Submitted at', value: (i) => i.submittedAt },
+    { label: 'Message', value: (i) => i.message },
+  ])
+  downloadCsv(`inquiries-${new Date().toISOString().slice(0, 10)}.csv`, csv)
+}
+
 // Deleting used to be a plain form submit that waited on the full round
 // trip to Blob and the page refresh before anything visibly changed — with
 // no pending state in between, it was impossible to tell whether the click
@@ -42,7 +71,13 @@ export default function InquiriesList({ inquiries }) {
   const [deleteError, setDeleteError] = useState(null)
   const [convertingId, setConvertingId] = useState(null)
   const [convertError, setConvertError] = useState(null)
+  const [selected, setSelected] = useState(new Set())
+  const [bulkPending, startBulkTransition] = useTransition()
   const [, startTransition] = useTransition()
+
+  const { query, setQuery, activeFilters, setFilter, filtered } = useSearchFilter(items, {
+    searchKeys: ['name', 'email', 'phone', 'business'],
+  })
 
   function handleDelete(inquiry) {
     if (!confirm(`Delete the inquiry from "${inquiry.name}"? This can't be undone.`)) return
@@ -54,6 +89,11 @@ export default function InquiriesList({ inquiries }) {
       try {
         await deleteInquiryAction(formData)
         setItems((prev) => prev.filter((item) => item.id !== inquiry.id))
+        setSelected((prev) => {
+          const next = new Set(prev)
+          next.delete(inquiry.id)
+          return next
+        })
       } catch {
         setDeleteError(inquiry.id)
       } finally {
@@ -83,6 +123,48 @@ export default function InquiriesList({ inquiries }) {
     })
   }
 
+  function toggleSelected(id) {
+    setSelected((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  function toggleSelectAllVisible() {
+    setSelected((prev) => {
+      const visibleIds = filtered.map((i) => i.id)
+      const allSelected = visibleIds.length > 0 && visibleIds.every((id) => prev.has(id))
+      return allSelected ? new Set() : new Set(visibleIds)
+    })
+  }
+
+  function handleBulkDelete() {
+    if (!confirm(`Delete ${selected.size} inquir${selected.size === 1 ? 'y' : 'ies'}? This can't be undone.`)) return
+    const ids = [...selected]
+    const formData = new FormData()
+    ids.forEach((id) => formData.append('id', id))
+    startBulkTransition(async () => {
+      await bulkDeleteInquiriesAction(formData)
+      setItems((prev) => prev.filter((item) => !selected.has(item.id)))
+      setSelected(new Set())
+    })
+  }
+
+  function handleBulkStatus(status) {
+    if (!status) return
+    const ids = [...selected]
+    const formData = new FormData()
+    ids.forEach((id) => formData.append('id', id))
+    formData.set('status', status)
+    startBulkTransition(async () => {
+      await bulkSetInquiryStatusAction(formData)
+      setItems((prev) => prev.map((item) => (selected.has(item.id) ? { ...item, status } : item)))
+      setSelected(new Set())
+    })
+  }
+
   if (items.length === 0) {
     return (
       <p className="mt-8 text-sm text-neutral-500">
@@ -91,83 +173,145 @@ export default function InquiriesList({ inquiries }) {
     )
   }
 
+  const visibleIds = filtered.map((i) => i.id)
+  const allVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => selected.has(id))
+
   return (
-    <div className="mt-6 space-y-4">
-      {items.map((inquiry) => {
-        const isDeleting = deletingId === inquiry.id
-        return (
-          <div
-            key={inquiry.id}
-            className={`rounded-xl border border-neutral-200 bg-white p-5 transition-opacity duration-300 ${
-              isDeleting ? 'pointer-events-none opacity-40' : ''
-            }`}
-          >
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <p className="font-display text-base font-bold text-ink">{inquiry.name}</p>
-                <p className="text-xs text-neutral-400">
-                  {new Date(inquiry.submittedAt).toLocaleString(undefined, {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: 'numeric',
-                    minute: '2-digit',
-                  })}
-                </p>
-              </div>
-              <InquiryStatusSelect id={inquiry.id} status={inquiry.status} />
-            </div>
+    <div className="mt-6">
+      <div className="flex flex-wrap items-center gap-2">
+        <SearchBar value={query} onChange={setQuery} placeholder="Search name, email, phone…" />
+        <FilterSelect
+          value={activeFilters.status}
+          onChange={(v) => setFilter('status', v)}
+          options={STATUS_OPTIONS}
+          placeholder="All statuses"
+        />
+        <button
+          type="button"
+          onClick={() => exportInquiries(filtered)}
+          className="ml-auto rounded-md border border-neutral-300 px-3 py-2 text-sm text-neutral-600 hover:border-brand hover:text-brand"
+        >
+          Export CSV
+        </button>
+      </div>
 
-            <div className="mt-4 grid gap-3 sm:grid-cols-3">
-              <DetailRow label="Email" value={inquiry.email} />
-              <DetailRow label="Phone" value={inquiry.phone} />
-              <DetailRow label="Class date" value={inquiry.classDate ? formatClassDate(inquiry.classDate) : null} />
-              <DetailRow label="Business" value={inquiry.business} />
-              <DetailRow label="Role" value={inquiry.role} />
-              <DetailRow label="Participants" value={inquiry.participants} />
-              <DetailRow label="Heard via" value={HEAR_ABOUT_LABELS[inquiry.hearAbout] || inquiry.hearAbout} />
-            </div>
-
-            {inquiry.message && (
-              <div className="mt-3 border-t border-neutral-100 pt-3">
-                <p className="text-[10px] tracking-wide text-neutral-400 uppercase">Message</p>
-                <p className="mt-0.5 text-sm whitespace-pre-line text-ink">{inquiry.message}</p>
-              </div>
-            )}
-
-            <div className="mt-4 flex items-center justify-end gap-3 border-t border-neutral-100 pt-3">
-              {convertError === inquiry.id && (
-                <span className="text-xs text-red-600">Couldn&rsquo;t convert — try again.</span>
-              )}
-              {inquiry.studentId ? (
-                <a href="/admin/students" className="text-xs font-medium text-green-700 hover:underline">
-                  ✓ On roster
-                </a>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => handleConvert(inquiry)}
-                  disabled={convertingId === inquiry.id}
-                  className="text-xs font-medium text-brand hover:underline disabled:opacity-60"
-                >
-                  {convertingId === inquiry.id ? 'Converting…' : 'Convert to student'}
-                </button>
-              )}
-              {deleteError === inquiry.id && (
-                <span className="text-xs text-red-600">Couldn&rsquo;t delete — try again.</span>
-              )}
+      {filtered.length > 0 && (
+        <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
+          <label className="flex items-center gap-1.5 text-neutral-500">
+            <input type="checkbox" checked={allVisibleSelected} onChange={toggleSelectAllVisible} />
+            Select all ({filtered.length})
+          </label>
+          {selected.size > 0 && (
+            <div className="flex flex-wrap items-center gap-2 rounded-md border border-neutral-200 bg-white px-3 py-1.5">
+              <span className="text-xs text-neutral-500">{selected.size} selected</span>
+              <FilterSelect
+                value=""
+                onChange={handleBulkStatus}
+                options={STATUS_OPTIONS}
+                placeholder="Set status…"
+              />
               <button
                 type="button"
-                onClick={() => handleDelete(inquiry)}
-                disabled={isDeleting}
-                className="text-sm text-neutral-400 hover:text-red-600 disabled:hover:text-neutral-400"
+                onClick={handleBulkDelete}
+                disabled={bulkPending}
+                className="text-xs font-medium text-neutral-400 hover:text-red-600 disabled:opacity-60"
               >
-                {isDeleting ? 'Deleting…' : 'Delete'}
+                {bulkPending ? 'Working…' : 'Delete selected'}
               </button>
             </div>
-          </div>
-        )
-      })}
+          )}
+        </div>
+      )}
+
+      {filtered.length === 0 ? (
+        <p className="mt-6 text-sm text-neutral-500">No inquiries match your search.</p>
+      ) : (
+        <div className="mt-4 space-y-4">
+          {filtered.map((inquiry) => {
+            const isDeleting = deletingId === inquiry.id
+            return (
+              <div
+                key={inquiry.id}
+                className={`rounded-xl border border-neutral-200 bg-white p-5 transition-opacity duration-300 ${
+                  isDeleting ? 'pointer-events-none opacity-40' : ''
+                }`}
+              >
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    <input
+                      type="checkbox"
+                      checked={selected.has(inquiry.id)}
+                      onChange={() => toggleSelected(inquiry.id)}
+                      className="mt-1.5"
+                    />
+                    <div>
+                      <p className="font-display text-base font-bold text-ink">{inquiry.name}</p>
+                      <p className="text-xs text-neutral-400">
+                        {new Date(inquiry.submittedAt).toLocaleString(undefined, {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                          hour: 'numeric',
+                          minute: '2-digit',
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                  <InquiryStatusSelect id={inquiry.id} status={inquiry.status} />
+                </div>
+
+                <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                  <DetailRow label="Email" value={inquiry.email} />
+                  <DetailRow label="Phone" value={inquiry.phone} />
+                  <DetailRow label="Class date" value={inquiry.classDate ? formatClassDate(inquiry.classDate) : null} />
+                  <DetailRow label="Business" value={inquiry.business} />
+                  <DetailRow label="Role" value={inquiry.role} />
+                  <DetailRow label="Participants" value={inquiry.participants} />
+                  <DetailRow label="Heard via" value={HEAR_ABOUT_LABELS[inquiry.hearAbout] || inquiry.hearAbout} />
+                </div>
+
+                {inquiry.message && (
+                  <div className="mt-3 border-t border-neutral-100 pt-3">
+                    <p className="text-[10px] tracking-wide text-neutral-400 uppercase">Message</p>
+                    <p className="mt-0.5 text-sm whitespace-pre-line text-ink">{inquiry.message}</p>
+                  </div>
+                )}
+
+                <div className="mt-4 flex items-center justify-end gap-3 border-t border-neutral-100 pt-3">
+                  {convertError === inquiry.id && (
+                    <span className="text-xs text-red-600">Couldn&rsquo;t convert — try again.</span>
+                  )}
+                  {inquiry.studentId ? (
+                    <a href="/admin/students" className="text-xs font-medium text-green-700 hover:underline">
+                      ✓ On roster
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => handleConvert(inquiry)}
+                      disabled={convertingId === inquiry.id}
+                      className="text-xs font-medium text-brand hover:underline disabled:opacity-60"
+                    >
+                      {convertingId === inquiry.id ? 'Converting…' : 'Convert to student'}
+                    </button>
+                  )}
+                  {deleteError === inquiry.id && (
+                    <span className="text-xs text-red-600">Couldn&rsquo;t delete — try again.</span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(inquiry)}
+                    disabled={isDeleting}
+                    className="text-sm text-neutral-400 hover:text-red-600 disabled:hover:text-neutral-400"
+                  >
+                    {isDeleting ? 'Deleting…' : 'Delete'}
+                  </button>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }

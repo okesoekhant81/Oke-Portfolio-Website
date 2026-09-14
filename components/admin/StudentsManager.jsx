@@ -4,6 +4,8 @@ import { useActionState } from 'react'
 import Link from 'next/link'
 import { addStudentAction } from '../../app/actions/students'
 import StudentRow from './StudentRow'
+import { useSearchFilter, SearchBar } from './SearchFilterBar'
+import { toCsv, downloadCsv } from '../../lib/csv'
 
 function formatDate(dateStr) {
   const d = new Date(`${dateStr}T00:00:00`)
@@ -21,11 +23,35 @@ const STATUS_STYLES = {
 
 const STATUS_LABELS = { upcoming: 'Upcoming', 'in-progress': 'In progress', completed: 'Completed' }
 
+function attendanceSummary(student) {
+  const entries = student.attendance || []
+  const present = entries.filter((a) => a.present).length
+  return `${present}/${entries.length}`
+}
+
+function exportStudents(students) {
+  const csv = toCsv(students, [
+    { label: 'Name', value: (s) => s.name },
+    { label: 'Email', value: (s) => s.email },
+    { label: 'Phone', value: (s) => s.phone },
+    { label: 'Business', value: (s) => s.business },
+    { label: 'Role', value: (s) => s.role },
+    { label: 'Class date', value: (s) => s.classDate },
+    { label: 'Payment status', value: (s) => s.paymentStatus },
+    { label: 'Amount paid', value: (s) => s.amountPaid },
+    { label: 'Attendance (present/total)', value: attendanceSummary },
+  ])
+  downloadCsv(`students-${new Date().toISOString().slice(0, 10)}.csv`, csv)
+}
+
 // Grouped by class date rather than one flat list — the whole point of
 // this page is "who's in which class," so that grouping should be the
 // default view rather than something the admin has to filter into.
 export default function StudentsManager({ students, classDates }) {
   const [state, formAction, pending] = useActionState(addStudentAction, null)
+  const { query, setQuery, filtered } = useSearchFilter(students, {
+    searchKeys: ['name', 'email', 'phone', 'business'],
+  })
 
   const validDates = new Set(classDates.map((d) => d.date))
   const groups = classDates.map((d) => ({
@@ -33,9 +59,10 @@ export default function StudentsManager({ students, classDates }) {
     id: d.id,
     status: d.status || 'upcoming',
     label: `${formatDate(d.date)}${d.label ? ` — ${d.label}` : ''}`,
-    students: students.filter((s) => s.classDate === d.date),
+    students: filtered.filter((s) => s.classDate === d.date),
   }))
-  const unassigned = students.filter((s) => !s.classDate || !validDates.has(s.classDate))
+  const unassigned = filtered.filter((s) => !s.classDate || !validDates.has(s.classDate))
+  const isFiltering = query.trim().length > 0
 
   return (
     <div className="mt-6">
@@ -82,47 +109,66 @@ export default function StudentsManager({ students, classDates }) {
           page.
         </p>
       ) : (
-        <div className="mt-6 space-y-8">
-          {groups.map((group) => (
-            <div key={group.key}>
-              <div className="flex flex-wrap items-center gap-2">
-                <Link
-                  href={`/admin/classes/${group.id}`}
-                  className="text-xs font-semibold tracking-wide text-neutral-500 uppercase hover:text-brand"
-                >
-                  {group.label} · {group.students.length}
-                </Link>
-                <span
-                  className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${STATUS_STYLES[group.status] || STATUS_STYLES.upcoming}`}
-                >
-                  {STATUS_LABELS[group.status] || 'Upcoming'}
-                </span>
-              </div>
-              {group.students.length > 0 ? (
-                <div className="mt-3 space-y-3">
-                  {group.students.map((s) => (
-                    <StudentRow key={s.id} student={s} classDates={classDates} />
-                  ))}
+        <>
+          <div className="mt-6 flex flex-wrap items-center gap-2">
+            <SearchBar value={query} onChange={setQuery} placeholder="Search name, email, phone…" />
+            <button
+              type="button"
+              onClick={() => exportStudents(filtered)}
+              className="ml-auto rounded-md border border-neutral-300 px-3 py-2 text-sm text-neutral-600 hover:border-brand hover:text-brand"
+            >
+              Export CSV
+            </button>
+          </div>
+
+          {filtered.length === 0 ? (
+            <p className="mt-6 text-sm text-neutral-500">No students match your search.</p>
+          ) : (
+            <div className="mt-6 space-y-8">
+              {groups
+                .filter((group) => group.students.length > 0 || !isFiltering)
+                .map((group) => (
+                  <div key={group.key}>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Link
+                        href={`/admin/classes/${group.id}`}
+                        className="text-xs font-semibold tracking-wide text-neutral-500 uppercase hover:text-brand"
+                      >
+                        {group.label} · {group.students.length}
+                      </Link>
+                      <span
+                        className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${STATUS_STYLES[group.status] || STATUS_STYLES.upcoming}`}
+                      >
+                        {STATUS_LABELS[group.status] || 'Upcoming'}
+                      </span>
+                    </div>
+                    {group.students.length > 0 ? (
+                      <div className="mt-3 space-y-3">
+                        {group.students.map((s) => (
+                          <StudentRow key={s.id} student={s} classDates={classDates} />
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="mt-2 text-xs text-neutral-400">No students assigned yet.</p>
+                    )}
+                  </div>
+                ))}
+
+              {unassigned.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold tracking-wide text-neutral-400 uppercase">
+                    Unassigned · {unassigned.length}
+                  </p>
+                  <div className="mt-3 space-y-3">
+                    {unassigned.map((s) => (
+                      <StudentRow key={s.id} student={s} classDates={classDates} />
+                    ))}
+                  </div>
                 </div>
-              ) : (
-                <p className="mt-2 text-xs text-neutral-400">No students assigned yet.</p>
               )}
             </div>
-          ))}
-
-          {unassigned.length > 0 && (
-            <div>
-              <p className="text-xs font-semibold tracking-wide text-neutral-400 uppercase">
-                Unassigned · {unassigned.length}
-              </p>
-              <div className="mt-3 space-y-3">
-                {unassigned.map((s) => (
-                  <StudentRow key={s.id} student={s} classDates={classDates} />
-                ))}
-              </div>
-            </div>
           )}
-        </div>
+        </>
       )}
     </div>
   )

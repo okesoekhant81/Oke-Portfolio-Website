@@ -103,7 +103,24 @@ function cellClass(count, max, isFuture) {
   return 'bg-brand/25'
 }
 
-export default function AnalyticsPanel({ postViews, postLikes, daily, posts }) {
+const HEAR_ABOUT_LABELS = {
+  facebook: 'Facebook',
+  instagram: 'Instagram',
+  tiktok: 'TikTok',
+  referral: 'Friend or colleague',
+  search: 'Google search',
+  other: 'Other',
+}
+
+function formatClassLabel(classDate) {
+  const d = new Date(`${classDate.date}T00:00:00`)
+  const formatted = Number.isNaN(d.getTime())
+    ? classDate.date
+    : d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+  return classDate.label ? `${formatted} — ${classDate.label}` : formatted
+}
+
+export default function AnalyticsPanel({ postViews, postLikes, daily, posts, classDates = [], students = [], inquiries = [] }) {
   const totalViews = Object.values(postViews).reduce((sum, n) => sum + n, 0)
   const totalLikes = Object.values(postLikes).reduce((sum, n) => sum + n, 0)
   const last30Days = sumLastNDays(daily, 30)
@@ -119,6 +136,30 @@ export default function AnalyticsPanel({ postViews, postLikes, daily, posts }) {
   const maxTopViews = Math.max(1, ...topPosts.map((post) => post.views))
   const WEEKS = 12
   const { days, max, monthLabels, rangeStart, rangeEnd } = buildHeatmap(daily, WEEKS)
+
+  const revenueByClass = classDates
+    .map((d) => ({
+      id: d.id,
+      label: formatClassLabel(d),
+      revenue: students.filter((s) => s.classDate === d.date).reduce((sum, s) => sum + (Number(s.amountPaid) || 0), 0),
+    }))
+    .filter((c) => c.revenue > 0)
+    .sort((a, b) => b.revenue - a.revenue)
+  const maxRevenue = Math.max(1, ...revenueByClass.map((c) => c.revenue))
+  const totalRevenue = revenueByClass.reduce((sum, c) => sum + c.revenue, 0)
+
+  const sourceCounts = inquiries.reduce((acc, inquiry) => {
+    const key = inquiry.hearAbout || 'unknown'
+    acc[key] = (acc[key] || 0) + 1
+    return acc
+  }, {})
+  const sourceBreakdown = Object.entries(sourceCounts)
+    .map(([key, count]) => ({ key, label: HEAR_ABOUT_LABELS[key] || 'Unknown', count }))
+    .sort((a, b) => b.count - a.count)
+  const maxSourceCount = Math.max(1, ...sourceBreakdown.map((s) => s.count))
+
+  const convertedCount = inquiries.filter((i) => i.studentId).length
+  const conversionRate = inquiries.length > 0 ? Math.round((convertedCount / inquiries.length) * 100) : 0
 
   return (
     <div className="mt-10">
@@ -223,6 +264,75 @@ export default function AnalyticsPanel({ postViews, postLikes, daily, posts }) {
             </div>
           </div>
         )
+      )}
+
+      {(revenueByClass.length > 0 || sourceBreakdown.length > 0 || inquiries.length > 0) && (
+        <>
+          <h2 className="mt-10 font-display text-lg font-bold italic text-ink">Workshop</h2>
+
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            {revenueByClass.length > 0 && (
+              <div className="rounded-xl border border-neutral-200 bg-white p-5">
+                <p className="text-xs text-neutral-500">Revenue by class · {totalRevenue.toLocaleString()} MMK total</p>
+                <div className="mt-3 space-y-3">
+                  {revenueByClass.map((c) => (
+                    <div key={c.id}>
+                      <div className="flex items-center justify-between gap-4 text-sm">
+                        <p className="truncate text-ink">{c.label}</p>
+                        <span className="shrink-0 tabular-nums text-neutral-500">{c.revenue.toLocaleString()} MMK</span>
+                      </div>
+                      <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-neutral-100">
+                        <div
+                          className="h-full rounded-full bg-brand"
+                          style={{ width: `${Math.max(4, (c.revenue / maxRevenue) * 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {sourceBreakdown.length > 0 && (
+              <div className="rounded-xl border border-neutral-200 bg-white p-5">
+                <p className="text-xs text-neutral-500">How inquiries heard about the workshop</p>
+                <div className="mt-3 space-y-3">
+                  {sourceBreakdown.map((s) => (
+                    <div key={s.key}>
+                      <div className="flex items-center justify-between gap-4 text-sm">
+                        <p className="text-ink">{s.label}</p>
+                        <span className="shrink-0 tabular-nums text-neutral-500">{s.count}</span>
+                      </div>
+                      <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-neutral-100">
+                        <div
+                          className="h-full rounded-full bg-brand"
+                          style={{ width: `${Math.max(4, (s.count / maxSourceCount) * 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {inquiries.length > 0 && (
+            <div className="mt-4 grid gap-4 sm:grid-cols-3">
+              <div className="rounded-xl border border-neutral-200 bg-white p-5">
+                <p className="text-xs text-neutral-500">Total inquiries</p>
+                <p className="mt-1 text-3xl font-semibold text-ink">{inquiries.length}</p>
+              </div>
+              <div className="rounded-xl border border-neutral-200 bg-white p-5">
+                <p className="text-xs text-neutral-500">Converted to students</p>
+                <p className="mt-1 text-3xl font-semibold text-ink">{convertedCount}</p>
+              </div>
+              <div className="rounded-xl border border-neutral-200 bg-white p-5">
+                <p className="text-xs text-neutral-500">Conversion rate</p>
+                <p className="mt-1 text-3xl font-semibold text-ink">{conversionRate}%</p>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   )

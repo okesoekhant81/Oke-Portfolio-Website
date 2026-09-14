@@ -5,15 +5,19 @@ import { isBlobConfigured } from '../../lib/blobStore'
 import { getAnalytics, getPostLikes } from '../../lib/content/analytics'
 import { getInquiries } from '../../lib/content/inquiries'
 import { getPosts } from '../../lib/content/posts'
+import { getClassDates } from '../../lib/content/classDates'
+import { getStudents } from '../../lib/content/students'
 
 export const dynamic = 'force-dynamic'
 
 export default async function AdminDashboard() {
-  const [{ postViews, daily }, postLikes, posts, inquiries] = await Promise.all([
+  const [{ postViews, daily }, postLikes, posts, inquiries, classDates, students] = await Promise.all([
     getAnalytics(),
     getPostLikes(),
     getPosts(),
     getInquiries(),
+    getClassDates(),
+    getStudents(),
   ])
   const newInquiries = inquiries.filter((inquiry) => inquiry.status === 'new').length
 
@@ -68,7 +72,15 @@ export default async function AdminDashboard() {
           </Link>
         </div>
 
-        <AnalyticsPanel postViews={postViews} postLikes={postLikes} daily={daily} posts={posts} />
+        <AnalyticsPanel
+          postViews={postViews}
+          postLikes={postLikes}
+          daily={daily}
+          posts={posts}
+          classDates={classDates}
+          students={students}
+          inquiries={inquiries}
+        />
       </div>
     </main>
   )

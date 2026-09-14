@@ -1,10 +1,11 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { addInquiry, deleteInquiry, setInquiryStatus } from '../../lib/content/inquiries'
+import { addInquiry, deleteInquiry, deleteInquiries, setInquiryStatus, setInquiriesStatus } from '../../lib/content/inquiries'
 import { getClassDates } from '../../lib/content/classDates'
 import { checkSubmissionLimit, recordSubmission } from '../../lib/submissionLimits'
 import { clientIp } from '../../lib/clientIp'
+import { notifyNewInquiry } from '../../lib/notify'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -65,8 +66,9 @@ export async function submitInquiryAction(prevState, formData) {
     }
   }
 
+  let record
   try {
-    await addInquiry({
+    record = await addInquiry({
       name,
       email,
       phone,
@@ -81,6 +83,7 @@ export async function submitInquiryAction(prevState, formData) {
     return { error: err.message || 'Could not submit. Please try again.' }
   }
 
+  await notifyNewInquiry(record)
   revalidatePath('/admin/inquiries')
   return { success: true }
 }
@@ -101,5 +104,22 @@ export async function deleteInquiryAction(formData) {
   if (!id) return
 
   await deleteInquiry(id)
+  revalidatePath('/admin/inquiries')
+}
+
+export async function bulkDeleteInquiriesAction(formData) {
+  const ids = formData.getAll('id').map((v) => v.toString())
+  if (ids.length === 0) return
+
+  await deleteInquiries(ids)
+  revalidatePath('/admin/inquiries')
+}
+
+export async function bulkSetInquiryStatusAction(formData) {
+  const ids = formData.getAll('id').map((v) => v.toString())
+  const status = formData.get('status')?.toString()
+  if (ids.length === 0 || !status) return
+
+  await setInquiriesStatus(ids, status)
   revalidatePath('/admin/inquiries')
 }
