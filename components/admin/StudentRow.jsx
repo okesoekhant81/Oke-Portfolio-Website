@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import {
+  updateStudentProfileAction,
   updateStudentClassAction,
   updateStudentPaymentAction,
   deleteStudentAction,
@@ -292,6 +293,123 @@ function AttendancePanel({ student }) {
   )
 }
 
+const fieldClass =
+  'rounded-md border border-neutral-300 px-2 py-1 text-xs outline-none focus:border-brand'
+
+// Name/email/phone/business/role were only ever set once, at creation —
+// there was no way back into them, so a typo when adding a student (or
+// converting one from an inquiry that already had one) was permanent
+// short of deleting the student and losing their payment/attendance
+// history. View mode is the default (matches the same "view first,
+// explicit Edit to change" instinct as the homepage/workshop content
+// forms), not continuous inline editing.
+function ProfileEditor({ student }) {
+  const [editing, setEditing] = useState(false)
+  const [name, setName] = useState(student.name || '')
+  const [email, setEmail] = useState(student.email || '')
+  const [phone, setPhone] = useState(student.phone || '')
+  const [business, setBusiness] = useState(student.business || '')
+  const [role, setRole] = useState(student.role || '')
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState(null)
+  const [, startTransition] = useTransition()
+
+  function startEdit() {
+    setName(student.name || '')
+    setEmail(student.email || '')
+    setPhone(student.phone || '')
+    setBusiness(student.business || '')
+    setRole(student.role || '')
+    setError(null)
+    setEditing(true)
+  }
+
+  function handleSave() {
+    if (!name.trim()) {
+      setError('Please enter a name.')
+      return
+    }
+    setSaving(true)
+    setError(null)
+    const formData = new FormData()
+    formData.set('id', student.id)
+    formData.set('name', name)
+    formData.set('email', email)
+    formData.set('phone', phone)
+    formData.set('business', business)
+    formData.set('role', role)
+    startTransition(async () => {
+      try {
+        const result = await updateStudentProfileAction(formData)
+        if (result?.error) setError(result.error)
+        else setEditing(false)
+      } catch {
+        setError('Could not save. Please try again.')
+      } finally {
+        setSaving(false)
+      }
+    })
+  }
+
+  if (!editing) {
+    return (
+      <div className="min-w-0">
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="font-display text-base font-bold text-ink">{student.name}</p>
+          <button type="button" onClick={startEdit} className="text-xs text-neutral-400 hover:text-brand">
+            Edit
+          </button>
+        </div>
+        <p className="text-xs text-neutral-400">
+          {[student.email, student.phone].filter(Boolean).join(' · ') || 'No contact info'}
+        </p>
+        {student.business && (
+          <p className="text-xs text-neutral-400">
+            {student.business}
+            {student.role ? ` — ${student.role}` : ''}
+          </p>
+        )}
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-w-0 flex-1 space-y-2">
+      <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" className={`w-full font-medium ${fieldClass}`} />
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" className={fieldClass} />
+        <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone" className={fieldClass} />
+        <input
+          value={business}
+          onChange={(e) => setBusiness(e.target.value)}
+          placeholder="Business (optional)"
+          className={fieldClass}
+        />
+        <input value={role} onChange={(e) => setRole(e.target.value)} placeholder="Role (optional)" className={fieldClass} />
+      </div>
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={saving}
+          className="rounded-md bg-brand px-3 py-1 text-xs font-medium text-white disabled:opacity-60"
+        >
+          {saving ? 'Saving…' : 'Save'}
+        </button>
+        <button
+          type="button"
+          onClick={() => setEditing(false)}
+          disabled={saving}
+          className="text-xs text-neutral-500 hover:text-ink"
+        >
+          Cancel
+        </button>
+        {error && <span className="text-xs text-red-600">{error}</span>}
+      </div>
+    </div>
+  )
+}
+
 export default function StudentRow({ student, classDates }) {
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState(false)
@@ -321,18 +439,7 @@ export default function StudentRow({ student, classDates }) {
       }`}
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="font-display text-base font-bold text-ink">{student.name}</p>
-          <p className="text-xs text-neutral-400">
-            {[student.email, student.phone].filter(Boolean).join(' · ') || 'No contact info'}
-          </p>
-          {student.business && (
-            <p className="text-xs text-neutral-400">
-              {student.business}
-              {student.role ? ` — ${student.role}` : ''}
-            </p>
-          )}
-        </div>
+        <ProfileEditor student={student} />
         <ClassSelect student={student} classDates={classDates} />
       </div>
 

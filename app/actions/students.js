@@ -73,6 +73,30 @@ export async function convertInquiryToStudentAction(formData) {
   return { success: true, studentId: student.id }
 }
 
+// Name/email/phone/business/role were only ever settable at creation —
+// there was no way back into them afterward, so a typo at add-time (or an
+// inquiry converted with one already in it) was permanent short of
+// deleting the student and losing their payment/attendance history.
+export async function updateStudentProfileAction(formData) {
+  const id = formData.get('id')?.toString()
+  if (!id) return { error: 'Missing student.' }
+
+  const get = (name) => formData.get(name)?.toString().trim() ?? ''
+  const name = get('name').slice(0, MAX_LENGTHS.name)
+  if (!name) return { error: 'Please enter a name.' }
+
+  await updateStudent(id, {
+    name,
+    email: get('email').slice(0, MAX_LENGTHS.email),
+    phone: get('phone').slice(0, MAX_LENGTHS.phone),
+    business: get('business').slice(0, MAX_LENGTHS.business),
+    role: get('role').slice(0, MAX_LENGTHS.role),
+  })
+  revalidatePath('/admin/students')
+  revalidatePath('/admin/classes/[id]', 'page')
+  return { success: true }
+}
+
 export async function updateStudentClassAction(formData) {
   const id = formData.get('id')?.toString()
   if (!id) return
