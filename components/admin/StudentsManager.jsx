@@ -49,8 +49,13 @@ function exportStudents(students) {
 // default view rather than something the admin has to filter into.
 export default function StudentsManager({ students, classDates }) {
   const [state, formAction, pending] = useActionState(addStudentAction, null)
+  // 'sourceInquiryId' (a converted registrant's original Registration ID,
+  // same as shown on their success screen and payment-confirmed email —
+  // see lib/registrantEmail.js) and 'id' (a student added directly, with
+  // no source inquiry) together let the admin paste back whatever ID a
+  // registrant quotes and land on the right row.
   const { query, setQuery, filtered } = useSearchFilter(students, {
-    searchKeys: ['name', 'email', 'phone', 'business'],
+    searchKeys: ['name', 'email', 'phone', 'business', 'id', 'sourceInquiryId'],
   })
 
   const validDates = new Set(classDates.map((d) => d.date))

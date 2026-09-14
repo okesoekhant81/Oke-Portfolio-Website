@@ -364,6 +364,9 @@ function ProfileEditor({ student }) {
         <p className="text-xs text-neutral-400">
           {[student.email, student.phone].filter(Boolean).join(' · ') || 'No contact info'}
         </p>
+        <p className="text-xs text-neutral-400">
+          Registration ID: <span className="font-mono">{(student.sourceInquiryId || student.id).toUpperCase()}</span>
+        </p>
         {student.business && (
           <p className="text-xs text-neutral-400">
             {student.business}

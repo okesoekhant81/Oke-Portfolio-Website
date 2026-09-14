@@ -76,8 +76,13 @@ export default function InquiriesList({ inquiries }) {
   const [bulkPending, startBulkTransition] = useTransition()
   const [, startTransition] = useTransition()
 
+  // 'id' lets the admin paste the Registration ID a registrant quotes back
+  // (from their success screen or the payment-confirmed email) straight
+  // into search — case-insensitive matching in useSearchFilter means it
+  // doesn't matter that it's stored lowercase but shown to registrants
+  // uppercase.
   const { query, setQuery, activeFilters, setFilter, filtered } = useSearchFilter(items, {
-    searchKeys: ['name', 'email', 'phone', 'business'],
+    searchKeys: ['name', 'email', 'phone', 'business', 'id'],
   })
 
   function handleDelete(inquiry) {
@@ -262,6 +267,8 @@ export default function InquiriesList({ inquiries }) {
                           hour: 'numeric',
                           minute: '2-digit',
                         })}
+                        {' · '}
+                        <span className="font-mono">{inquiry.id.toUpperCase()}</span>
                       </p>
                     </div>
                   </div>
