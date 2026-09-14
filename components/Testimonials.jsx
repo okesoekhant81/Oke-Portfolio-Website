@@ -3,6 +3,7 @@
 import { useRef } from 'react'
 import Image from 'next/image'
 import Reveal from './Reveal'
+import StarRating from './StarRating'
 import { getDictionary, italicIfLatin } from '../lib/dictionaries'
 
 const RECENT_COUNT = 4
@@ -66,7 +67,8 @@ export default function Testimonials({ testimonials, locale = 'en' }) {
               data-card
               className="w-[85%] shrink-0 snap-start rounded-xl border border-neutral-200 p-5 dark:border-neutral-800 sm:w-[46%] lg:w-[31%]"
             >
-              <p className={`font-display text-sm leading-relaxed text-ink dark:text-neutral-100 ${italicIfLatin(locale)}`}>
+              <StarRating value={t.rating ?? 5} />
+              <p className={`mt-2 font-display text-sm leading-relaxed text-ink dark:text-neutral-100 ${italicIfLatin(locale)}`}>
                 &ldquo;{t.quote}&rdquo;
               </p>
               <div className="mt-4 flex items-center gap-3">

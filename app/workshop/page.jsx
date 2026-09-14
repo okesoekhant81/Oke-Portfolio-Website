@@ -14,7 +14,7 @@ import { getStudents } from '../../lib/content/students'
 import { getTestimonials } from '../../lib/content/testimonials'
 import { getWorkshopContent } from '../../lib/content/workshop'
 import { getLocale } from '../../lib/i18n'
-import { localizeHomepageContent, localizeWorkshopContent } from '../../lib/localizeContent'
+import { localizeHomepageContent, localizeWorkshopContent, localizeTestimonials } from '../../lib/localizeContent'
 import { getDictionary, headingGap, headingLeading, italicIfLatin } from '../../lib/dictionaries'
 import { SITE_URL, SITE_NAME } from '../../lib/site'
 
@@ -39,7 +39,7 @@ export async function generateMetadata() {
 }
 
 export default async function WorkshopPage() {
-  const [rawContent, rawHomepage, locale, classDates, students, testimonials] = await Promise.all([
+  const [rawContent, rawHomepage, locale, classDates, students, rawTestimonials] = await Promise.all([
     getWorkshopContent(),
     getHomepageContent(),
     getLocale(),
@@ -50,6 +50,7 @@ export default async function WorkshopPage() {
   const dict = getDictionary(locale)
   const content = localizeWorkshopContent(rawContent, locale)
   const homepage = localizeHomepageContent(rawHomepage, locale)
+  const testimonials = localizeTestimonials(rawTestimonials, locale)
 
   const inProgressClass = classDates.find((d) => d.status === 'in-progress')
   const inProgressCount = inProgressClass

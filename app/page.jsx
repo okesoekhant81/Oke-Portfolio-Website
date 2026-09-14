@@ -14,7 +14,7 @@ import { getPosts } from '../lib/content/posts'
 import { getTestimonials } from '../lib/content/testimonials'
 import { getAnalytics } from '../lib/content/analytics'
 import { getLocale } from '../lib/i18n'
-import { localizeHomepageContent, localizePost } from '../lib/localizeContent'
+import { localizeHomepageContent, localizePost, localizeTestimonials } from '../lib/localizeContent'
 import { SITE_URL, SITE_NAME, SOCIAL_LINKS } from '../lib/site'
 
 function buildPersonJsonLd(locale) {
@@ -42,7 +42,7 @@ function buildPersonJsonLd(locale) {
 }
 
 export default async function Home() {
-  const [rawContent, rawPosts, testimonials, locale, { postViews }] = await Promise.all([
+  const [rawContent, rawPosts, rawTestimonials, locale, { postViews }] = await Promise.all([
     getHomepageContent(),
     getPosts(),
     getTestimonials(),
@@ -50,6 +50,7 @@ export default async function Home() {
     getAnalytics(),
   ])
   const content = localizeHomepageContent(rawContent, locale)
+  const testimonials = localizeTestimonials(rawTestimonials, locale)
   const posts = rawPosts
     .slice(0, 4)
     .map((post) => ({ ...localizePost(post, locale), views: postViews[post.slug] || 0 }))

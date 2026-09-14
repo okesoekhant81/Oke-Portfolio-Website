@@ -11,6 +11,12 @@ function revalidateAll() {
   revalidatePath('/workshop')
 }
 
+function clampRating(value) {
+  const n = Number(value)
+  if (!Number.isFinite(n)) return 5
+  return Math.min(5, Math.max(1, Math.round(n)))
+}
+
 export async function addTestimonialAction(prevState, formData) {
   const get = (key) => formData.get(key)?.toString().trim() ?? ''
   const name = get('name').slice(0, MAX_LENGTHS.name)
@@ -19,7 +25,15 @@ export async function addTestimonialAction(prevState, formData) {
   if (!quote) return { error: 'Please enter a quote.' }
 
   try {
-    await addTestimonial({ name, role: get('role').slice(0, MAX_LENGTHS.role), quote, photo: get('photo') })
+    await addTestimonial({
+      name,
+      role: get('role').slice(0, MAX_LENGTHS.role),
+      roleMy: get('roleMy').slice(0, MAX_LENGTHS.role),
+      quote,
+      quoteMy: get('quoteMy').slice(0, MAX_LENGTHS.quote),
+      photo: get('photo'),
+      rating: clampRating(get('rating')),
+    })
   } catch (err) {
     return { error: err.message || 'Could not save. Please try again.' }
   }
@@ -39,7 +53,15 @@ export async function updateTestimonialAction(formData) {
   if (!quote) return { error: 'Please enter a quote.' }
 
   try {
-    await updateTestimonial(id, { name, role: get('role').slice(0, MAX_LENGTHS.role), quote, photo: get('photo') })
+    await updateTestimonial(id, {
+      name,
+      role: get('role').slice(0, MAX_LENGTHS.role),
+      roleMy: get('roleMy').slice(0, MAX_LENGTHS.role),
+      quote,
+      quoteMy: get('quoteMy').slice(0, MAX_LENGTHS.quote),
+      photo: get('photo'),
+      rating: clampRating(get('rating')),
+    })
   } catch (err) {
     return { error: err.message || 'Could not save. Please try again.' }
   }

@@ -8,9 +8,23 @@ import {
   reorderTestimonialAction,
 } from '../../app/actions/testimonials'
 import ImageField from './ImageField'
-import { FormLocaleContext, LockContext } from './ContentFormFields'
+import StarRating from '../StarRating'
+import { FormLocaleContext, LockContext, Field, TextArea, LanguageTabs } from './ContentFormFields'
 
 const inputClass = 'rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-brand'
+
+function RatingField({ name, defaultValue = 5 }) {
+  const [value, setValue] = useState(defaultValue)
+  return (
+    <div>
+      <label className="block text-xs font-medium text-neutral-600">Rating</label>
+      <div className="mt-1">
+        <StarRating value={value} onChange={setValue} size={20} />
+      </div>
+      <input type="hidden" name={name} value={value} />
+    </div>
+  )
+}
 
 function ReorderButtons({ id, disabled }) {
   const [, startTransition] = useTransition()
@@ -113,7 +127,8 @@ function TestimonialItem({ testimonial, isFirst }) {
       <li className="flex items-start gap-3 rounded-lg border border-neutral-100 p-3">
         <ReorderButtons id={testimonial.id} disabled={isFirst} />
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-ink">
+          <StarRating value={testimonial.rating ?? 5} size={14} />
+          <p className="mt-1 text-sm font-semibold text-ink">
             {testimonial.name}
             {testimonial.role && <span className="font-normal text-neutral-400"> — {testimonial.role}</span>}
           </p>
@@ -134,9 +149,23 @@ function TestimonialItem({ testimonial, isFirst }) {
       <form action={handleSave} className="space-y-3">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <input name="name" required defaultValue={testimonial.name} placeholder="Name" className={inputClass} />
-          <input name="role" defaultValue={testimonial.role} placeholder="Role / business (optional)" className={inputClass} />
+          <Field
+            label="Role / business (optional)"
+            name="role"
+            defaultValue={testimonial.role}
+            nameMy="roleMy"
+            defaultValueMy={testimonial.roleMy}
+          />
         </div>
-        <textarea name="quote" required rows={3} defaultValue={testimonial.quote} placeholder="Quote" className={`w-full ${inputClass}`} />
+        <TextArea
+          label="Quote"
+          name="quote"
+          defaultValue={testimonial.quote}
+          nameMy="quoteMy"
+          defaultValueMy={testimonial.quoteMy}
+          rows={3}
+        />
+        <RatingField name="rating" defaultValue={testimonial.rating ?? 5} />
         <ImageField label="Photo (optional)" name="photo" defaultValue={testimonial.photo} />
         <div className="flex items-center gap-3">
           <button
@@ -164,21 +193,22 @@ function TestimonialItem({ testimonial, isFirst }) {
   )
 }
 
-// Reused stand-alone rather than through <Section>/<Field> — this form
-// isn't bilingual (a testimonial is a direct quote, translating it would
-// misrepresent what the person said), so it only needs ImageField's
-// context providers, not the rest of ContentFormFields' machinery.
 export default function TestimonialsManager({ testimonials }) {
   const [state, formAction, pending] = useActionState(addTestimonialAction, null)
+  const [formLocale, setFormLocale] = useState('en')
 
   return (
-    <FormLocaleContext.Provider value="en">
+    <FormLocaleContext.Provider value={formLocale}>
       <LockContext.Provider value={false}>
         <div className="mt-6 rounded-xl border border-neutral-200 bg-white p-6">
           <p className="font-display text-base font-bold italic text-brand">Testimonials</p>
           <p className="mt-1 text-xs text-neutral-500">
             Shown on the homepage and workshop page as social proof. Order here is the order they appear in.
           </p>
+
+          <div className="mt-4">
+            <LanguageTabs value={formLocale} onChange={setFormLocale} />
+          </div>
 
           {testimonials.length > 0 && (
             <ul className="mt-4 space-y-3">
@@ -195,9 +225,10 @@ export default function TestimonialsManager({ testimonials }) {
           >
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <input name="name" required placeholder="Name" className={inputClass} />
-              <input name="role" placeholder="Role / business (optional)" className={inputClass} />
+              <Field label="Role / business (optional)" name="role" nameMy="roleMy" />
             </div>
-            <textarea name="quote" required rows={3} placeholder="Quote" className={`w-full ${inputClass}`} />
+            <TextArea label="Quote" name="quote" nameMy="quoteMy" rows={3} />
+            <RatingField name="rating" defaultValue={5} />
             <ImageField label="Photo (optional)" name="photo" defaultValue="" />
             <div className="flex items-center gap-3">
               <button
