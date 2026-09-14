@@ -2,13 +2,16 @@ import Image from 'next/image'
 import Link from 'next/link'
 import Contact from '../../components/Contact'
 import NavMenu from '../../components/NavMenu'
+import FAQAccordion from '../../components/FAQAccordion'
 import RegistrationForm from '../../components/RegistrationForm'
 import Reveal from '../../components/Reveal'
 import RichText from '../../components/RichText'
+import Testimonials from '../../components/Testimonials'
 import WorkshopOutline from '../../components/WorkshopOutline'
 import { getClassDates } from '../../lib/content/classDates'
 import { getHomepageContent } from '../../lib/content/homepage'
 import { getStudents } from '../../lib/content/students'
+import { getTestimonials } from '../../lib/content/testimonials'
 import { getWorkshopContent } from '../../lib/content/workshop'
 import { getLocale } from '../../lib/i18n'
 import { localizeHomepageContent, localizeWorkshopContent } from '../../lib/localizeContent'
@@ -36,12 +39,13 @@ export async function generateMetadata() {
 }
 
 export default async function WorkshopPage() {
-  const [rawContent, rawHomepage, locale, classDates, students] = await Promise.all([
+  const [rawContent, rawHomepage, locale, classDates, students, testimonials] = await Promise.all([
     getWorkshopContent(),
     getHomepageContent(),
     getLocale(),
     getClassDates(),
     getStudents(),
+    getTestimonials(),
   ])
   const dict = getDictionary(locale)
   const content = localizeWorkshopContent(rawContent, locale)
@@ -203,6 +207,10 @@ export default async function WorkshopPage() {
           </div>
         </Reveal>
 
+        <Reveal delay={0.22}>
+          <FAQAccordion heading={content.faqHeading} faqs={content.faqs} locale={locale} />
+        </Reveal>
+
         <Reveal delay={0.25}>
           <div className="mt-12 rounded-xl border border-neutral-200 bg-neutral-50 p-6 dark:border-neutral-800 dark:bg-white/5 sm:p-8">
             <h2
@@ -217,6 +225,8 @@ export default async function WorkshopPage() {
           </div>
         </Reveal>
       </div>
+
+      <Testimonials testimonials={testimonials} locale={locale} />
 
       <Contact
         line1={homepage.contactLine1}

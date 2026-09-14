@@ -3,7 +3,7 @@ import { SOCIAL_ICONS } from '../lib/site'
 // Single-path brand glyphs (viewBox 0 0 24 24) rendered in currentColor so
 // they stay monochrome like the rest of the site instead of each brand's
 // own multi-color mark.
-const PATHS = {
+export const ICON_PATHS = {
   Facebook:
     'M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.019c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.307h3.919l-.386 1.858-.287 1.809h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z',
   Instagram:
@@ -29,7 +29,7 @@ export default function SocialIcons({ className = '' }) {
           className="text-ink/70 transition-colors duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-brand dark:text-neutral-400 dark:hover:text-brand"
         >
           <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="currentColor" aria-hidden="true">
-            <path d={PATHS[name]} />
+            <path d={ICON_PATHS[name]} />
           </svg>
         </a>
       ))}

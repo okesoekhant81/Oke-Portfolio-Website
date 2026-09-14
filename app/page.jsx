@@ -5,11 +5,13 @@ import Services from '../components/Services'
 import Strategy from '../components/Strategy'
 import ThingsImBuilding from '../components/ThingsImBuilding'
 import Workshop from '../components/Workshop'
+import Testimonials from '../components/Testimonials'
 import AboutMe from '../components/AboutMe'
 import LatestArticles from '../components/LatestArticles'
 import Contact from '../components/Contact'
 import { getHomepageContent } from '../lib/content/homepage'
 import { getPosts } from '../lib/content/posts'
+import { getTestimonials } from '../lib/content/testimonials'
 import { getAnalytics } from '../lib/content/analytics'
 import { getLocale } from '../lib/i18n'
 import { localizeHomepageContent, localizePost } from '../lib/localizeContent'
@@ -40,9 +42,10 @@ function buildPersonJsonLd(locale) {
 }
 
 export default async function Home() {
-  const [rawContent, rawPosts, locale, { postViews }] = await Promise.all([
+  const [rawContent, rawPosts, testimonials, locale, { postViews }] = await Promise.all([
     getHomepageContent(),
     getPosts(),
+    getTestimonials(),
     getLocale(),
     getAnalytics(),
   ])
@@ -94,6 +97,7 @@ export default async function Home() {
         role={content.workshopRole}
         locale={locale}
       />
+      <Testimonials testimonials={testimonials} locale={locale} />
       <AboutMe line1={content.aboutLine1} line2={content.aboutLine2} body={content.aboutBody} locale={locale} />
       <LatestArticles posts={posts} locale={locale} />
       <Contact

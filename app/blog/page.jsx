@@ -1,4 +1,4 @@
-import ArticleCard from '../../components/ArticleCard'
+import BlogList from '../../components/BlogList'
 import Contact from '../../components/Contact'
 import NavMenu from '../../components/NavMenu'
 import Reveal from '../../components/Reveal'
@@ -26,14 +26,6 @@ export async function generateMetadata() {
   }
 }
 
-// The design repeats a 4-post cluster — one large featured card, two square
-// cards side by side, then one wide card — for as many posts as exist.
-function chunk(items, size) {
-  const groups = []
-  for (let i = 0; i < items.length; i += size) groups.push(items.slice(i, i + size))
-  return groups
-}
-
 export default async function BlogIndex() {
   const [rawPosts, rawContent, locale, { postViews }] = await Promise.all([
     getPosts(),
@@ -44,7 +36,6 @@ export default async function BlogIndex() {
   const dict = getDictionary(locale)
   const content = localizeHomepageContent(rawContent, locale)
   const posts = rawPosts.map((post) => ({ ...localizePost(post, locale), views: postViews[post.slug] || 0 }))
-  const groups = chunk(posts, 4)
 
   return (
     <main className="dark:bg-ink">
@@ -59,45 +50,7 @@ export default async function BlogIndex() {
         {posts.length === 0 ? (
           <p className="mt-10 text-sm leading-relaxed text-muted sm:text-base dark:text-neutral-400">{dict.blog.empty}</p>
         ) : (
-          <div className="mt-10 space-y-4 sm:mt-14 lg:space-y-6">
-            {groups.map((group, i) => {
-              const [featured, squareA, squareB, wide] = group
-              return (
-                <div key={i} className="grid grid-cols-2 gap-4 lg:grid-cols-3 lg:gap-6">
-                  {featured && (
-                    <ArticleCard post={featured} variant="featured" locale={locale} className="col-span-2 lg:row-span-2" />
-                  )}
-                  {squareA && (
-                    <ArticleCard
-                      post={squareA}
-                      variant="square"
-                      locale={locale}
-                      delay={0.05}
-                      className="lg:col-start-3 lg:row-start-1"
-                    />
-                  )}
-                  {squareB && (
-                    <ArticleCard
-                      post={squareB}
-                      variant="square"
-                      locale={locale}
-                      delay={0.1}
-                      className="lg:col-start-3 lg:row-start-2"
-                    />
-                  )}
-                  {wide && (
-                    <ArticleCard
-                      post={wide}
-                      variant="wide"
-                      locale={locale}
-                      delay={0.05}
-                      className="col-span-2 lg:col-span-3"
-                    />
-                  )}
-                </div>
-              )
-            })}
-          </div>
+          <BlogList posts={posts} locale={locale} />
         )}
       </div>
 

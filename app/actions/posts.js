@@ -16,6 +16,8 @@ export async function savePostAction(prevState, formData) {
 
   const previousSlug = get('previousSlug') || undefined
 
+  const tags = [...new Set(get('tags').split(',').map((t) => t.trim()).filter(Boolean))].slice(0, 10)
+
   const post = {
     title,
     titleMy: get('titleMy'),
@@ -26,6 +28,7 @@ export async function savePostAction(prevState, formData) {
     publishedAt: get('publishedAt') || new Date().toISOString(),
     body: get('body'),
     bodyMy: get('bodyMy'),
+    tags,
   }
 
   try {

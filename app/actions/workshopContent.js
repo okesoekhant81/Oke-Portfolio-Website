@@ -13,6 +13,13 @@ export async function saveWorkshop(prevState, formData) {
     lessonsMy: get(`module-${i}-lessonsMy`),
   }))
 
+  const faqs = [0, 1, 2, 3, 4, 5].map((i) => ({
+    question: get(`faq-${i}-question`),
+    questionMy: get(`faq-${i}-questionMy`),
+    answer: get(`faq-${i}-answer`),
+    answerMy: get(`faq-${i}-answerMy`),
+  }))
+
   const data = {
     heroImage: get('heroImage'),
     heroTitle: get('heroTitle'),
@@ -50,6 +57,10 @@ export async function saveWorkshop(prevState, formData) {
     ctaHeadingMy: get('ctaHeadingMy'),
     ctaBody: get('ctaBody'),
     ctaBodyMy: get('ctaBodyMy'),
+
+    faqHeading: get('faqHeading'),
+    faqHeadingMy: get('faqHeadingMy'),
+    faqs,
   }
 
   try {

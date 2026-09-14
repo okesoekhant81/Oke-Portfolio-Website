@@ -185,6 +185,40 @@ export default function WorkshopContentForm({ content }) {
           />
         </Section>
 
+        <Section title="FAQ">
+          <Field
+            label="Section heading"
+            name="faqHeading"
+            defaultValue={content.faqHeading}
+            nameMy="faqHeadingMy"
+            defaultValueMy={content.faqHeadingMy}
+          />
+          {content.faqs.map((faq, i) => (
+            <div key={i} className="rounded-lg border border-neutral-100 p-4">
+              <p className="text-xs font-semibold text-neutral-400">
+                Question {i + 1} <span className="font-normal">(leave blank to skip)</span>
+              </p>
+              <div className="mt-2 space-y-3">
+                <Field
+                  label="Question"
+                  name={`faq-${i}-question`}
+                  defaultValue={faq.question}
+                  nameMy={`faq-${i}-questionMy`}
+                  defaultValueMy={faq.questionMy}
+                />
+                <TextArea
+                  label="Answer"
+                  name={`faq-${i}-answer`}
+                  defaultValue={faq.answer}
+                  nameMy={`faq-${i}-answerMy`}
+                  defaultValueMy={faq.answerMy}
+                  rows={3}
+                />
+              </div>
+            </div>
+          ))}
+        </Section>
+
         <SaveBar locked={locked} onEdit={() => setLocked(false)} onCancel={handleCancel} pending={pending} state={state} />
         </form>
       </LockContext.Provider>

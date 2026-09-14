@@ -119,6 +119,19 @@ export default function PostForm({ post }) {
 
       <div>
         <label className="block text-xs font-medium text-neutral-600">
+          Tags <span className="font-normal text-neutral-400">(comma-separated, e.g. branding, marketing)</span>
+        </label>
+        <input
+          name="tags"
+          defaultValue={(post?.tags || []).join(', ')}
+          readOnly={locked}
+          tabIndex={locked ? -1 : 0}
+          className={fieldClass()}
+        />
+      </div>
+
+      <div>
+        <label className="block text-xs font-medium text-neutral-600">
           Body{' '}
           <span className="font-normal text-neutral-400">
             (*emphasis*, **bold**, blank line = new paragraph)

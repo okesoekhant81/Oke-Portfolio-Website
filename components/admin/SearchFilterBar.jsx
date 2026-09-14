@@ -1,30 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-
-// Plain case-insensitive substring match across the given fields, plus
-// exact-match dropdown filters — shared by every admin list (Inquiries,
-// Students, Posts) instead of each page reimplementing its own filtering.
-// Client-side only, since these lists are fully loaded already; a real
-// search index would be overkill at this scale.
-export function useSearchFilter(items, { searchKeys = [] } = {}) {
-  const [query, setQuery] = useState('')
-  const [activeFilters, setActiveFilters] = useState({})
-
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    return items.filter((item) => {
-      if (q && !searchKeys.some((key) => String(item[key] || '').toLowerCase().includes(q))) return false
-      return Object.entries(activeFilters).every(([key, value]) => !value || item[key] === value)
-    })
-  }, [items, query, activeFilters, searchKeys])
-
-  function setFilter(key, value) {
-    setActiveFilters((prev) => ({ ...prev, [key]: value }))
-  }
-
-  return { query, setQuery, activeFilters, setFilter, filtered }
-}
+export { useSearchFilter } from '../../lib/useSearchFilter'
 
 export function SearchBar({ value, onChange, placeholder = 'Search…' }) {
   return (

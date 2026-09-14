@@ -7,6 +7,7 @@ export default function AdminNav({ active }) {
     { href: '/admin/homepage', label: 'Homepage' },
     { href: '/admin/workshop', label: 'Workshop' },
     { href: '/admin/classes', label: 'Classes' },
+    { href: '/admin/testimonials', label: 'Testimonials' },
     { href: '/admin/posts', label: 'Articles' },
     { href: '/admin/inquiries', label: 'Inquiries' },
     { href: '/admin/students', label: 'Students' },
