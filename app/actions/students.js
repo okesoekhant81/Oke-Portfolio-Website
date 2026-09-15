@@ -18,6 +18,8 @@ import { getWorkshopContent } from '../../lib/content/workshop'
 import { localizeWorkshopContent } from '../../lib/localizeContent'
 import { sendRegistrationConfirmation } from '../../lib/registrantEmail'
 import { logActivity } from '../../lib/activityLog'
+import { sendMetaCapiEvent } from '../../lib/metaCapi'
+import { SITE_URL } from '../../lib/site'
 
 const MAX_LENGTHS = { name: 200, email: 200, phone: 60, business: 200, role: 120, paymentNote: 500, note: 500 }
 
@@ -73,6 +75,12 @@ export async function convertInquiryToStudentAction(formData) {
       sourceInquiryId: inquiry.id,
       locale: inquiry.locale || 'en',
       paymentProofUrl: inquiry.paymentProofUrl || '',
+      // Carried through from the original registration so the Purchase
+      // CAPI event fired on payment verification (see
+      // updateStudentPaymentAction) can still attribute to the same ad
+      // click/session — see the comment in app/actions/inquiries.js.
+      fbp: inquiry.fbp || '',
+      fbc: inquiry.fbc || '',
     })
     await markInquiryConverted(inquiry.id, student.id)
   } catch (err) {
@@ -134,7 +142,9 @@ export async function updateStudentPaymentAction(formData) {
     amountPaid,
   })
 
-  if (previous && previous.paymentStatus !== 'paid' && paymentStatus === 'paid' && previous.classDate) {
+  const justPaid = Boolean(previous && previous.paymentStatus !== 'paid' && paymentStatus === 'paid')
+
+  if (justPaid && previous.classDate) {
     const [classInfo, rawWorkshop] = await Promise.all([
       getClassDates().then((dates) => dates.find((d) => d.date === previous.classDate)),
       getWorkshopContent(),
@@ -143,6 +153,29 @@ export async function updateStudentPaymentAction(formData) {
       const workshop = localizeWorkshopContent(rawWorkshop, previous.locale || 'en')
       await sendRegistrationConfirmation(previous, classInfo, workshop, previous.locale || 'en')
     }
+  }
+
+  // Purchase only ever fires from here, server-side via CAPI — never from
+  // the registration form or its screenshot upload. Uploading a payment
+  // screenshot isn't a confirmed payment; this action running with
+  // paymentStatus flipping to 'paid' is the admin actually having checked
+  // the KPay transaction themselves. `purchase-${id}` (not a fresh id per
+  // save) makes this idempotent: re-saving an already-paid student can't
+  // re-enter this block (justPaid requires the *previous* status to not
+  // already be 'paid'), so the same student can't produce two Purchase
+  // events without genuinely going back to unpaid and being paid again.
+  if (justPaid) {
+    await sendMetaCapiEvent({
+      eventName: 'Purchase',
+      eventId: `purchase-${id}`,
+      eventSourceUrl: `${SITE_URL}/workshop`,
+      email: previous.email,
+      phone: previous.phone,
+      externalId: previous.sourceInquiryId || id,
+      fbp: previous.fbp,
+      fbc: previous.fbc,
+      customData: { value: amountPaid, currency: 'MMK', order_id: id },
+    })
   }
 
   await logActivity('Student payment updated', `${id}: ${amountPaid} MMK`)

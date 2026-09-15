@@ -1,9 +1,10 @@
 'use client'
 
-import { useActionState, useRef, useState } from 'react'
+import { useActionState, useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { submitInquiryAction } from '../app/actions/inquiries'
 import { getDictionary, italicIfLatin } from '../lib/dictionaries'
+import { trackPixelEvent } from '../lib/metaPixelClient'
 
 const EASE = [0.16, 1, 0.3, 1]
 
@@ -61,6 +62,17 @@ function CopyRow({ label, value, copyLabel, copiedLabel }) {
 export default function RegistrationForm({ locale = 'en', classDates = [], paymentMethods = [] }) {
   const dict = getDictionary(locale)
   const [state, dispatch, pending] = useActionState(submitInquiryAction, null)
+
+  // Browser-side half of CompleteRegistration — submitInquiryAction already
+  // fired the server-side CAPI copy with the same metaEventId, so Meta
+  // dedups these into one event instead of double counting. Depends on
+  // state.success/metaEventId, not on `step`/`pending`, so it can't
+  // re-fire on unrelated re-renders once the action has already resolved.
+  useEffect(() => {
+    if (!state?.success || !state?.metaEventId) return
+    trackPixelEvent('CompleteRegistration', state.metaValue ? { value: state.metaValue, currency: 'MMK' } : undefined, state.metaEventId)
+  }, [state?.success, state?.metaEventId, state?.metaValue])
+
   // Payment lives inside the 'optional' step below rather than as its own
   // step — capped at 5 steps total this way regardless of how many payment
   // methods (or future optional bits) get added, instead of the step count

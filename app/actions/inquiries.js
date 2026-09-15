@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { headers, cookies } from 'next/headers'
 import { addInquiry, deleteInquiry, deleteInquiries, setInquiryStatus, setInquiriesStatus } from '../../lib/content/inquiries'
 import { getClassDates } from '../../lib/content/classDates'
 import { getStudents } from '../../lib/content/students'
@@ -10,6 +11,8 @@ import { clientIp } from '../../lib/clientIp'
 import { notifyNewInquiry } from '../../lib/notify'
 import { logActivity } from '../../lib/activityLog'
 import { getLocale } from '../../lib/i18n'
+import { sendMetaCapiEvent } from '../../lib/metaCapi'
+import { SITE_URL } from '../../lib/site'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -62,13 +65,17 @@ export async function submitInquiryAction(prevState, formData) {
   // at isFull from whatever headcount it rendered with, which can already
   // be stale by the time this submission lands.
   let waitlisted = false
+  // Hoisted out of the `if (classDate)` block below — also used after it to
+  // give the CompleteRegistration Pixel/CAPI events below a real course
+  // price instead of a guess.
+  let matchedClass = null
   if (classDate) {
     // The registration form only ever offers 'upcoming' dates as options,
     // but that's a client-side filter — re-checked here since nothing
     // stops a request from naming an in-progress or completed class
     // directly. Missing/legacy status is treated as upcoming (open),
     // same fallback used everywhere else a class's status is shown.
-    const matchedClass = (await getClassDates()).find((d) => d.date === classDate)
+    matchedClass = (await getClassDates()).find((d) => d.date === classDate)
     if (matchedClass && matchedClass.status && matchedClass.status !== 'upcoming') {
       return { error: 'That class is no longer open for registration. Please choose another date.' }
     }
@@ -98,6 +105,15 @@ export async function submitInquiryAction(prevState, formData) {
 
   const locale = await getLocale()
 
+  // Captured now (set by the Pixel base script once consent is accepted —
+  // see components/MetaPixel.jsx) and carried on the record through
+  // conversion to a student, so the admin-verified Purchase event fired
+  // later from updateStudentPaymentAction can still attribute back to the
+  // same ad click/session, not just this registration.
+  const cookieStore = await cookies()
+  const fbp = cookieStore.get('_fbp')?.value || ''
+  const fbc = cookieStore.get('_fbc')?.value || ''
+
   let record
   try {
     record = await addInquiry({
@@ -113,6 +129,8 @@ export async function submitInquiryAction(prevState, formData) {
       locale,
       waitlisted,
       paymentProofUrl,
+      fbp,
+      fbc,
     })
   } catch (err) {
     return { error: err.message || 'Could not submit. Please try again.' }
@@ -123,8 +141,41 @@ export async function submitInquiryAction(prevState, formData) {
   // the form was submitted. This is only the admin-facing "someone
   // registered, go check" ping.
   await notifyNewInquiry(record)
+
+  // CompleteRegistration: fired from both the browser Pixel (see
+  // RegistrationForm.jsx, once state.success comes back) and here,
+  // server-side via CAPI — the same record.id as event_id on both sides is
+  // what lets Meta dedup them into a single event instead of double
+  // counting. The server side alone also covers visitors who declined
+  // cookies or run an ad/tracker blocker, which the browser Pixel can't.
+  // Purchase is deliberately NOT fired here — see updateStudentPaymentAction
+  // for why (this is a submission, not a confirmed payment).
+  const headerList = await headers()
+  const eventSourceUrl = headerList.get('referer') || `${SITE_URL}/workshop`
+  await sendMetaCapiEvent({
+    eventName: 'CompleteRegistration',
+    eventId: record.id,
+    eventSourceUrl,
+    email,
+    phone,
+    externalId: record.id,
+    clientIp: ip,
+    userAgent: headerList.get('user-agent') || '',
+    fbp,
+    fbc,
+    customData: matchedClass?.defaultFee ? { value: matchedClass.defaultFee, currency: 'MMK' } : undefined,
+  })
+
   revalidatePath('/admin/inquiries')
-  return { success: true, waitlisted, registrationId: record.id.toUpperCase() }
+  return {
+    success: true,
+    waitlisted,
+    registrationId: record.id.toUpperCase(),
+    // Handed to RegistrationForm.jsx so its browser-side fbq('track', ...)
+    // call can match the server event above exactly.
+    metaEventId: record.id,
+    metaValue: matchedClass?.defaultFee || undefined,
+  }
 }
 
 // Both of the below rely on only being reachable through a form on
