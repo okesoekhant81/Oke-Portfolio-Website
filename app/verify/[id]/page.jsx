@@ -1,8 +1,10 @@
 import NavMenu from '../../../components/NavMenu'
+import PrintableCertificate from '../../../components/admin/PrintableCertificate'
 import { getStudent } from '../../../lib/content/students'
 import { getClassDates } from '../../../lib/content/classDates'
 import { getWorkshopContent } from '../../../lib/content/workshop'
 import { getLocale } from '../../../lib/i18n'
+import { localizeWorkshopContent } from '../../../lib/localizeContent'
 import { SITE_NAME } from '../../../lib/site'
 
 export const dynamic = 'force-dynamic'
@@ -16,13 +18,6 @@ export const metadata = {
   robots: { index: false, follow: false },
 }
 
-function formatDate(dateStr) {
-  if (!dateStr) return null
-  const d = new Date(`${dateStr}T00:00:00`)
-  if (Number.isNaN(d.getTime())) return dateStr
-  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-}
-
 export default async function VerifyCertificatePage({ params }) {
   const { id: rawId } = await params
   // Registration IDs are always shown to registrants uppercase (see
@@ -32,12 +27,13 @@ export default async function VerifyCertificatePage({ params }) {
   // rather than trusting the case it arrives in.
   const id = rawId.toLowerCase()
 
-  const [student, classDates, workshop, locale] = await Promise.all([
+  const [student, classDates, rawWorkshop, locale] = await Promise.all([
     getStudent(id),
     getClassDates(),
     getWorkshopContent(),
     getLocale(),
   ])
+  const workshop = localizeWorkshopContent(rawWorkshop, locale)
 
   const assignedClass = classDates.find((d) => d.date === student?.classDate)
   // Both conditions matter, not just "class completed" — a student whose
@@ -47,11 +43,16 @@ export default async function VerifyCertificatePage({ params }) {
   // rather than trusting the class status alone.
   const verified = Boolean(student && student.paymentStatus === 'paid' && assignedClass?.status === 'completed')
   const courseName = assignedClass?.label || `${workshop.heroTitle} ${workshop.heroSubtitle}`
+  // The site's current course outline, not a snapshot of what existed when
+  // this particular student took it — same "courseName" reasoning as
+  // above: nothing here is versioned per-class, so "what the certificate
+  // represents" is always read as of today.
+  const outlineModules = (workshop.modules || []).filter((m) => m.title)
 
   return (
     <main className="min-h-screen dark:bg-ink">
       <NavMenu locale={locale} />
-      <div className="mx-auto max-w-md px-6 py-16 text-center sm:px-12">
+      <div className={`mx-auto px-6 py-16 text-center sm:px-12 ${verified ? 'max-w-2xl' : 'max-w-md'}`}>
         {verified ? (
           <>
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-green-100 dark:bg-green-500/15">
@@ -69,20 +70,42 @@ export default async function VerifyCertificatePage({ params }) {
               </svg>
             </div>
             <p className="mt-4 font-display text-lg font-bold text-ink dark:text-neutral-100">Certificate verified</p>
-            <div className="mt-6 rounded-xl border border-neutral-200 bg-white p-6 text-left dark:border-neutral-800 dark:bg-white/5">
-              <p className="text-xs text-muted dark:text-neutral-400">Name</p>
-              <p className="text-sm font-semibold text-ink dark:text-neutral-100">{student.name}</p>
-              <p className="mt-3 text-xs text-muted dark:text-neutral-400">Course</p>
-              <p className="text-sm font-semibold text-ink dark:text-neutral-100">{courseName}</p>
-              {student.classDate && (
-                <>
-                  <p className="mt-3 text-xs text-muted dark:text-neutral-400">Completed</p>
-                  <p className="text-sm font-semibold text-ink dark:text-neutral-100">{formatDate(student.classDate)}</p>
-                </>
-              )}
-              <p className="mt-3 text-xs text-muted dark:text-neutral-400">Issued by</p>
-              <p className="text-sm font-semibold text-ink dark:text-neutral-100">{SITE_NAME}</p>
+
+            <div className="mt-6">
+              <PrintableCertificate
+                studentName={student.name}
+                courseName={courseName}
+                classDate={student.classDate}
+                issuerName={SITE_NAME}
+                logoUrl={workshop.certificateLogo}
+                signatureUrl={workshop.certificateSignature}
+              />
             </div>
+
+            {outlineModules.length > 0 && (
+              <div className="mt-8 rounded-xl border border-neutral-200 bg-white p-6 text-left dark:border-neutral-800 dark:bg-white/5">
+                <p className="text-xs font-semibold text-neutral-500">Course outline completed</p>
+                <ul className="mt-3 space-y-2">
+                  {outlineModules.map((module, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-ink dark:text-neutral-100">
+                      <svg
+                        viewBox="0 0 24 24"
+                        className="mt-0.5 h-4 w-4 shrink-0 text-green-600 dark:text-green-400"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span>{module.title}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </>
         ) : (
           <>
