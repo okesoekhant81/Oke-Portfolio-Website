@@ -8,9 +8,16 @@ function formatDate(dateStr) {
 // padding read as a certificate frame without needing an actual image
 // asset. Visible on screen too (unlike PrintableRoster, which is print-only)
 // since an admin generating one wants to preview it before printing.
-export default function PrintableCertificate({ studentName, courseName, classDate, issuerName }) {
+export default function PrintableCertificate({ studentName, courseName, classDate, issuerName, logoUrl }) {
   return (
     <div className="mx-auto max-w-2xl border-8 border-double border-brand/30 bg-white p-10 text-center print:border-black/60">
+      {logoUrl && (
+        // A plain <img>, not next/image — this only ever renders on-screen in
+        // the admin panel or on a printed page, neither of which benefits
+        // from next/image's lazy-loading/responsive-srcset machinery, and
+        // print stylesheets generally want the real image tag anyway.
+        <img src={logoUrl} alt="" className="mx-auto mb-4 h-16 w-auto object-contain" />
+      )}
       <p className="text-xs tracking-[0.3em] text-neutral-400 uppercase">Certificate of Completion</p>
       <p className="mt-6 text-sm text-neutral-500">This certifies that</p>
       <p className="mt-3 font-display text-3xl font-bold italic text-brand">{studentName}</p>

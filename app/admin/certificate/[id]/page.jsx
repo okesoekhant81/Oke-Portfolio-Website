@@ -36,6 +36,7 @@ export default async function CertificatePage({ params }) {
             courseName={courseName}
             classDate={student.classDate}
             issuerName={SITE_NAME}
+            logoUrl={workshop.certificateLogo}
           />
         </div>
       </div>
