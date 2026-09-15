@@ -8,7 +8,7 @@ function formatDate(dateStr) {
 // padding read as a certificate frame without needing an actual image
 // asset. Visible on screen too (unlike PrintableRoster, which is print-only)
 // since an admin generating one wants to preview it before printing.
-export default function PrintableCertificate({ studentName, courseName, classDate, issuerName, logoUrl }) {
+export default function PrintableCertificate({ studentName, courseName, classDate, issuerName, logoUrl, verifyUrl }) {
   return (
     <div className="mx-auto max-w-2xl border-8 border-double border-brand/30 bg-white p-10 text-center print:border-black/60">
       {logoUrl && (
@@ -28,6 +28,14 @@ export default function PrintableCertificate({ studentName, courseName, classDat
         <div className="w-40 border-t border-neutral-300 pt-2 text-xs text-neutral-500">{issuerName}</div>
         <div className="w-40 border-t border-neutral-300 pt-2 text-xs text-neutral-500">Date</div>
       </div>
+      {verifyUrl && (
+        // The only way anyone holding a printed/screenshotted certificate
+        // would ever find /verify/[id] — without this line on the
+        // certificate itself, that page has no real path to being used.
+        <p className="mt-8 text-[10px] text-neutral-400">
+          Verify this certificate at {verifyUrl.replace(/^https?:\/\//, '')}
+        </p>
+      )}
     </div>
   )
 }

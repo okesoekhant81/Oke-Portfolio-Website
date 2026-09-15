@@ -6,7 +6,7 @@ import PrintButton from '../../../../components/admin/PrintButton'
 import { getStudent } from '../../../../lib/content/students'
 import { getClassDates } from '../../../../lib/content/classDates'
 import { getWorkshopContent } from '../../../../lib/content/workshop'
-import { SITE_NAME } from '../../../../lib/site'
+import { SITE_NAME, SITE_URL } from '../../../../lib/site'
 
 export const dynamic = 'force-dynamic'
 
@@ -37,6 +37,7 @@ export default async function CertificatePage({ params }) {
             classDate={student.classDate}
             issuerName={SITE_NAME}
             logoUrl={workshop.certificateLogo}
+            verifyUrl={`${SITE_URL}/verify/${student.id}`}
           />
         </div>
       </div>
