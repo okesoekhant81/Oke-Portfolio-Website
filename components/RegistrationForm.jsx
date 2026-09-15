@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useEffect, useRef, useState } from 'react'
+import { startTransition, useActionState, useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { submitInquiryAction } from '../app/actions/inquiries'
 import { getDictionary, italicIfLatin } from '../lib/dictionaries'
@@ -167,6 +167,18 @@ export default function RegistrationForm({ locale = 'en', classDates = [], payme
   // type="submit" element anywhere in the form, there is nothing for the
   // browser to implicitly activate — submission only ever happens through
   // this function, called directly from the button's onClick.
+  //
+  // dispatch() (useActionState's action) has to be called inside
+  // startTransition() when it's invoked manually like this rather than
+  // wired through a <form action={}> — otherwise React logs "called
+  // outside of a transition" and `pending` below doesn't reliably flip to
+  // true. That was the actual bug behind a registrant tapping this button
+  // a few times and ending up with several duplicate registrations: the
+  // button's disabled={pending} below wasn't reliably engaging, so a fast
+  // second/third tap could fire before the first request was even
+  // reflected in the UI. Wrapped correctly, isPending goes true
+  // synchronously as part of this same click, so the button is already
+  // disabled before a physically-separate next click can land.
   function submitForm() {
     if (paymentRequired && !proofUrl) {
       setProofMissingError(true)
@@ -177,7 +189,9 @@ export default function RegistrationForm({ locale = 'en', classDates = [], payme
     formData.set('website', honeypotRef.current?.value || '')
     formData.set('formStartedAt', String(startedAt))
     formData.set('paymentProofUrl', proofUrl)
-    dispatch(formData)
+    startTransition(() => {
+      dispatch(formData)
+    })
   }
 
   if (state?.success) {
