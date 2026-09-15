@@ -1,6 +1,7 @@
 import AdminNav from '../../../components/admin/AdminNav'
 import BackupButton from '../../../components/admin/BackupButton'
 import DbHardeningPanel from '../../../components/admin/DbHardeningPanel'
+import DbDiagnosticButton from '../../../components/admin/DbDiagnosticButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,6 +26,14 @@ export default function BackupAdminPage() {
         </p>
         <div className="mt-6 rounded-xl border border-neutral-200 bg-white p-6">
           <DbHardeningPanel />
+        </div>
+
+        <h2 className="mt-10 font-display text-xl font-bold italic text-brand">Database diagnostic</h2>
+        <p className="mt-1 text-sm text-neutral-500">
+          Investigating why the Postgres copy lost fields before re-attempting the cutover.
+        </p>
+        <div className="mt-6 rounded-xl border border-neutral-200 bg-white p-6">
+          <DbDiagnosticButton />
         </div>
       </div>
     </main>
