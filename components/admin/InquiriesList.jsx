@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 import InquiryStatusSelect from './InquiryStatusSelect'
 import { useSearchFilter, SearchBar, FilterSelect } from './SearchFilterBar'
 import { toCsv, downloadCsv } from '../../lib/csv'
@@ -69,6 +69,14 @@ function exportInquiries(inquiries) {
 // the row only disappears once the delete has actually gone through.
 export default function InquiriesList({ inquiries }) {
   const [items, setItems] = useState(inquiries)
+  // `items` only ever starts from `inquiries` on mount — a re-render with a
+  // new `inquiries` prop (AutoRefresh's poll, or another admin's edit
+  // landing via revalidatePath) wouldn't otherwise reach this local copy at
+  // all, since useState's initializer doesn't re-run on updates. This is
+  // what actually makes a poll visible.
+  useEffect(() => {
+    setItems(inquiries)
+  }, [inquiries])
   const [deletingId, setDeletingId] = useState(null)
   const [deleteError, setDeleteError] = useState(null)
   const [convertingId, setConvertingId] = useState(null)
