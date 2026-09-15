@@ -1,21 +1,42 @@
 import NavMenu from '../../../components/NavMenu'
 import PrintableCertificate from '../../../components/admin/PrintableCertificate'
+import CertificateShare from '../../../components/CertificateShare'
 import { getStudent } from '../../../lib/content/students'
 import { getClassDates } from '../../../lib/content/classDates'
 import { getWorkshopContent } from '../../../lib/content/workshop'
 import { getLocale } from '../../../lib/i18n'
 import { localizeWorkshopContent } from '../../../lib/localizeContent'
-import { SITE_NAME } from '../../../lib/site'
+import { generateVerifyQrDataUrl } from '../../../lib/certificateQr'
+import { SITE_NAME, SITE_URL } from '../../../lib/site'
 
 export const dynamic = 'force-dynamic'
 
 // Not meant to be discovered or crawled — each URL is only useful to
 // whoever already holds that one Registration ID (a student proving their
 // own certificate to someone else), not something search engines or a
-// public listing should surface.
-export const metadata = {
-  title: 'Verify a certificate',
-  robots: { index: false, follow: false },
+// public listing should surface. Open Graph tags still matter despite
+// that: noindex only keeps search engines from listing this page, it
+// doesn't stop Facebook's own scraper from reading these when the share
+// button below sends someone here, and without them the share preview is
+// just the site's generic homepage card.
+export async function generateMetadata({ params }) {
+  const { id: rawId } = await params
+  const id = rawId.toLowerCase()
+  const [student, classDates] = await Promise.all([getStudent(id), getClassDates()])
+  const assignedClass = classDates.find((d) => d.date === student?.classDate)
+  const verified = Boolean(student && student.paymentStatus === 'paid' && assignedClass?.status === 'completed')
+
+  if (!verified) {
+    return { title: 'Verify a certificate', robots: { index: false, follow: false } }
+  }
+
+  const title = `${student.name} — Certificate Verified`
+  const description = `${student.name} completed ${assignedClass?.label || SITE_NAME} at ${SITE_NAME}.`
+  return {
+    title,
+    robots: { index: false, follow: false },
+    openGraph: { title, description, url: `${SITE_URL}/verify/${student.id}` },
+  }
 }
 
 export default async function VerifyCertificatePage({ params }) {
@@ -48,6 +69,8 @@ export default async function VerifyCertificatePage({ params }) {
   // above: nothing here is versioned per-class, so "what the certificate
   // represents" is always read as of today.
   const outlineModules = (workshop.modules || []).filter((m) => m.title)
+  const verifyUrl = verified ? `${SITE_URL}/verify/${student.id}` : null
+  const qrCodeUrl = verifyUrl ? await generateVerifyQrDataUrl(verifyUrl) : null
 
   return (
     <main className="min-h-screen dark:bg-ink">
@@ -79,8 +102,11 @@ export default async function VerifyCertificatePage({ params }) {
                 issuerName={SITE_NAME}
                 logoUrl={workshop.certificateLogo}
                 signatureUrl={workshop.certificateSignature}
+                qrCodeUrl={qrCodeUrl}
               />
             </div>
+
+            <CertificateShare url={verifyUrl} title={`${student.name} completed ${courseName} — ${SITE_NAME}`} />
 
             {outlineModules.length > 0 && (
               <div className="mt-8 rounded-xl border border-neutral-200 bg-white p-6 text-left dark:border-neutral-800 dark:bg-white/5">

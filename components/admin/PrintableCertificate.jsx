@@ -16,6 +16,7 @@ export default function PrintableCertificate({
   logoUrl,
   signatureUrl,
   verifyUrl,
+  qrCodeUrl,
 }) {
   return (
     <div className="mx-auto max-w-2xl border-8 border-double border-brand/30 bg-white p-10 text-center print:border-black/60">
@@ -44,7 +45,12 @@ export default function PrintableCertificate({
           <div className="border-t border-neutral-300 pt-2 text-xs text-neutral-500">{issuerName}</div>
         </div>
         <div className="w-40">
-          <div className="h-12" aria-hidden="true" />
+          {/* Same reserved slot as the signature column — a scannable QR
+              straight to /verify/[id] when there's one to show, matching
+              the signature image's height so the two lines stay level. */}
+          <div className="flex h-12 items-end justify-center">
+            {qrCodeUrl && <img src={qrCodeUrl} alt="Scan to verify this certificate" className="h-12 w-12" />}
+          </div>
           <div className="border-t border-neutral-300 pt-2 text-xs text-neutral-500">
             {/* The class's own completion date, not a blank line for
                 someone to hand-write — this already is the date being
