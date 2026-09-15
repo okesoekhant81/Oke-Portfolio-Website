@@ -479,11 +479,17 @@ export default function RegistrationForm({ locale = 'en', classDates = [], payme
                           </div>
                           {m.note && <p className="mt-2 text-xs text-muted dark:text-neutral-400">{m.note}</p>}
                           {m.qrImage && (
-                            <img
-                              src={m.qrImage}
-                              alt={`${m.name} QR code`}
-                              className="mt-2 h-32 w-32 rounded-lg border border-neutral-200 object-contain dark:border-neutral-700"
-                            />
+                            // Sized for actually scanning off a phone screen, not just
+                            // confirming a QR code exists — the old 128px box was too
+                            // small to focus a camera on reliably. Opens full-size in a
+                            // new tab too, for anyone who wants to zoom in further.
+                            <a href={m.qrImage} target="_blank" rel="noreferrer" className="mt-3 block w-fit">
+                              <img
+                                src={m.qrImage}
+                                alt={`${m.name} QR code`}
+                                className="h-56 w-56 rounded-lg border border-neutral-200 object-contain sm:h-64 sm:w-64 dark:border-neutral-700"
+                              />
+                            </a>
                           )}
                         </div>
                       ))}

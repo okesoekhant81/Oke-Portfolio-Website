@@ -19,6 +19,13 @@ function formatDate(dateStr) {
   return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
+// Was plain "text-xs text-neutral-400 hover:text-brand" (no border/padding) —
+// easy to miss and fiddly to tap on mobile since it read as a caption, not a
+// control. Shared by the three toggle triggers below (Label/Time/Meeting
+// link) so they read as one consistent set of small buttons.
+const TOGGLE_BTN =
+  'rounded-md border border-neutral-300 px-2.5 py-1 text-xs font-medium text-ink transition-colors duration-150 hover:border-brand hover:text-brand'
+
 const STATUS_STYLES = {
   upcoming: 'border-neutral-300 bg-neutral-100 text-neutral-600',
   'in-progress': 'border-brand/40 bg-brand/10 text-brand',
@@ -183,7 +190,7 @@ function TimeEditor({ id, time }) {
     return (
       <span className="inline-flex items-center gap-1.5">
         {time && <span className="text-neutral-400">· {time}</span>}
-        <button type="button" onClick={() => setEditing(true)} className="text-xs text-neutral-400 hover:text-brand">
+        <button type="button" onClick={() => setEditing(true)} className={TOGGLE_BTN}>
           {time ? 'Edit time' : 'Add time'}
         </button>
       </span>
@@ -251,7 +258,7 @@ function MeetingLinkEditor({ id, meetingLink }) {
             Meet link
           </a>
         )}
-        <button type="button" onClick={() => setEditing(true)} className="text-xs text-neutral-400 hover:text-brand">
+        <button type="button" onClick={() => setEditing(true)} className={TOGGLE_BTN}>
           {meetingLink ? 'Edit meeting link' : 'Add meeting link'}
         </button>
       </span>
@@ -311,12 +318,8 @@ function LabelEditor({ id, label }) {
     return (
       <span className="inline-flex items-center gap-1.5">
         {label && <span className="text-neutral-400">— {label}</span>}
-        <button
-          type="button"
-          onClick={() => setEditing(true)}
-          className="text-xs text-neutral-400 hover:text-brand"
-        >
-          {label ? 'Edit' : 'Add label'}
+        <button type="button" onClick={() => setEditing(true)} className={TOGGLE_BTN}>
+          {label ? 'Edit label' : 'Add label'}
         </button>
       </span>
     )
