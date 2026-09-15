@@ -1,6 +1,7 @@
 import AdminNav from '../../../components/admin/AdminNav'
 import BackupButton from '../../../components/admin/BackupButton'
 import DbHardeningPanel from '../../../components/admin/DbHardeningPanel'
+import NewsletterMigrationPanel from '../../../components/admin/NewsletterMigrationPanel'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,6 +26,12 @@ export default function BackupAdminPage() {
         </p>
         <div className="mt-6 rounded-xl border border-neutral-200 bg-white p-6">
           <DbHardeningPanel />
+        </div>
+
+        <h2 className="mt-10 font-display text-xl font-bold italic text-brand">Newsletter migration</h2>
+        <p className="mt-1 text-sm text-neutral-500">Moves subscriber emails from Blob to Postgres.</p>
+        <div className="mt-6 rounded-xl border border-neutral-200 bg-white p-6">
+          <NewsletterMigrationPanel />
         </div>
       </div>
     </main>
