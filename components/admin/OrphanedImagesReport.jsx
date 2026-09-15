@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { getOrphanedImagesReportAction } from '../../app/actions/imageReport'
+import { getOrphanedImagesReportAction, deleteOrphanedImagesAction } from '../../app/actions/imageReport'
+import { useConfirm } from './ConfirmProvider'
 
 function formatBytes(bytes) {
   if (bytes < 1024) return `${bytes} B`
@@ -23,14 +24,36 @@ function formatBytes(bytes) {
 export default function OrphanedImagesReport() {
   const [state, setState] = useState('idle') // idle | working | error
   const [report, setReport] = useState(null)
+  const [deleteState, setDeleteState] = useState('idle') // idle | working | error
+  const [deleteResult, setDeleteResult] = useState(null)
+  const confirm = useConfirm()
 
   async function handleClick() {
     setState('working')
+    setDeleteResult(null)
     try {
       setReport(await getOrphanedImagesReportAction())
       setState('idle')
     } catch {
       setState('error')
+    }
+  }
+
+  async function handleDelete() {
+    const ok = await confirm(
+      `Permanently delete ${report.orphanedCount} unreferenced images (${formatBytes(report.orphanedBytes)})? This can't be undone.`,
+      { confirmLabel: 'Delete' }
+    )
+    if (!ok) return
+
+    setDeleteState('working')
+    try {
+      const result = await deleteOrphanedImagesAction()
+      setDeleteResult(result)
+      setDeleteState('idle')
+      setReport(await getOrphanedImagesReportAction())
+    } catch {
+      setDeleteState('error')
     }
   }
 
@@ -45,6 +68,12 @@ export default function OrphanedImagesReport() {
         {state === 'working' ? 'Scanning…' : 'Scan for orphaned images'}
       </button>
       {state === 'error' && <p className="mt-2 text-sm text-red-600">Could not build the report. Please try again.</p>}
+
+      {deleteResult && (
+        <p className="mt-2 text-sm text-green-700">
+          Deleted {deleteResult.deletedCount} images ({formatBytes(deleteResult.deletedBytes)}).
+        </p>
+      )}
 
       {report && (
         <div className="mt-4">
@@ -78,6 +107,21 @@ export default function OrphanedImagesReport() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+          {report.orphanedCount > 0 && (
+            <div className="mt-3">
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={deleteState === 'working'}
+                className="rounded-md bg-red-600 px-5 py-2 text-sm font-medium text-white transition-opacity disabled:opacity-60"
+              >
+                {deleteState === 'working' ? 'Deleting…' : 'Delete all orphaned images'}
+              </button>
+              {deleteState === 'error' && (
+                <p className="mt-2 text-sm text-red-600">Could not delete. Please try again.</p>
+              )}
             </div>
           )}
         </div>
