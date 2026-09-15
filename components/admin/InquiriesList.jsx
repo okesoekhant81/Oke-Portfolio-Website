@@ -268,7 +268,7 @@ export default function InquiriesList({ inquiries }) {
                           minute: '2-digit',
                         })}
                         {' · '}
-                        <span className="font-mono">{inquiry.id.toUpperCase()}</span>
+                        <span className="font-mono">{inquiry.id?.toUpperCase()}</span>
                       </p>
                     </div>
                   </div>
