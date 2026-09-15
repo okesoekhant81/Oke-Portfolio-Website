@@ -37,6 +37,7 @@ const GROUPS = [
       { href: '/admin/activity', label: 'Activity' },
       { href: '/admin/trash', label: 'Trash' },
       { href: '/admin/team', label: 'Team' },
+      { href: '/admin/features', label: 'Features' },
     ],
   },
 ]
