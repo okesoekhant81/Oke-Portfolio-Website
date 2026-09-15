@@ -9,7 +9,7 @@ import { getLocale } from '../../lib/i18n'
 import { localizeAboutContent, localizeHomepageContent } from '../../lib/localizeContent'
 import { getDictionary, headingGap, headingLeading, italicIfLatin } from '../../lib/dictionaries'
 import { SITE_URL, SITE_NAME, SOCIAL_LINKS } from '../../lib/site'
-import { safeJsonLd } from '../../lib/jsonLd'
+import { safeJsonLd, buildBreadcrumbJsonLd } from '../../lib/jsonLd'
 
 export async function generateMetadata() {
   const [rawContent, locale] = await Promise.all([getAboutContent(), getLocale()])
@@ -57,9 +57,15 @@ export default async function AboutPage() {
     inLanguage: locale,
   }
 
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: dict.nav.home, url: SITE_URL },
+    { name: dict.nav.about, url: `${SITE_URL}/about` },
+  ])
+
   return (
     <main className="dark:bg-ink">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(personJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbJsonLd) }} />
       <NavMenu locale={locale} />
       <div className="mx-auto max-w-2xl px-6 pt-8 pb-14 sm:px-12 sm:pt-10 sm:pb-16 md:px-16 lg:max-w-3xl">
         <Link

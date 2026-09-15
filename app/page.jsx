@@ -15,7 +15,7 @@ import { getTestimonials } from '../lib/content/testimonials'
 import { getAnalytics } from '../lib/content/analytics'
 import { getLocale } from '../lib/i18n'
 import { localizeHomepageContent, localizePost, localizeTestimonials } from '../lib/localizeContent'
-import { SITE_URL, SITE_NAME, SOCIAL_LINKS } from '../lib/site'
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, SOCIAL_LINKS } from '../lib/site'
 import { safeJsonLd } from '../lib/jsonLd'
 
 function buildPersonJsonLd(locale) {
@@ -42,6 +42,33 @@ function buildPersonJsonLd(locale) {
   }
 }
 
+// Site-level entities, distinct from the personal Person above — these are
+// what let search engines resolve "who runs this site" and "what is this
+// site" independently of any one page. logo points at apple-icon (180x180),
+// the largest actual image this site generates for its icon — Google's
+// Organization logo guidance wants a real image, not the 32x32 favicon.
+function buildWebsiteJsonLd(locale) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: SITE_NAME,
+    url: SITE_URL,
+    description: SITE_DESCRIPTION,
+    inLanguage: locale,
+  }
+}
+
+function buildOrganizationJsonLd() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: SITE_NAME,
+    url: SITE_URL,
+    logo: `${SITE_URL}/apple-icon`,
+    sameAs: SOCIAL_LINKS,
+  }
+}
+
 export default async function Home() {
   const [rawContent, rawPosts, rawTestimonials, locale, { postViews }] = await Promise.all([
     getHomepageContent(),
@@ -56,10 +83,14 @@ export default async function Home() {
     .slice(0, 4)
     .map((post) => ({ ...localizePost(post, locale), views: postViews[post.slug] || 0 }))
   const personJsonLd = buildPersonJsonLd(locale)
+  const websiteJsonLd = buildWebsiteJsonLd(locale)
+  const organizationJsonLd = buildOrganizationJsonLd()
 
   return (
     <main>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(personJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(websiteJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(organizationJsonLd) }} />
       <NavMenu locale={locale} />
       <Hero
         name={content.heroName}

@@ -17,7 +17,7 @@ import { getLocale } from '../../lib/i18n'
 import { localizeHomepageContent, localizeWorkshopContent, localizeTestimonials } from '../../lib/localizeContent'
 import { getDictionary, headingGap, headingLeading, italicIfLatin } from '../../lib/dictionaries'
 import { SITE_URL, SITE_NAME } from '../../lib/site'
-import { safeJsonLd } from '../../lib/jsonLd'
+import { safeJsonLd, buildBreadcrumbJsonLd } from '../../lib/jsonLd'
 
 export async function generateMetadata() {
   const [rawContent, locale] = await Promise.all([getWorkshopContent(), getLocale()])
@@ -147,11 +147,17 @@ export default async function WorkshopPage() {
     })),
   }
 
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: dict.nav.home, url: SITE_URL },
+    { name: `${content.heroTitle} ${content.heroSubtitle}`, url: `${SITE_URL}/workshop` },
+  ])
+
   return (
     <main className="dark:bg-ink">
       <NavMenu locale={locale} />
       <div className="mx-auto max-w-2xl px-6 pt-8 pb-14 sm:px-12 sm:pt-10 sm:pb-16 md:px-16 lg:max-w-3xl">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(courseJsonLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbJsonLd) }} />
         {faqJsonLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(faqJsonLd) }} />}
 
         <Link

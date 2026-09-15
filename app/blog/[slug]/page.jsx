@@ -17,7 +17,7 @@ import { getLocale } from '../../../lib/i18n'
 import { localizeHomepageContent, localizePost } from '../../../lib/localizeContent'
 import { getDictionary, headingGap, headingLeading, italicIfLatin } from '../../../lib/dictionaries'
 import { SITE_URL, SITE_NAME } from '../../../lib/site'
-import { safeJsonLd } from '../../../lib/jsonLd'
+import { safeJsonLd, buildBreadcrumbJsonLd } from '../../../lib/jsonLd'
 
 export async function generateMetadata({ params }) {
   const { slug } = await params
@@ -86,11 +86,18 @@ export default async function BlogPost({ params }) {
     ...(post.tags?.length > 0 && { keywords: post.tags.join(', ') }),
   }
 
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: dict.nav.home, url: SITE_URL },
+    { name: dict.nav.articles, url: `${SITE_URL}/blog` },
+    { name: post.title, url: `${SITE_URL}/blog/${slug}` },
+  ])
+
   return (
     <main className="dark:bg-ink">
       <NavMenu locale={locale} />
       <div className="mx-auto max-w-2xl px-6 pt-8 pb-14 sm:px-12 sm:pt-10 sm:pb-16 md:px-16 lg:max-w-3xl">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(articleJsonLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbJsonLd) }} />
 
         <Link
           href="/blog"

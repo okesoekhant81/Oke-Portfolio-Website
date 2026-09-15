@@ -56,6 +56,13 @@ export const metadata = {
   },
 }
 
+// Same brand color as the favicon/apple-icon/opengraph-image — tints the
+// browser chrome (mobile Safari's address bar, Android's status bar) to
+// match instead of the OS default.
+export const viewport = {
+  themeColor: '#e83606',
+}
+
 export default function RootLayout({ children }) {
   // Deliberately not locale-aware here (stays a plain, static component):
   // reading the locale cookie in the shared root layout would force every
