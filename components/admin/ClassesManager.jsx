@@ -350,6 +350,72 @@ function LabelEditor({ id, label }) {
   )
 }
 
+// Fee/capacity/meeting link are edited far less often than a class is
+// glanced at (to check headcount or status), so keeping all six editors
+// visible on every row made the list hard to scan — this hides the three
+// least-frequently-touched ones behind a per-row toggle, closed by
+// default. Date/label/time/status/count/revenue (the "what class is this,
+// how full is it" summary) stay on the always-visible line.
+function ClassRow({ d, classStudents, revenue, deletingId, deleteError, onDelete }) {
+  const [expanded, setExpanded] = useState(false)
+
+  return (
+    <li className={`rounded-lg border border-neutral-100 px-3 py-3 ${deletingId === d.id ? 'opacity-40' : ''}`}>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <span className="flex items-center gap-2 text-sm">
+          <Link href={`/admin/classes/${d.id}`} className="font-medium text-ink hover:text-brand">
+            {formatDate(d.date)}
+          </Link>
+          {d.label && <span className="text-neutral-400">— {d.label}</span>}
+          {d.time && <span className="text-neutral-400">· {d.time}</span>}
+        </span>
+        <span className="flex items-center gap-2">
+          <StatusSelect id={d.id} status={d.status} />
+          {deleteError === d.id && <span className="text-xs text-red-600">Couldn&rsquo;t delete</span>}
+          <button
+            type="button"
+            onClick={() => onDelete(d.id)}
+            disabled={deletingId === d.id}
+            className="text-xs text-neutral-400 hover:text-red-600 disabled:hover:text-neutral-400"
+          >
+            {deletingId === d.id ? 'Deleting…' : 'Delete'}
+          </button>
+        </span>
+      </div>
+      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-neutral-500">
+        <Link href={`/admin/classes/${d.id}`} className="hover:text-brand">
+          {classStudents.length} student{classStudents.length === 1 ? '' : 's'}
+        </Link>
+        {d.capacity > 0 && (
+          <span className={classStudents.length >= d.capacity ? 'font-medium text-brand' : ''}>
+            {classStudents.length >= d.capacity
+              ? 'Full'
+              : `${d.capacity - classStudents.length} seat${d.capacity - classStudents.length === 1 ? '' : 's'} left`}
+          </span>
+        )}
+        <span>{revenue.toLocaleString()} MMK collected</span>
+        {d.meetingLink && (
+          <a href={d.meetingLink} target="_blank" rel="noreferrer" className="text-brand hover:underline">
+            Meet link
+          </a>
+        )}
+        <button type="button" onClick={() => setExpanded((v) => !v)} className="text-neutral-400 hover:text-ink">
+          {expanded ? 'Hide details ▲' : 'Details ▾'}
+        </button>
+      </div>
+      {expanded && (
+        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-neutral-100 pt-2 text-xs text-neutral-500">
+          <LabelEditor id={d.id} label={d.label} />
+          <TimeEditor id={d.id} time={d.time} />
+          <FeeEditor id={d.id} defaultFee={d.defaultFee} />
+          <CapacityEditor id={d.id} capacity={d.capacity} />
+          <MeetingLinkEditor id={d.id} meetingLink={d.meetingLink} />
+        </div>
+      )}
+    </li>
+  )
+}
+
 // Renders straight from the `dates`/`students` props rather than keeping a
 // local copy — a successful add/delete/edit calls revalidatePath, which
 // refreshes these props from the server automatically, so there's nothing
@@ -391,48 +457,15 @@ export default function ClassesManager({ dates, students }) {
             const classStudents = students.filter((s) => s.classDate === d.date)
             const revenue = classStudents.reduce((sum, s) => sum + (Number(s.amountPaid) || 0), 0)
             return (
-              <li
+              <ClassRow
                 key={d.id}
-                className={`rounded-lg border border-neutral-100 px-3 py-3 ${deletingId === d.id ? 'opacity-40' : ''}`}
-              >
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <span className="flex items-center gap-2 text-sm">
-                    <Link href={`/admin/classes/${d.id}`} className="font-medium text-ink hover:text-brand">
-                      {formatDate(d.date)}
-                    </Link>
-                    <LabelEditor id={d.id} label={d.label} />
-                    <TimeEditor id={d.id} time={d.time} />
-                  </span>
-                  <span className="flex items-center gap-2">
-                    <StatusSelect id={d.id} status={d.status} />
-                    {deleteError === d.id && <span className="text-xs text-red-600">Couldn&rsquo;t delete</span>}
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(d.id)}
-                      disabled={deletingId === d.id}
-                      className="text-xs text-neutral-400 hover:text-red-600 disabled:hover:text-neutral-400"
-                    >
-                      {deletingId === d.id ? 'Deleting…' : 'Delete'}
-                    </button>
-                  </span>
-                </div>
-                <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-neutral-500">
-                  <Link href={`/admin/classes/${d.id}`} className="hover:text-brand">
-                    {classStudents.length} student{classStudents.length === 1 ? '' : 's'}
-                  </Link>
-                  {d.capacity > 0 && (
-                    <span className={classStudents.length >= d.capacity ? 'font-medium text-brand' : ''}>
-                      {classStudents.length >= d.capacity
-                        ? 'Full'
-                        : `${d.capacity - classStudents.length} seat${d.capacity - classStudents.length === 1 ? '' : 's'} left`}
-                    </span>
-                  )}
-                  <span>{revenue.toLocaleString()} MMK collected</span>
-                  <FeeEditor id={d.id} defaultFee={d.defaultFee} />
-                  <CapacityEditor id={d.id} capacity={d.capacity} />
-                  <MeetingLinkEditor id={d.id} meetingLink={d.meetingLink} />
-                </div>
-              </li>
+                d={d}
+                classStudents={classStudents}
+                revenue={revenue}
+                deletingId={deletingId}
+                deleteError={deleteError}
+                onDelete={handleDelete}
+              />
             )
           })}
         </ul>

@@ -41,6 +41,16 @@ export default function ClassAttendanceSheet({ classId, students }) {
     setOverrides((prev) => ({ ...prev, [student.id]: !presentFor(student) }))
   }
 
+  // Attendance-taking is "assume everyone showed up, uncheck the no-shows"
+  // by default already — these are for the opposite case (a cancelled
+  // session, or starting a re-count from scratch) and for undoing a run of
+  // individual unchecks in one click instead of clicking through each one
+  // again.
+  function markAll(present) {
+    setSaved(false)
+    setOverrides(Object.fromEntries(students.map((s) => [s.id, present])))
+  }
+
   function changeDate(next) {
     setSelectedDate(next)
     setOverrides({})
@@ -108,7 +118,21 @@ export default function ClassAttendanceSheet({ classId, students }) {
         </div>
       </div>
 
-      <ul className="mt-3 divide-y divide-neutral-100">
+      <div className="mt-3 flex items-center justify-between gap-3">
+        <p className="text-xs text-neutral-400">
+          {students.filter((s) => presentFor(s)).length}/{students.length} present
+        </p>
+        <div className="flex items-center gap-3 text-xs font-medium">
+          <button type="button" onClick={() => markAll(true)} className="text-brand hover:underline">
+            Mark all present
+          </button>
+          <button type="button" onClick={() => markAll(false)} className="text-neutral-400 hover:text-red-600">
+            Mark all absent
+          </button>
+        </div>
+      </div>
+
+      <ul className="mt-2 divide-y divide-neutral-100">
         {students.map((s) => (
           <li key={s.id} className="flex items-center justify-between gap-3 py-2">
             <span className="text-sm text-ink">{s.name}</span>

@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import AdminNav from '../../../../components/admin/AdminNav'
 import AddStudentToClassForm from '../../../../components/admin/AddStudentToClassForm'
+import AssignExistingStudentForm from '../../../../components/admin/AssignExistingStudentForm'
 import ClassAttendanceSheet from '../../../../components/admin/ClassAttendanceSheet'
 import StudentRow from '../../../../components/admin/StudentRow'
 import PrintRosterButton from '../../../../components/admin/PrintRosterButton'
@@ -25,6 +26,7 @@ export default async function ClassDetailPage({ params }) {
   if (!classInfo) notFound()
 
   const students = allStudents.filter((s) => s.classDate === classInfo.date)
+  const otherStudents = allStudents.filter((s) => s.classDate !== classInfo.date)
   const totalRevenue = students.reduce((sum, s) => sum + (Number(s.amountPaid) || 0), 0)
   const classLabel = `${formatDate(classInfo.date)}${classInfo.label ? ` — ${classInfo.label}` : ''}`
 
@@ -75,6 +77,7 @@ export default async function ClassDetailPage({ params }) {
           ) : (
             <p className="mt-2 text-sm text-neutral-500">No students assigned to this class yet.</p>
           )}
+          <AssignExistingStudentForm classDate={classInfo.date} candidates={otherStudents} />
         </div>
 
         <AddStudentToClassForm classDate={classInfo.date} />
