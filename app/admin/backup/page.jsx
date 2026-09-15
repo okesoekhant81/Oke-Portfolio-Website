@@ -1,6 +1,5 @@
 import AdminNav from '../../../components/admin/AdminNav'
 import BackupButton from '../../../components/admin/BackupButton'
-import DbMigrationPanel from '../../../components/admin/DbMigrationPanel'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,15 +16,6 @@ export default function BackupAdminPage() {
         </p>
         <div className="mt-6 rounded-xl border border-neutral-200 bg-white p-6">
           <BackupButton />
-        </div>
-
-        <h2 className="mt-10 font-display text-xl font-bold italic text-brand">Database migration</h2>
-        <p className="mt-1 text-sm text-neutral-500">
-          Moves student/inquiry/admin data from Blob onto Postgres. This step only copies — the app keeps using
-          Blob for this data until a follow-up update switches it over.
-        </p>
-        <div className="mt-6 rounded-xl border border-neutral-200 bg-white p-6">
-          <DbMigrationPanel />
         </div>
       </div>
     </main>
