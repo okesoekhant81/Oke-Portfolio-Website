@@ -1,5 +1,6 @@
 import AdminNav from '../../../components/admin/AdminNav'
 import BackupButton from '../../../components/admin/BackupButton'
+import OrphanedImagesReport from '../../../components/admin/OrphanedImagesReport'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,6 +17,16 @@ export default function BackupAdminPage() {
         </p>
         <div className="mt-6 rounded-xl border border-neutral-200 bg-white p-6">
           <BackupButton />
+        </div>
+
+        <h2 className="mt-10 font-display text-xl font-bold italic text-brand">Orphaned images</h2>
+        <p className="mt-1 text-sm text-neutral-500">
+          Scans every uploaded image against everything it could still be referenced from, and lists any that
+          aren't referenced anywhere anymore — usually old uploads left behind after an image was replaced. This
+          only reports; it doesn't delete anything.
+        </p>
+        <div className="mt-6 rounded-xl border border-neutral-200 bg-white p-6">
+          <OrphanedImagesReport />
         </div>
       </div>
     </main>
