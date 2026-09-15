@@ -32,19 +32,25 @@ export default function PrintableCertificate({
       <p className="mt-4 text-sm text-neutral-500">has successfully completed</p>
       <p className="mt-2 font-display text-xl font-bold text-ink">{courseName}</p>
       {classDate && <p className="mt-1 text-sm text-neutral-500">{formatDate(classDate)}</p>}
-      <div className="mx-auto mt-12 flex max-w-sm items-end justify-between">
+      <div className="mx-auto mt-12 flex max-w-sm justify-between">
         <div className="w-40">
-          {signatureUrl && (
-            // Sits in the blank space above the signature line, same as a
-            // real wet signature would — not part of the line/caption below.
-            <img src={signatureUrl} alt="" className="mx-auto h-12 w-auto object-contain" />
-          )}
+          {/* Both columns reserve the same h-12 slot above their line,
+              signature or not — without a matching empty slot on the date
+              side, the two columns end up different heights and the date's
+              line/text visibly shift down to compensate. */}
+          <div className="flex h-12 items-end justify-center">
+            {signatureUrl && <img src={signatureUrl} alt="" className="h-12 w-auto object-contain" />}
+          </div>
           <div className="border-t border-neutral-300 pt-2 text-xs text-neutral-500">{issuerName}</div>
         </div>
-        <div className="w-40 border-t border-neutral-300 pt-2 text-xs text-neutral-500">
-          {/* The class's own completion date, not a blank line for someone
-              to hand-write — this already is the date being certified. */}
-          {classDate ? formatDate(classDate) : 'Date'}
+        <div className="w-40">
+          <div className="h-12" aria-hidden="true" />
+          <div className="border-t border-neutral-300 pt-2 text-xs text-neutral-500">
+            {/* The class's own completion date, not a blank line for
+                someone to hand-write — this already is the date being
+                certified. */}
+            {classDate ? formatDate(classDate) : 'Date'}
+          </div>
         </div>
       </div>
       {verifyUrl && (
