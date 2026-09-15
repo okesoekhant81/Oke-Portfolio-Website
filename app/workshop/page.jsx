@@ -57,6 +57,21 @@ export default async function WorkshopPage() {
   const inProgressCount = inProgressClass
     ? students.filter((s) => s.classDate === inProgressClass.date).length
     : 0
+  // Same slot the in-progress card used to occupy — once that cohort's
+  // status flips to 'completed', it used to just vanish from this spot
+  // instead of leaving something in its place. Only shown when nothing is
+  // actually in progress (a real active cohort is stronger social proof
+  // than a finished one), and only the most recent completed class, not
+  // every one that's ever run.
+  const recentlyCompleted = inProgressClass
+    ? null
+    : classDates.filter((d) => d.status === 'completed').sort((a, b) => b.date.localeCompare(a.date))[0]
+  const recentlyCompletedCount = recentlyCompleted
+    ? students.filter((s) => s.classDate === recentlyCompleted.date).length
+    : 0
+  // A completed class nobody actually attended isn't social proof of
+  // anything — skip it rather than showing "0 students recently finished".
+  const showRecentlyCompleted = Boolean(recentlyCompleted) && recentlyCompletedCount > 0
   const nextUpcoming = classDates
     .filter((d) => d.status !== 'completed' && d.date !== inProgressClass?.date)
     .sort((a, b) => a.date.localeCompare(b.date))[0]
@@ -195,7 +210,7 @@ export default async function WorkshopPage() {
           />
         </Reveal>
 
-        {(inProgressClass || nextUpcoming) && (
+        {(inProgressClass || showRecentlyCompleted || nextUpcoming) && (
           <Reveal delay={0.12}>
             <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
               {inProgressClass && (
@@ -206,6 +221,17 @@ export default async function WorkshopPage() {
                   </p>
                   <p className="mt-1 text-sm text-ink dark:text-neutral-100">
                     <span className="font-bold">{inProgressCount}</span> {dict.workshop.cohortActiveBody}
+                  </p>
+                </div>
+              )}
+              {showRecentlyCompleted && (
+                <div className="rounded-xl border border-green-200 bg-green-50 p-4 dark:border-green-500/30 dark:bg-green-500/10">
+                  <p className="flex items-center gap-1.5 text-xs font-semibold text-green-700 dark:text-green-400">
+                    <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-green-600 dark:bg-green-400" aria-hidden="true" />
+                    {dict.workshop.cohortCompletedLabel}
+                  </p>
+                  <p className="mt-1 text-sm text-ink dark:text-neutral-100">
+                    <span className="font-bold">{recentlyCompletedCount}</span> {dict.workshop.cohortCompletedBody}
                   </p>
                 </div>
               )}
