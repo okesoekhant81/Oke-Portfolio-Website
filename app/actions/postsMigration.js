@@ -1,6 +1,6 @@
 'use server'
 
-import { readJson, writeJson } from '../../lib/blobStore'
+import { readJson, writeJson, deleteJson } from '../../lib/blobStore'
 import { logActivity } from '../../lib/activityLog'
 
 const INDEX_PATH = 'content/posts-index.json'
@@ -35,4 +35,19 @@ export async function migratePostsToSingleFileAction() {
     migratedCount: found.length,
     missingSlugs,
   }
+}
+
+// The final step, once the cutover in lib/content/posts.js has shipped and
+// been verified in production — deletes the old index and every old
+// per-post file the site no longer reads or writes. Only reachable from the
+// confirm-gated button on /admin/backup. Not run automatically: unlike the
+// copy above, this one is destructive and has no "safe to re-run" story
+// once the old files are gone.
+export async function cleanupOldPostFilesAction() {
+  const slugs = (await readJson(INDEX_PATH)) || []
+  await Promise.all(slugs.map((slug) => deleteJson(postPath(slug))))
+  await deleteJson(INDEX_PATH)
+
+  await logActivity('Old per-post storage cleaned up', `${slugs.length} post files + index`)
+  return { deletedCount: slugs.length }
 }

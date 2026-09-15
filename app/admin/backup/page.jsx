@@ -32,9 +32,8 @@ export default function BackupAdminPage() {
 
         <h2 className="mt-10 font-display text-xl font-bold italic text-brand">Posts storage migration (one-time)</h2>
         <p className="mt-1 text-sm text-neutral-500">
-          Copies every article into a new single-file storage shape, without touching the current one. Run this,
-          check the report below is clean, then let Claude know so the site can be switched over to read from it —
-          this step alone changes nothing live.
+          The site now reads and writes articles from a single consolidated file. This deletes the old, no-longer-used
+          per-post files left behind by that switch.
         </p>
         <div className="mt-6 rounded-xl border border-neutral-200 bg-white p-6">
           <PostsMigrationTool />
