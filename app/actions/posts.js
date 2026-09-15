@@ -2,7 +2,8 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { savePost, deletePost, restorePost, permanentlyDeletePost } from '../../lib/content/posts'
+import { savePost, deletePost, restorePost, permanentlyDeletePost, getPost } from '../../lib/content/posts'
+import { cleanupReplacedImages, cleanupAllImages } from '../../lib/imageCleanup'
 import { slugify } from '../../lib/slugify'
 import { logActivity } from '../../lib/activityLog'
 
@@ -16,6 +17,7 @@ export async function savePostAction(prevState, formData) {
   if (!slug) return { error: 'Could not generate a slug from that title.' }
 
   const previousSlug = get('previousSlug') || undefined
+  const previousPost = await getPost(previousSlug || slug, { includeUnpublished: true, includeDeleted: true })
 
   const tags = [...new Set(get('tags').split(',').map((t) => t.trim()).filter(Boolean))].slice(0, 10)
 
@@ -38,6 +40,7 @@ export async function savePostAction(prevState, formData) {
   } catch (err) {
     return { error: err.message || 'Could not save. Please try again.' }
   }
+  await cleanupReplacedImages(previousPost, post)
 
   await logActivity(previousSlug ? 'Article updated' : 'Article created', post.title)
   revalidatePath('/blog')
@@ -80,7 +83,9 @@ export async function permanentlyDeletePostAction(formData) {
   const slug = formData.get('slug')?.toString()
   if (!slug) return
 
+  const post = await getPost(slug, { includeUnpublished: true, includeDeleted: true })
   await permanentlyDeletePost(slug)
+  if (post) await cleanupAllImages(post)
 
   await logActivity('Article permanently deleted', slug)
   revalidatePath('/admin/trash')

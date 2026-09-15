@@ -14,6 +14,7 @@ import {
   getStudentsFingerprint,
 } from '../../lib/content/students'
 import { getInquiry, markInquiryConverted } from '../../lib/content/inquiries'
+import { cleanupAllImages } from '../../lib/imageCleanup'
 import { getClassDates } from '../../lib/content/classDates'
 import { getWorkshopContent } from '../../lib/content/workshop'
 import { localizeWorkshopContent } from '../../lib/localizeContent'
@@ -211,7 +212,9 @@ export async function restoreStudentAction(formData) {
 export async function permanentlyDeleteStudentAction(formData) {
   const id = formData.get('id')?.toString()
   if (!id) return
+  const student = await getStudent(id)
   await permanentlyDeleteStudent(id)
+  if (student) await cleanupAllImages(student)
   await logActivity('Student permanently deleted', id)
   revalidatePath('/admin/trash')
 }

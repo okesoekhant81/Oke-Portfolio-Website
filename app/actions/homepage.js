@@ -1,7 +1,8 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { saveHomepageContent } from '../../lib/content/homepage'
+import { saveHomepageContent, getHomepageContent } from '../../lib/content/homepage'
+import { cleanupReplacedImages } from '../../lib/imageCleanup'
 import { logActivity } from '../../lib/activityLog'
 
 export async function saveHomepage(prevState, formData) {
@@ -96,11 +97,16 @@ export async function saveHomepage(prevState, formData) {
     contactTaglineMy: get('contactTaglineMy'),
   }
 
+  const previous = await getHomepageContent()
   try {
     await saveHomepageContent(data)
   } catch (err) {
     return { error: err.message || 'Could not save. Please try again.' }
   }
+  // Any image field (hero photo, a service's icon, a project's logo, ...)
+  // that changed just orphaned its old upload forever — nothing else in
+  // this app ever deletes an image, see lib/imageCleanup.js.
+  await cleanupReplacedImages(previous, data)
 
   await logActivity('Homepage content saved')
   revalidatePath('/')

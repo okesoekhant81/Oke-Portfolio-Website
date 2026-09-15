@@ -1,7 +1,8 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { saveWorkshopContent } from '../../lib/content/workshop'
+import { saveWorkshopContent, getWorkshopContent } from '../../lib/content/workshop'
+import { cleanupReplacedImages } from '../../lib/imageCleanup'
 import { logActivity } from '../../lib/activityLog'
 
 export async function saveWorkshop(prevState, formData) {
@@ -100,11 +101,13 @@ export async function saveWorkshop(prevState, formData) {
     certificateReadyBodyMy: get('certificateReadyBodyMy'),
   }
 
+  const previous = await getWorkshopContent()
   try {
     await saveWorkshopContent(data)
   } catch (err) {
     return { error: err.message || 'Could not save. Please try again.' }
   }
+  await cleanupReplacedImages(previous, data)
 
   await logActivity('Workshop content saved')
   revalidatePath('/workshop')

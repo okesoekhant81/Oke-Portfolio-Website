@@ -8,7 +8,9 @@ import {
   restoreTestimonial,
   permanentlyDeleteTestimonial,
   reorderTestimonial,
+  getTestimonials,
 } from '../../lib/content/testimonials'
+import { cleanupReplacedImages, cleanupAllImages } from '../../lib/imageCleanup'
 import { checkSubmissionLimit, recordSubmission } from '../../lib/submissionLimits'
 import { clientIp } from '../../lib/clientIp'
 import { logActivity } from '../../lib/activityLog'
@@ -64,6 +66,7 @@ export async function updateTestimonialAction(formData) {
   if (!name) return { error: 'Please enter a name.' }
   if (!quote) return { error: 'Please enter a quote.' }
 
+  const previous = (await getTestimonials({ includeDeleted: true })).find((t) => t.id === id)
   try {
     await updateTestimonial(id, {
       name,
@@ -77,6 +80,7 @@ export async function updateTestimonialAction(formData) {
   } catch (err) {
     return { error: err.message || 'Could not save. Please try again.' }
   }
+  await cleanupReplacedImages(previous, { photo: get('photo') })
 
   await logActivity('Testimonial updated', name)
   revalidateAll()
@@ -159,7 +163,9 @@ export async function permanentlyDeleteTestimonialAction(formData) {
   const id = formData.get('id')?.toString()
   if (!id) return
 
+  const testimonial = (await getTestimonials({ includeDeleted: true })).find((t) => t.id === id)
   await permanentlyDeleteTestimonial(id)
+  if (testimonial) await cleanupAllImages(testimonial)
   await logActivity('Testimonial permanently deleted', id)
   revalidatePath('/admin/trash')
 }

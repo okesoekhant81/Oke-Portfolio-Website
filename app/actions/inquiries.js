@@ -9,7 +9,10 @@ import {
   setInquiryStatus,
   setInquiriesStatus,
   getInquiriesFingerprint,
+  getInquiry,
+  getInquiries,
 } from '../../lib/content/inquiries'
+import { cleanupAllImages } from '../../lib/imageCleanup'
 import { getClassDates } from '../../lib/content/classDates'
 import { getStudents } from '../../lib/content/students'
 import { getWorkshopContent } from '../../lib/content/workshop'
@@ -204,11 +207,17 @@ export async function updateInquiryStatusAction(formData) {
   revalidatePath('/admin/inquiries')
 }
 
+// The only delete path for inquiries — there's no Trash step for these like
+// there is for students/posts/testimonials, so every delete here is already
+// permanent and any payment screenshot it references needs cleaning up now,
+// not behind a separate "permanent delete" action.
 export async function deleteInquiryAction(formData) {
   const id = formData.get('id')?.toString()
   if (!id) return
 
+  const inquiry = await getInquiry(id)
   await deleteInquiry(id)
+  if (inquiry) await cleanupAllImages(inquiry)
   await logActivity('Inquiry deleted', id)
   revalidatePath('/admin/inquiries')
 }
@@ -217,7 +226,10 @@ export async function bulkDeleteInquiriesAction(formData) {
   const ids = formData.getAll('id').map((v) => v.toString())
   if (ids.length === 0) return
 
+  const idSet = new Set(ids)
+  const inquiries = (await getInquiries()).filter((inq) => idSet.has(inq.id))
   await deleteInquiries(ids)
+  await cleanupAllImages(inquiries)
   await logActivity('Inquiries bulk-deleted', `${ids.length} inquiries`)
   revalidatePath('/admin/inquiries')
 }
