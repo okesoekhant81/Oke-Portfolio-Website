@@ -2,7 +2,14 @@
 
 import { revalidatePath } from 'next/cache'
 import { headers, cookies } from 'next/headers'
-import { addInquiry, deleteInquiry, deleteInquiries, setInquiryStatus, setInquiriesStatus } from '../../lib/content/inquiries'
+import {
+  addInquiry,
+  deleteInquiry,
+  deleteInquiries,
+  setInquiryStatus,
+  setInquiriesStatus,
+  getInquiriesFingerprint,
+} from '../../lib/content/inquiries'
 import { getClassDates } from '../../lib/content/classDates'
 import { getStudents } from '../../lib/content/students'
 import { getWorkshopContent } from '../../lib/content/workshop'
@@ -176,6 +183,14 @@ export async function submitInquiryAction(prevState, formData) {
     metaEventId: record.id,
     metaValue: matchedClass?.defaultFee || undefined,
   }
+}
+
+// Callable directly from AutoRefresh (a client component) rather than
+// through a form — same as any other Server Action, just invoked on a
+// timer instead of a click. Only reachable from /admin/inquiries, gated by
+// proxy.js like everything else here.
+export async function getInquiriesFingerprintAction() {
+  return getInquiriesFingerprint()
 }
 
 // Both of the below rely on only being reachable through a form on

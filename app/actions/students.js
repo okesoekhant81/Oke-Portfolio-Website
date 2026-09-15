@@ -11,6 +11,7 @@ import {
   deleteAttendanceEntry,
   setAttendanceForClass,
   getStudent,
+  getStudentsFingerprint,
 } from '../../lib/content/students'
 import { getInquiry, markInquiryConverted } from '../../lib/content/inquiries'
 import { getClassDates } from '../../lib/content/classDates'
@@ -27,6 +28,13 @@ function clampAmount(value) {
   const n = Number(value)
   if (!Number.isFinite(n) || n < 0) return 0
   return Math.round(n)
+}
+
+// Callable directly from AutoRefresh (a client component) rather than
+// through a form — same as any other Server Action, just invoked on a
+// timer instead of a click.
+export async function getStudentsFingerprintAction() {
+  return getStudentsFingerprint()
 }
 
 export async function addStudentAction(prevState, formData) {

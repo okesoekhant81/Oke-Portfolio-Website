@@ -1,28 +1,55 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 
-// Polls the server at a fixed interval via router.refresh() — the pages
-// that render this are `dynamic = 'force-dynamic'`, so each refresh re-runs
-// that page's own data fetch (getInquiries/getStudents/...) server-side and
-// passes fresh props down. Without this, a new registration submitted by a
-// visitor never appears for an admin already sitting on the page; they'd
-// only see it after manually reloading.
+// Polls a cheap "did anything change" check (checkAction — a row count plus
+// the latest timestamp, see getInquiriesFingerprint/getStudentsFingerprint)
+// rather than blindly refetching this page's full data on a timer.
+// router.refresh() — the actually expensive step, since it re-runs the
+// page's own getInquiries()/getStudents() and re-renders everything below
+// it — only fires when that check's result differs from the last poll, so
+// a quiet page does nothing but a cheap count query every few seconds.
 //
-// Skips while the tab is hidden/backgrounded rather than polling
-// unconditionally — an admin with this tab open in the background all day
-// shouldn't be generating a request (and a Postgres query) every interval
-// for a page nobody's looking at.
-export default function AutoRefresh({ intervalMs = 20000 }) {
+// Skips entirely while the tab is hidden/backgrounded, same reasoning as
+// before: nobody's watching, so there's nothing to keep live.
+export default function AutoRefresh({ checkAction, intervalMs = 5000 }) {
   const router = useRouter()
+  const lastFingerprint = useRef(null)
+  const hasBaseline = useRef(false)
 
   useEffect(() => {
-    const id = setInterval(() => {
-      if (document.visibilityState === 'visible') router.refresh()
-    }, intervalMs)
+    if (!checkAction) return
+
+    async function poll() {
+      if (document.visibilityState !== 'visible') return
+
+      let fingerprint
+      try {
+        fingerprint = await checkAction()
+      } catch {
+        return
+      }
+      if (!fingerprint) return
+
+      const key = `${fingerprint.count}:${fingerprint.latest}`
+      // The first successful check just establishes what "current" already
+      // looks like — nothing to compare against yet, and definitely not
+      // something to refresh over.
+      if (!hasBaseline.current) {
+        lastFingerprint.current = key
+        hasBaseline.current = true
+        return
+      }
+      if (key !== lastFingerprint.current) {
+        lastFingerprint.current = key
+        router.refresh()
+      }
+    }
+
+    const id = setInterval(poll, intervalMs)
     return () => clearInterval(id)
-  }, [router, intervalMs])
+  }, [checkAction, intervalMs, router])
 
   return null
 }
