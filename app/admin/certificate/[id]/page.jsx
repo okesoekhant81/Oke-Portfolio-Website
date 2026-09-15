@@ -37,6 +37,7 @@ export default async function CertificatePage({ params }) {
             classDate={student.classDate}
             issuerName={SITE_NAME}
             logoUrl={workshop.certificateLogo}
+            signatureUrl={workshop.certificateSignature}
             verifyUrl={`${SITE_URL}/verify/${student.id}`}
           />
         </div>

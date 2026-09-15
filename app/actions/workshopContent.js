@@ -92,6 +92,7 @@ export async function saveWorkshop(prevState, formData) {
     paymentConfirmedSignatureMy: get('paymentConfirmedSignatureMy'),
 
     certificateLogo: get('certificateLogo'),
+    certificateSignature: get('certificateSignature'),
   }
 
   try {

@@ -8,7 +8,15 @@ function formatDate(dateStr) {
 // padding read as a certificate frame without needing an actual image
 // asset. Visible on screen too (unlike PrintableRoster, which is print-only)
 // since an admin generating one wants to preview it before printing.
-export default function PrintableCertificate({ studentName, courseName, classDate, issuerName, logoUrl, verifyUrl }) {
+export default function PrintableCertificate({
+  studentName,
+  courseName,
+  classDate,
+  issuerName,
+  logoUrl,
+  signatureUrl,
+  verifyUrl,
+}) {
   return (
     <div className="mx-auto max-w-2xl border-8 border-double border-brand/30 bg-white p-10 text-center print:border-black/60">
       {logoUrl && (
@@ -24,9 +32,20 @@ export default function PrintableCertificate({ studentName, courseName, classDat
       <p className="mt-4 text-sm text-neutral-500">has successfully completed</p>
       <p className="mt-2 font-display text-xl font-bold text-ink">{courseName}</p>
       {classDate && <p className="mt-1 text-sm text-neutral-500">{formatDate(classDate)}</p>}
-      <div className="mx-auto mt-12 flex max-w-sm items-center justify-between">
-        <div className="w-40 border-t border-neutral-300 pt-2 text-xs text-neutral-500">{issuerName}</div>
-        <div className="w-40 border-t border-neutral-300 pt-2 text-xs text-neutral-500">Date</div>
+      <div className="mx-auto mt-12 flex max-w-sm items-end justify-between">
+        <div className="w-40">
+          {signatureUrl && (
+            // Sits in the blank space above the signature line, same as a
+            // real wet signature would — not part of the line/caption below.
+            <img src={signatureUrl} alt="" className="mx-auto h-12 w-auto object-contain" />
+          )}
+          <div className="border-t border-neutral-300 pt-2 text-xs text-neutral-500">{issuerName}</div>
+        </div>
+        <div className="w-40 border-t border-neutral-300 pt-2 text-xs text-neutral-500">
+          {/* The class's own completion date, not a blank line for someone
+              to hand-write — this already is the date being certified. */}
+          {classDate ? formatDate(classDate) : 'Date'}
+        </div>
       </div>
       {verifyUrl && (
         // The only way anyone holding a printed/screenshotted certificate

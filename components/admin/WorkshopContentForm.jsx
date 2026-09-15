@@ -306,11 +306,16 @@ export default function WorkshopContentForm({ content }) {
 
         <Section title="Certificate">
           <p className="text-xs text-neutral-400">
-            Shown at the top of the certificate of completion (Students → a student whose class is marked
-            "Completed" gets a Certificate link). Optional — the certificate still works with just the text header
-            if you leave this blank.
+            Shown on the certificate of completion (Students → a student whose class is marked "Completed" gets a
+            Certificate link). Both optional — the certificate still works with just the text header and a blank
+            signature line if you leave these blank.
           </p>
           <ImageField label="Certificate logo (optional)" name="certificateLogo" defaultValue={content.certificateLogo} />
+          <ImageField
+            label="Signature (optional)"
+            name="certificateSignature"
+            defaultValue={content.certificateSignature}
+          />
         </Section>
 
         <SaveBar locked={locked} onEdit={() => setLocked(false)} onCancel={handleCancel} pending={pending} state={state} />
