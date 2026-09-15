@@ -7,7 +7,7 @@ import ClassAttendanceSheet from '../../../../components/admin/ClassAttendanceSh
 import StudentRow from '../../../../components/admin/StudentRow'
 import PrintRosterButton from '../../../../components/admin/PrintRosterButton'
 import PrintableRoster from '../../../../components/admin/PrintableRoster'
-import { getClassDate, getClassDates } from '../../../../lib/content/classDates'
+import { getClassDates } from '../../../../lib/content/classDates'
 import { getStudents } from '../../../../lib/content/students'
 
 export const dynamic = 'force-dynamic'
@@ -22,7 +22,12 @@ const STATUS_LABELS = { upcoming: 'Upcoming', 'in-progress': 'In progress', comp
 
 export default async function ClassDetailPage({ params }) {
   const { id } = await params
-  const [classInfo, allClassDates, allStudents] = await Promise.all([getClassDate(id), getClassDates(), getStudents()])
+  // getClassDate(id) used to be a separate call here — it's just
+  // getClassDates().find(...) internally, so calling it alongside the
+  // getClassDates() this page already needs for allClassDates meant every
+  // load of this page fetched the same Blob JSON twice for no reason.
+  const [allClassDates, allStudents] = await Promise.all([getClassDates(), getStudents()])
+  const classInfo = allClassDates.find((d) => d.id === id) || null
   if (!classInfo) notFound()
 
   const students = allStudents.filter((s) => s.classDate === classInfo.date)
