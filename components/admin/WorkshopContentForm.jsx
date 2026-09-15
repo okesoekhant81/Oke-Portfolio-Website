@@ -318,6 +318,28 @@ export default function WorkshopContentForm({ content }) {
           />
         </Section>
 
+        <Section title="Certificate Ready Email">
+          <p className="text-xs text-neutral-400">
+            Sent to every paid student in a class the moment you mark that class "Completed" (see Classes) — links
+            to their certificate at /verify.
+          </p>
+          <Field
+            label="Email subject"
+            name="certificateReadySubject"
+            defaultValue={content.certificateReadySubject}
+            nameMy="certificateReadySubjectMy"
+            defaultValueMy={content.certificateReadySubjectMy}
+          />
+          <TextArea
+            label="Email message — shown above the certificate link"
+            name="certificateReadyBody"
+            defaultValue={content.certificateReadyBody}
+            nameMy="certificateReadyBodyMy"
+            defaultValueMy={content.certificateReadyBodyMy}
+            rows={3}
+          />
+        </Section>
+
         <SaveBar locked={locked} onEdit={() => setLocked(false)} onCancel={handleCancel} pending={pending} state={state} />
         </form>
       </LockContext.Provider>

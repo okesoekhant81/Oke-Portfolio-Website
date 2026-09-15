@@ -93,6 +93,11 @@ export async function saveWorkshop(prevState, formData) {
 
     certificateLogo: get('certificateLogo'),
     certificateSignature: get('certificateSignature'),
+
+    certificateReadySubject: get('certificateReadySubject'),
+    certificateReadySubjectMy: get('certificateReadySubjectMy'),
+    certificateReadyBody: get('certificateReadyBody'),
+    certificateReadyBodyMy: get('certificateReadyBodyMy'),
   }
 
   try {

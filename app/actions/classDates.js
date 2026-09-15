@@ -1,7 +1,11 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { addClassDate, updateClassDate, deleteClassDate } from '../../lib/content/classDates'
+import { addClassDate, updateClassDate, deleteClassDate, getClassDates } from '../../lib/content/classDates'
+import { getStudents } from '../../lib/content/students'
+import { getWorkshopContent } from '../../lib/content/workshop'
+import { localizeWorkshopContent } from '../../lib/localizeContent'
+import { sendCertificateReady } from '../../lib/registrantEmail'
 import { logActivity } from '../../lib/activityLog'
 
 function clampFee(value) {
@@ -60,8 +64,33 @@ export async function updateClassDateStatusAction(formData) {
   const status = formData.get('status')?.toString()
   if (!id || !VALID_STATUSES.includes(status)) return
 
+  // Read before writing — need the class's status as it was a moment ago
+  // to tell "just marked completed" apart from "already completed, saved
+  // again", and updateClassDate itself only returns void.
+  const previousClass = (await getClassDates()).find((d) => d.id === id)
+
   await updateClassDate(id, { status })
   await logActivity('Class status changed', `${id} → ${status}`)
+
+  // Fires once, only on the transition into 'completed' — re-saving an
+  // already-completed class (or any other status change) never re-enters
+  // this, same idempotency reasoning as the payment-confirmed email in
+  // updateStudentPaymentAction. Only paid students get one: an unpaid
+  // registration was never issued a real certificate (see the `verified`
+  // check in app/verify/[id]/page.jsx), so emailing them a link that would
+  // just show "couldn't verify" is worse than not emailing at all.
+  const justCompleted = Boolean(previousClass && previousClass.status !== 'completed' && status === 'completed')
+  if (justCompleted) {
+    const [students, rawWorkshop] = await Promise.all([getStudents(), getWorkshopContent()])
+    const paidStudents = students.filter((s) => s.classDate === previousClass.date && s.paymentStatus === 'paid')
+    await Promise.all(
+      paidStudents.map((student) => {
+        const workshop = localizeWorkshopContent(rawWorkshop, student.locale || 'en')
+        return sendCertificateReady(student, previousClass, workshop, student.locale || 'en')
+      })
+    )
+  }
+
   revalidatePath('/admin/classes')
   revalidatePath('/admin/classes/[id]', 'page')
   revalidatePath('/admin/students')
