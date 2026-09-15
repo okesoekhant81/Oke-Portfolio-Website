@@ -10,6 +10,7 @@ import {
   addAttendanceAction,
   deleteAttendanceAction,
 } from '../../app/actions/students'
+import { useConfirm } from './ConfirmProvider'
 
 function formatDate(dateStr) {
   if (!dateStr) return null
@@ -418,10 +419,11 @@ export default function StudentRow({ student, classDates }) {
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState(false)
   const [, startTransition] = useTransition()
+  const confirm = useConfirm()
   const assignedClass = classDates.find((d) => d.date === student.classDate)
 
-  function handleDelete() {
-    if (!confirm(`Remove ${student.name} from the roster? This can't be undone.`)) return
+  async function handleDelete() {
+    if (!(await confirm(`Remove ${student.name} from the roster? This can't be undone.`))) return
     setDeleting(true)
     setDeleteError(false)
     const formData = new FormData()

@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { restoreStudentAction, permanentlyDeleteStudentAction } from '../../app/actions/students'
 import { restorePostAction, permanentlyDeletePostAction } from '../../app/actions/posts'
 import { restoreTestimonialAction, permanentlyDeleteTestimonialAction } from '../../app/actions/testimonials'
+import { useConfirm } from './ConfirmProvider'
 
 // One row's restore/delete-forever buttons, generalized over which content
 // type it belongs to via idField ('id' for students/testimonials, 'slug'
@@ -13,9 +14,10 @@ function TrashSection({ title, items, idField, emptyText, restoreAction, deleteA
   const [busyId, setBusyId] = useState(null)
   const [removed, setRemoved] = useState(() => new Set())
   const [, startTransition] = useTransition()
+  const confirm = useConfirm()
 
-  function run(action, id, confirmText) {
-    if (confirmText && !confirm(confirmText)) return
+  async function run(action, id, confirmText) {
+    if (confirmText && !(await confirm(confirmText))) return
     setBusyId(id)
     const formData = new FormData()
     formData.set(idField, id)

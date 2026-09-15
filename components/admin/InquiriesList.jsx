@@ -10,6 +10,7 @@ import {
   bulkSetInquiryStatusAction,
 } from '../../app/actions/inquiries'
 import { convertInquiryToStudentAction } from '../../app/actions/students'
+import { useConfirm } from './ConfirmProvider'
 
 function DetailRow({ label, value }) {
   if (!value) return null
@@ -75,6 +76,7 @@ export default function InquiriesList({ inquiries }) {
   const [selected, setSelected] = useState(new Set())
   const [bulkPending, startBulkTransition] = useTransition()
   const [, startTransition] = useTransition()
+  const confirm = useConfirm()
 
   // 'id' lets the admin paste the Registration ID a registrant quotes back
   // (from their success screen or the payment-confirmed email) straight
@@ -85,8 +87,8 @@ export default function InquiriesList({ inquiries }) {
     searchKeys: ['name', 'email', 'phone', 'business', 'id'],
   })
 
-  function handleDelete(inquiry) {
-    if (!confirm(`Delete the inquiry from "${inquiry.name}"? This can't be undone.`)) return
+  async function handleDelete(inquiry) {
+    if (!(await confirm(`Delete the inquiry from "${inquiry.name}"? This can't be undone.`))) return
     setDeletingId(inquiry.id)
     setDeleteError(null)
     const formData = new FormData()
@@ -146,8 +148,8 @@ export default function InquiriesList({ inquiries }) {
     })
   }
 
-  function handleBulkDelete() {
-    if (!confirm(`Delete ${selected.size} inquir${selected.size === 1 ? 'y' : 'ies'}? This can't be undone.`)) return
+  async function handleBulkDelete() {
+    if (!(await confirm(`Delete ${selected.size} inquir${selected.size === 1 ? 'y' : 'ies'}? This can't be undone.`))) return
     const ids = [...selected]
     const formData = new FormData()
     ids.forEach((id) => formData.append('id', id))

@@ -2,13 +2,15 @@
 
 import { useActionState, useState, useTransition } from 'react'
 import { addAdminUserAction, deleteAdminUserAction } from '../../app/actions/adminUsers'
+import { useConfirm } from './ConfirmProvider'
 
 function DeleteButton({ id, name }) {
   const [deleting, setDeleting] = useState(false)
   const [, startTransition] = useTransition()
+  const confirm = useConfirm()
 
-  function handleDelete() {
-    if (!confirm(`Remove ${name}'s admin access? They'll no longer be able to sign in.`)) return
+  async function handleDelete() {
+    if (!(await confirm(`Remove ${name}'s admin access? They'll no longer be able to sign in.`))) return
     setDeleting(true)
     const formData = new FormData()
     formData.set('id', id)

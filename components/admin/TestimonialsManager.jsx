@@ -11,6 +11,7 @@ import {
 import ImageField from './ImageField'
 import StarRating from '../StarRating'
 import { FormLocaleContext, LockContext, Field, TextArea, LanguageTabs } from './ContentFormFields'
+import { useConfirm } from './ConfirmProvider'
 
 const inputClass = 'rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-brand'
 
@@ -72,9 +73,10 @@ function DeleteButton({ id, name, label = 'Delete', labelIng = 'Deleting', confi
   const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState(false)
   const [, startTransition] = useTransition()
+  const confirm = useConfirm()
 
-  function handleDelete() {
-    if (!confirm(confirmText || `Delete the testimonial from "${name}"?`)) return
+  async function handleDelete() {
+    if (!(await confirm(confirmText || `Delete the testimonial from "${name}"?`))) return
     setDeleting(true)
     setError(false)
     const formData = new FormData()

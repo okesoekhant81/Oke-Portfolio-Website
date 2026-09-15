@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { deleteSubscriberAction } from '../../app/actions/newsletter'
 import { useSearchFilter, SearchBar } from './SearchFilterBar'
 import { toCsv, downloadCsv } from '../../lib/csv'
+import { useConfirm } from './ConfirmProvider'
 
 function exportSubscribers(subscribers) {
   const csv = toCsv(subscribers, [
@@ -16,9 +17,10 @@ function exportSubscribers(subscribers) {
 function DeleteButton({ email }) {
   const [deleting, setDeleting] = useState(false)
   const [, startTransition] = useTransition()
+  const confirm = useConfirm()
 
-  function handleDelete() {
-    if (!confirm(`Remove "${email}" from the list?`)) return
+  async function handleDelete() {
+    if (!(await confirm(`Remove "${email}" from the list?`))) return
     setDeleting(true)
     const formData = new FormData()
     formData.set('email', email)

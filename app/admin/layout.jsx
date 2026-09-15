@@ -1,3 +1,5 @@
+import { ConfirmProvider } from '../../components/admin/ConfirmProvider'
+
 // The admin panel has nothing for search engines to index and shouldn't
 // appear in results — this noindex applies to every /admin/* route,
 // including client-component pages (like /admin/login) that can't export
@@ -10,5 +12,5 @@ export const metadata = {
 }
 
 export default function AdminLayout({ children }) {
-  return children
+  return <ConfirmProvider>{children}</ConfirmProvider>
 }
