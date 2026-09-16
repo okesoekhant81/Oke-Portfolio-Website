@@ -1,7 +1,6 @@
 import AdminNav from '../../../components/admin/AdminNav'
 import BackupButton from '../../../components/admin/BackupButton'
 import OrphanedImagesReport from '../../../components/admin/OrphanedImagesReport'
-import PostsSplitMigrationTool from '../../../components/admin/PostsSplitMigrationTool'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,15 +27,6 @@ export default function BackupAdminPage() {
         </p>
         <div className="mt-6 rounded-xl border border-neutral-200 bg-white p-6">
           <OrphanedImagesReport />
-        </div>
-
-        <h2 className="mt-10 font-display text-xl font-bold italic text-brand">Posts storage split (one-time)</h2>
-        <p className="mt-1 text-sm text-neutral-500">
-          The site now reads and writes articles from the split storage shape. This deletes the old, no-longer-used
-          single-file version left behind by that switch.
-        </p>
-        <div className="mt-6 rounded-xl border border-neutral-200 bg-white p-6">
-          <PostsSplitMigrationTool />
         </div>
       </div>
     </main>
