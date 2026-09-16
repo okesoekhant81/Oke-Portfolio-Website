@@ -1,7 +1,7 @@
 import AdminNav from '../../../components/admin/AdminNav'
 import BackupButton from '../../../components/admin/BackupButton'
 import OrphanedImagesReport from '../../../components/admin/OrphanedImagesReport'
-import PostsDebugTool from '../../../components/admin/PostsDebugTool'
+import PostsSplitMigrationTool from '../../../components/admin/PostsSplitMigrationTool'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,13 +30,14 @@ export default function BackupAdminPage() {
           <OrphanedImagesReport />
         </div>
 
-        <h2 className="mt-10 font-display text-xl font-bold italic text-brand">Posts debug (temporary)</h2>
+        <h2 className="mt-10 font-display text-xl font-bold italic text-brand">Posts storage split (one-time)</h2>
         <p className="mt-1 text-sm text-neutral-500">
-          Investigating a report that a new article shows its cover image but not title/body on the public page.
-          Run this and share the output.
+          Splits articles into a lightweight list file plus one file per article, without touching the current
+          storage. Run this, then let Claude know so the site can be switched over to read from it — this step
+          alone changes nothing live.
         </p>
         <div className="mt-6 rounded-xl border border-neutral-200 bg-white p-6">
-          <PostsDebugTool />
+          <PostsSplitMigrationTool />
         </div>
       </div>
     </main>
