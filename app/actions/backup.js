@@ -3,7 +3,7 @@
 import { getHomepageContent } from '../../lib/content/homepage'
 import { getAboutContent } from '../../lib/content/about'
 import { getWorkshopContent } from '../../lib/content/workshop'
-import { getPosts } from '../../lib/content/posts'
+import { getPostsFull } from '../../lib/content/posts'
 import { getTestimonials } from '../../lib/content/testimonials'
 import { getClassDates } from '../../lib/content/classDates'
 import { getStudents } from '../../lib/content/students'
@@ -34,7 +34,7 @@ export async function getFullBackupAction() {
     getHomepageContent(),
     getAboutContent(),
     getWorkshopContent(),
-    getPosts({ includeUnpublished: true }),
+    getPostsFull({ includeUnpublished: true }),
     getTestimonials(),
     getClassDates(),
     getStudents(),
