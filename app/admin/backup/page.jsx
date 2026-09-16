@@ -1,6 +1,7 @@
 import AdminNav from '../../../components/admin/AdminNav'
 import BackupButton from '../../../components/admin/BackupButton'
 import OrphanedImagesReport from '../../../components/admin/OrphanedImagesReport'
+import PostsDebugTool from '../../../components/admin/PostsDebugTool'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,6 +28,15 @@ export default function BackupAdminPage() {
         </p>
         <div className="mt-6 rounded-xl border border-neutral-200 bg-white p-6">
           <OrphanedImagesReport />
+        </div>
+
+        <h2 className="mt-10 font-display text-xl font-bold italic text-brand">Posts debug (temporary)</h2>
+        <p className="mt-1 text-sm text-neutral-500">
+          Investigating a report that a new article shows its cover image but not title/body on the public page.
+          Run this and share the output.
+        </p>
+        <div className="mt-6 rounded-xl border border-neutral-200 bg-white p-6">
+          <PostsDebugTool />
         </div>
       </div>
     </main>
