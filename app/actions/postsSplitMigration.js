@@ -1,6 +1,6 @@
 'use server'
 
-import { readJson, writeJson } from '../../lib/blobStore'
+import { readJson, writeJson, deleteJson } from '../../lib/blobStore'
 import { logActivity } from '../../lib/activityLog'
 
 const ALL_POSTS_PATH = 'content/posts-all.json'
@@ -42,4 +42,15 @@ export async function migratePostsToSplitStorageAction() {
   await logActivity('Posts migrated to split storage (non-destructive copy)', `${posts.length} posts`)
 
   return { migratedCount: posts.length }
+}
+
+// The final step, once the cutover in lib/content/posts.js has shipped and
+// been verified in production — deletes the old single-file posts-all.json,
+// which the site no longer reads or writes. Only reachable from the
+// confirm-gated button on /admin/backup. Not run automatically, unlike the
+// copy above: this one is destructive.
+export async function cleanupOldPostsFileAction() {
+  await deleteJson(ALL_POSTS_PATH)
+  await logActivity('Old single-file posts storage cleaned up', 'content/posts-all.json')
+  return { deleted: true }
 }

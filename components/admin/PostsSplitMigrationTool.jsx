@@ -1,21 +1,29 @@
 'use client'
 
 import { useState } from 'react'
-import { migratePostsToSplitStorageAction } from '../../app/actions/postsSplitMigration'
+import { cleanupOldPostsFileAction } from '../../app/actions/postsSplitMigration'
+import { useConfirm } from './ConfirmProvider'
 
-// Temporary, one-time tool — copies posts-all.json into the new split
-// storage shape (a lightweight list file + one full-content file per post)
-// so it can be verified before the code is cut over to read/write it. See
-// app/actions/postsSplitMigration.js for why. Remove this component once
-// that cutover has shipped and been confirmed in production.
+// Temporary, one-time tool for the posts split-storage migration (see
+// lib/content/posts.js) — the migration copy and code cutover have already
+// shipped and been verified in production; this is the final cleanup step,
+// deleting the old single-file posts-all.json the site no longer reads or
+// writes. Remove this component (and its section on /admin/backup) once
+// this has been run; it has no purpose after that.
 export default function PostsSplitMigrationTool() {
   const [state, setState] = useState('idle') // idle | working | error
-  const [report, setReport] = useState(null)
+  const [result, setResult] = useState(null)
+  const confirm = useConfirm()
 
   async function handleClick() {
+    const ok = await confirm('Permanently delete the old single-file posts storage? This can\'t be undone.', {
+      confirmLabel: 'Delete',
+    })
+    if (!ok) return
+
     setState('working')
     try {
-      setReport(await migratePostsToSplitStorageAction())
+      setResult(await cleanupOldPostsFileAction())
       setState('idle')
     } catch {
       setState('error')
@@ -28,14 +36,14 @@ export default function PostsSplitMigrationTool() {
         type="button"
         onClick={handleClick}
         disabled={state === 'working'}
-        className="rounded-md border border-neutral-300 px-5 py-2 text-sm font-medium text-ink transition-opacity disabled:opacity-60"
+        className="rounded-md bg-red-600 px-5 py-2 text-sm font-medium text-white transition-opacity disabled:opacity-60"
       >
-        {state === 'working' ? 'Copying…' : 'Run posts split migration copy'}
+        {state === 'working' ? 'Deleting…' : 'Delete old posts-all.json'}
       </button>
-      {state === 'error' && <p className="mt-2 text-sm text-red-600">Could not run the migration. Please try again.</p>}
+      {state === 'error' && <p className="mt-2 text-sm text-red-600">Could not clean up. Please try again.</p>}
 
-      {report && (
-        <p className="mt-3 text-sm text-green-700">Copied {report.migratedCount} posts into the split storage shape.</p>
+      {result && (
+        <p className="mt-2 text-sm text-green-700">Deleted. Let Claude know so this tool can be removed.</p>
       )}
     </div>
   )
