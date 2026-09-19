@@ -4,11 +4,13 @@ import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Reveal from './Reveal'
 import RichText from './RichText'
-import { headingLeading, italicIfLatin } from '../lib/dictionaries'
+import { getDictionary, headingLeading, italicIfLatin } from '../lib/dictionaries'
 
 const MotionImage = motion.create(Image)
 
-export default function Hero({ name, body, badgePrefix, badgeEmphasis, image, locale = 'en' }) {
+export default function Hero({ name, body, image, locale = 'en' }) {
+  const dict = getDictionary(locale)
+
   return (
     <section className="bg-white pt-6 sm:pt-8 md:pt-10 dark:bg-ink">
       <div className="mx-auto flex max-w-5xl flex-col sm:flex-row sm:items-center sm:gap-10 sm:px-10 md:gap-16 md:px-16">
@@ -25,14 +27,21 @@ export default function Hero({ name, body, badgePrefix, badgeEmphasis, image, lo
           />
 
           <div className="mt-5">
-            <motion.span
+            <motion.a
+              href="/oke-soe-khant-cv.pdf"
+              download
               whileHover={{ scale: 1.06, boxShadow: '0 10px 25px -8px rgba(232,54,6,0.55)' }}
               whileTap={{ scale: 0.97 }}
               transition={{ type: 'spring', stiffness: 350, damping: 22, mass: 0.6 }}
-              className="inline-block cursor-default rounded-full bg-brand px-5 py-2 text-xs font-light text-white"
+              className="inline-flex items-center gap-2 rounded-full bg-brand px-5 py-2 text-xs font-light text-white"
             >
-              {badgePrefix} <span className={`font-display font-bold text-white ${italicIfLatin(locale)}`}>{badgeEmphasis}</span>
-            </motion.span>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M12 3v13" />
+                <path d="M6 11l6 6 6-6" />
+                <path d="M4 21h16" />
+              </svg>
+              <span className={`font-display font-bold text-white ${italicIfLatin(locale)}`}>{dict.home.downloadCv}</span>
+            </motion.a>
           </div>
         </Reveal>
 

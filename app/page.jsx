@@ -95,8 +95,6 @@ export default async function Home() {
       <Hero
         name={content.heroName}
         body={content.heroBody}
-        badgePrefix={content.heroBadgePrefix}
-        badgeEmphasis={content.heroBadgeEmphasis}
         image={content.heroImage}
         locale={locale}
       />
