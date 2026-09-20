@@ -299,6 +299,14 @@ export default async function WorkshopPage() {
           <FAQAccordion heading={content.faqHeading} faqs={content.faqs} locale={locale} />
         </Reveal>
 
+        <Reveal delay={0.23}>
+          <p className="mt-6 text-center text-xs text-muted dark:text-neutral-400">
+            <Link href="/verify" className="border-b border-brand/40 text-brand hover:border-brand">
+              {dict.certLookup.link}
+            </Link>
+          </p>
+        </Reveal>
+
         <Reveal delay={0.25}>
           <div className="mt-12 rounded-xl border border-neutral-200 bg-neutral-50 p-6 dark:border-neutral-800 dark:bg-white/5 sm:p-8">
             <h2
