@@ -2,6 +2,7 @@ import NavMenu from '../components/NavMenu'
 import Hero from '../components/Hero'
 import NotJustMarketing from '../components/NotJustMarketing'
 import Services from '../components/Services'
+import ClientWork from '../components/ClientWork'
 import Strategy from '../components/Strategy'
 import ThingsImBuilding from '../components/ThingsImBuilding'
 import Workshop from '../components/Workshop'
@@ -12,9 +13,10 @@ import Contact from '../components/Contact'
 import { getHomepageContent } from '../lib/content/homepage'
 import { getPosts } from '../lib/content/posts'
 import { getTestimonials } from '../lib/content/testimonials'
+import { getClientWork } from '../lib/content/clientWork'
 import { getAnalytics } from '../lib/content/analytics'
 import { getLocale } from '../lib/i18n'
-import { localizeHomepageContent, localizePost, localizeTestimonials } from '../lib/localizeContent'
+import { localizeHomepageContent, localizePost, localizeTestimonials, localizeClientWork } from '../lib/localizeContent'
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, SOCIAL_LINKS } from '../lib/site'
 import { safeJsonLd } from '../lib/jsonLd'
 
@@ -70,15 +72,17 @@ function buildOrganizationJsonLd() {
 }
 
 export default async function Home() {
-  const [rawContent, rawPosts, rawTestimonials, locale, { postViews }] = await Promise.all([
+  const [rawContent, rawPosts, rawTestimonials, rawClientWork, locale, { postViews }] = await Promise.all([
     getHomepageContent(),
     getPosts(),
     getTestimonials(),
+    getClientWork(),
     getLocale(),
     getAnalytics(),
   ])
   const content = localizeHomepageContent(rawContent, locale)
   const testimonials = localizeTestimonials(rawTestimonials, locale)
+  const clientWork = localizeClientWork(rawClientWork, locale)
   const posts = rawPosts
     .slice(0, 4)
     .map((post) => ({ ...localizePost(post, locale), views: postViews[post.slug] || 0 }))
@@ -105,6 +109,7 @@ export default async function Home() {
         locale={locale}
       />
       <Services services={content.services} />
+      <ClientWork clientWork={clientWork} locale={locale} />
       <Strategy
         line1={content.strategyLine1}
         line2={content.strategyLine2}

@@ -19,6 +19,7 @@ const GROUPS = [
       { href: '/admin/workshop', label: 'Workshop' },
       { href: '/admin/posts', label: 'Articles' },
       { href: '/admin/testimonials', label: 'Testimonials' },
+      { href: '/admin/client-work', label: 'Client Work' },
     ],
   },
   {

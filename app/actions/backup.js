@@ -5,6 +5,7 @@ import { getAboutContent } from '../../lib/content/about'
 import { getWorkshopContent } from '../../lib/content/workshop'
 import { getPostsFull } from '../../lib/content/posts'
 import { getTestimonials } from '../../lib/content/testimonials'
+import { getClientWork } from '../../lib/content/clientWork'
 import { getClassDates } from '../../lib/content/classDates'
 import { getStudents } from '../../lib/content/students'
 import { getInquiries } from '../../lib/content/inquiries'
@@ -24,6 +25,7 @@ export async function getFullBackupAction() {
     workshop,
     posts,
     testimonials,
+    clientWork,
     classDates,
     students,
     inquiries,
@@ -36,6 +38,7 @@ export async function getFullBackupAction() {
     getWorkshopContent(),
     getPostsFull({ includeUnpublished: true }),
     getTestimonials(),
+    getClientWork(),
     getClassDates(),
     getStudents(),
     getInquiries(),
@@ -51,6 +54,7 @@ export async function getFullBackupAction() {
     workshop,
     posts,
     testimonials,
+    clientWork,
     classDates,
     students,
     inquiries,
