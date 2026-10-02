@@ -27,8 +27,11 @@ export default function ClientWork({ clientWork, locale = 'en' }) {
           {clientWork.map((entry, i) => (
             <Reveal key={entry.id} delay={0.1 + (i % 4) * 0.08}>
               <div className="h-full rounded-xl border border-neutral-200 bg-white p-5 dark:border-neutral-800 dark:bg-ink">
+                {entry.logo && (
+                  <img src={entry.logo} alt={`${entry.name} logo`} className="h-8 w-auto max-w-[140px] object-contain" />
+                )}
                 <p
-                  className={`font-display text-base font-bold text-ink dark:text-neutral-100 ${italicIfLatin(locale)}`}
+                  className={`font-display text-base font-bold text-ink dark:text-neutral-100 ${italicIfLatin(locale)} ${entry.logo ? 'mt-3' : ''}`}
                 >
                   {entry.name}
                 </p>

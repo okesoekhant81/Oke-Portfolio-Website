@@ -7,6 +7,7 @@ import {
   deleteClientWorkAction,
   reorderClientWorkAction,
 } from '../../app/actions/clientWork'
+import ImageField from './ImageField'
 import { FormLocaleContext, LockContext, Field, TextArea, LanguageTabs } from './ContentFormFields'
 import { useConfirm } from './ConfirmProvider'
 
@@ -112,6 +113,9 @@ function ClientWorkItem({ entry, isFirst }) {
     return (
       <li className="flex items-start gap-3 rounded-lg border border-neutral-100 p-3">
         <ReorderButtons id={entry.id} disabled={isFirst} />
+        {entry.logo && (
+          <img src={entry.logo} alt="" className="h-10 w-10 shrink-0 rounded-md border border-neutral-100 object-contain" />
+        )}
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold text-ink">
             {entry.name}
@@ -134,6 +138,7 @@ function ClientWorkItem({ entry, isFirst }) {
     <li className="rounded-lg border border-brand/30 bg-brand/5 p-3">
       <form action={handleSave} className="space-y-3">
         <input name="name" required defaultValue={entry.name} placeholder="Client / project name" className={inputClass} />
+        <ImageField label="Logo (optional)" name="logo" defaultValue={entry.logo} />
         <Field label="Scope (e.g. Branding, Digital Marketing)" name="scope" defaultValue={entry.scope} nameMy="scopeMy" defaultValueMy={entry.scopeMy} />
         <TextArea
           label="What was done"
@@ -207,6 +212,7 @@ export default function ClientWorkManager({ clientWork }) {
             className="mt-4 space-y-3 border-t border-neutral-100 pt-4"
           >
             <input name="name" required placeholder="Client / project name" className={inputClass} />
+            <ImageField label="Logo (optional)" name="logo" defaultValue="" />
             <Field label="Scope (e.g. Branding, Digital Marketing)" name="scope" nameMy="scopeMy" />
             <TextArea label="What was done" name="description" nameMy="descriptionMy" rows={3} />
             <Field label="Highlight result (optional — e.g. a stat or growth number)" name="highlight" nameMy="highlightMy" />

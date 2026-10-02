@@ -7,6 +7,7 @@ import { getHomepageContent } from '../../lib/content/homepage'
 import { getWorkshopContent } from '../../lib/content/workshop'
 import { getPosts } from '../../lib/content/posts'
 import { getTestimonials } from '../../lib/content/testimonials'
+import { getClientWork } from '../../lib/content/clientWork'
 import { getStudents } from '../../lib/content/students'
 import { getInquiries } from '../../lib/content/inquiries'
 import { logActivity } from '../../lib/activityLog'
@@ -17,17 +18,18 @@ import { logActivity } from '../../lib/activityLog'
 // referenced between the scan and the click (e.g. someone re-uploading a
 // draft's cover image in another tab) is excluded automatically.
 async function findOrphanedImages() {
-  const [blobs, homepage, workshop, posts, testimonials, students, inquiries] = await Promise.all([
+  const [blobs, homepage, workshop, posts, testimonials, clientWork, students, inquiries] = await Promise.all([
     listAllBlobs('images/'),
     getHomepageContent(),
     getWorkshopContent(),
     getPosts({ includeUnpublished: true, includeDeleted: true }),
     getTestimonials({ includeDeleted: true }),
+    getClientWork(),
     getStudents({ includeDeleted: true }),
     getInquiries(),
   ])
 
-  const referenced = collectImageUrls([homepage, workshop, posts, testimonials, students, inquiries])
+  const referenced = collectImageUrls([homepage, workshop, posts, testimonials, clientWork, students, inquiries])
 
   const orphaned = blobs
     .filter((blob) => !referenced.has(blob.url))
