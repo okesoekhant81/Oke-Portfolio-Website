@@ -24,32 +24,41 @@ export default function ThingsImBuilding({ line1, line2, intro, emphasis, projec
         </Reveal>
 
         <div className="mt-10 grid grid-cols-2 gap-6 sm:gap-8">
-          {projects.map((project, i) => (
-            <Reveal key={project.name} delay={0.1 + i * 0.1}>
-              <motion.div
-                whileHover="hover"
-                initial="rest"
-                transition={{ type: 'spring', stiffness: 280, damping: 24, mass: 0.6 }}
-                variants={{ rest: { y: 0 }, hover: { y: -6 } }}
-              >
-                <motion.img
-                  src={project.logo}
-                  alt={`${project.name} logo`}
-                  variants={{ rest: { scale: 1 }, hover: { scale: 1.06 } }}
-                  transition={{ type: 'spring', stiffness: 280, damping: 20, mass: 0.6 }}
-                  className="h-auto w-32 origin-left object-contain sm:w-44"
-                />
-                <p className="mt-4 text-xs leading-relaxed text-ink dark:text-neutral-100">
-                  {dict.home.projectPrefix}
-                  <em className="font-display not-italic">{project.location}</em>
-                  {dict.home.projectSuffix} {project.description}
-                </p>
-                <p className={`mt-3 font-display text-xs font-bold text-ink dark:text-neutral-100 ${italicIfLatin(locale)}`}>
-                  {project.role}
-                </p>
-              </motion.div>
-            </Reveal>
-          ))}
+          {projects.map((project, i) => {
+            const Wrapper = project.url ? motion.a : motion.div
+            const linkProps = project.url ? { href: project.url, target: '_blank', rel: 'noopener noreferrer' } : {}
+            return (
+              <Reveal key={project.name} delay={0.1 + i * 0.1}>
+                <Wrapper
+                  {...linkProps}
+                  whileHover="hover"
+                  initial="rest"
+                  transition={{ type: 'spring', stiffness: 280, damping: 24, mass: 0.6 }}
+                  variants={{ rest: { y: 0 }, hover: { y: -6 } }}
+                  className={project.url ? 'block' : undefined}
+                >
+                  <motion.img
+                    src={project.logo}
+                    alt={`${project.name} logo`}
+                    variants={{ rest: { scale: 1 }, hover: { scale: 1.06 } }}
+                    transition={{ type: 'spring', stiffness: 280, damping: 20, mass: 0.6 }}
+                    className="h-auto w-32 origin-left object-contain sm:w-44"
+                  />
+                  <p className="mt-4 text-xs leading-relaxed text-ink dark:text-neutral-100">
+                    {dict.home.projectPrefix}
+                    <em className="font-display not-italic">{project.location}</em>
+                    {dict.home.projectSuffix} {project.description}
+                  </p>
+                  <p
+                    className={`mt-3 font-display text-xs font-bold ${project.url ? 'text-brand' : 'text-ink dark:text-neutral-100'} ${italicIfLatin(locale)}`}
+                  >
+                    {project.role}
+                    {project.url && ' ↗'}
+                  </p>
+                </Wrapper>
+              </Reveal>
+            )
+          })}
         </div>
       </div>
     </section>

@@ -7,6 +7,14 @@ import { logActivity } from '../../lib/activityLog'
 
 export async function saveHomepage(prevState, formData) {
   const get = (name) => formData.get(name)?.toString() ?? ''
+  // Admin-authored, but still only ever stored as a real http(s) link, not
+  // whatever scheme someone types — this ends up as an href on the public
+  // site (see ThingsImBuilding.jsx), so a stray javascript: URL shouldn't be
+  // possible to save even by accident.
+  const getUrl = (name) => {
+    const value = get(name).trim()
+    return /^https?:\/\//.test(value) ? value.slice(0, 500) : ''
+  }
 
   const services = [0, 1, 2, 3].map((i) => ({
     title: get(`service-${i}-title`),
@@ -18,6 +26,7 @@ export async function saveHomepage(prevState, formData) {
 
   const projects = [0, 1].map((i) => ({
     name: get(`project-${i}-name`),
+    url: getUrl(`project-${i}-url`),
     location: get(`project-${i}-location`),
     locationMy: get(`project-${i}-locationMy`),
     description: get(`project-${i}-description`),

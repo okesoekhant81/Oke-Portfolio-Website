@@ -186,6 +186,7 @@ export default function HomepageForm({ content }) {
               <p className="text-xs font-semibold text-neutral-400">Project {i + 1}</p>
               <div className="mt-2 space-y-3">
                 <Field label="Name" name={`project-${i}-name`} defaultValue={project.name} />
+                <Field label="Website URL (optional — makes the card a link)" name={`project-${i}-url`} defaultValue={project.url} />
                 <Field
                   label="Location phrase"
                   name={`project-${i}-location`}
