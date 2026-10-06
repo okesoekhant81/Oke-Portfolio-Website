@@ -72,8 +72,11 @@ export default async function WorkshopPage() {
   // A completed class nobody actually attended isn't social proof of
   // anything — skip it rather than showing "0 students recently finished".
   const showRecentlyCompleted = Boolean(recentlyCompleted) && recentlyCompletedCount > 0
+  // Only a class people can still register for — same "missing status means
+  // upcoming" fallback the registration form uses below. Used to be "anything
+  // not completed", which let a second in-progress class show up here too.
   const nextUpcoming = classDates
-    .filter((d) => d.status !== 'completed' && d.date !== inProgressClass?.date)
+    .filter((d) => !d.status || d.status === 'upcoming')
     .sort((a, b) => a.date.localeCompare(b.date))[0]
 
   // Only 'upcoming' classes are choosable in the registration form — once
@@ -212,11 +215,27 @@ export default async function WorkshopPage() {
 
         {(inProgressClass || showRecentlyCompleted || nextUpcoming) && (
           <Reveal delay={0.12}>
+            {/* The next class open for registration leads and carries the
+                brand highlight — it's the one a visitor here can act on. An
+                in-progress or just-finished cohort is supporting social
+                proof, so it sits second in neutral styling. */}
             <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {inProgressClass && (
+              {nextUpcoming && (
                 <div className="rounded-xl border border-brand/30 bg-brand/5 p-4 dark:border-brand/40 dark:bg-brand/10">
                   <p className="flex items-center gap-1.5 text-xs font-semibold text-brand">
                     <span className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-brand" aria-hidden="true" />
+                    {dict.workshop.nextCohortLabel}
+                  </p>
+                  <p className="mt-1 text-sm font-semibold text-ink dark:text-neutral-100">
+                    {formatClassDate(nextUpcoming.date)}
+                    {nextUpcoming.label ? ` — ${nextUpcoming.label}` : ''}
+                  </p>
+                </div>
+              )}
+              {inProgressClass && (
+                <div className="rounded-xl border border-neutral-200 p-4 dark:border-neutral-800">
+                  <p className="flex items-center gap-1.5 text-xs font-semibold text-muted dark:text-neutral-400">
+                    <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-brand" aria-hidden="true" />
                     {dict.workshop.cohortActiveLabel}
                   </p>
                   <p className="mt-1 text-sm text-ink dark:text-neutral-100">
@@ -232,15 +251,6 @@ export default async function WorkshopPage() {
                   </p>
                   <p className="mt-1 text-sm text-ink dark:text-neutral-100">
                     <span className="font-bold">{recentlyCompletedCount}</span> {dict.workshop.cohortCompletedBody}
-                  </p>
-                </div>
-              )}
-              {nextUpcoming && (
-                <div className="rounded-xl border border-neutral-200 p-4 dark:border-neutral-800">
-                  <p className="text-xs font-semibold text-muted dark:text-neutral-400">{dict.workshop.nextCohortLabel}</p>
-                  <p className="mt-1 text-sm font-semibold text-ink dark:text-neutral-100">
-                    {formatClassDate(nextUpcoming.date)}
-                    {nextUpcoming.label ? ` — ${nextUpcoming.label}` : ''}
                   </p>
                 </div>
               )}
