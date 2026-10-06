@@ -62,14 +62,20 @@ const VALID_STATUSES = ['upcoming', 'in-progress', 'completed']
 export async function updateClassDateStatusAction(formData) {
   const id = formData.get('id')?.toString()
   const status = formData.get('status')?.toString()
-  if (!id || !VALID_STATUSES.includes(status)) return
+  if (!id || !VALID_STATUSES.includes(status)) return { error: 'Invalid status.' }
 
   // Read before writing — need the class's status as it was a moment ago
   // to tell "just marked completed" apart from "already completed, saved
   // again", and updateClassDate itself only returns void.
   const previousClass = (await getClassDates()).find((d) => d.id === id)
+  if (!previousClass) return { error: 'Class not found — refresh the page and try again.' }
 
-  await updateClassDate(id, { status })
+  try {
+    await updateClassDate(id, { status })
+  } catch (err) {
+    console.error('updateClassDateStatusAction failed:', err)
+    return { error: 'Could not save the status. Please try again.' }
+  }
   await logActivity('Class status changed', `${id} → ${status}`)
 
   // Fires once, only on the transition into 'completed' — re-saving an
@@ -79,21 +85,35 @@ export async function updateClassDateStatusAction(formData) {
   // registration was never issued a real certificate (see the `verified`
   // check in app/verify/[id]/page.jsx), so emailing them a link that would
   // just show "couldn't verify" is worse than not emailing at all.
-  const justCompleted = Boolean(previousClass && previousClass.status !== 'completed' && status === 'completed')
+  //
+  // The status is already saved by this point, so an email failure is
+  // reported alongside success rather than thrown — throwing here used to
+  // make the admin UI roll its dropdown back as if the save itself had failed.
+  let emailFailed = false
+  const justCompleted = Boolean(previousClass.status !== 'completed' && status === 'completed')
   if (justCompleted) {
-    const [students, rawWorkshop] = await Promise.all([getStudents(), getWorkshopContent()])
-    const paidStudents = students.filter((s) => s.classDate === previousClass.date && s.paymentStatus === 'paid')
-    await Promise.all(
-      paidStudents.map((student) => {
-        const workshop = localizeWorkshopContent(rawWorkshop, student.locale || 'en')
-        return sendCertificateReady(student, previousClass, workshop, student.locale || 'en')
-      })
-    )
+    try {
+      const [students, rawWorkshop] = await Promise.all([getStudents(), getWorkshopContent()])
+      const paidStudents = students.filter((s) => s.classDate === previousClass.date && s.paymentStatus === 'paid')
+      await Promise.all(
+        paidStudents.map((student) => {
+          const workshop = localizeWorkshopContent(rawWorkshop, student.locale || 'en')
+          return sendCertificateReady(student, previousClass, workshop, student.locale || 'en')
+        })
+      )
+    } catch (err) {
+      console.error('Certificate-ready emails failed:', err)
+      emailFailed = true
+    }
   }
 
   revalidatePath('/admin/classes')
   revalidatePath('/admin/classes/[id]', 'page')
   revalidatePath('/admin/students')
+  // The public workshop page's "cohort in progress / recently completed"
+  // cards are driven by class status, so it needs refreshing too.
+  revalidatePath('/workshop')
+  return { success: true, emailFailed }
 }
 
 export async function updateClassDateFeeAction(formData) {

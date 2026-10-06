@@ -12,6 +12,7 @@ import {
   updateClassDateTimeAction,
   updateClassDateMeetingLinkAction,
 } from '../../app/actions/classDates'
+import { useConfirm } from './ConfirmProvider'
 
 function formatDate(dateStr) {
   const d = new Date(`${dateStr}T00:00:00`)
@@ -32,36 +33,101 @@ const STATUS_STYLES = {
   completed: 'border-green-300 bg-green-50 text-green-700',
 }
 
-function StatusSelect({ id, status }) {
-  const [current, setCurrent] = useState(status || 'upcoming')
-  const [, startTransition] = useTransition()
+const STATUS_LABELS = { upcoming: 'Upcoming', 'in-progress': 'In progress', completed: 'Completed' }
 
-  function handleChange(e) {
-    const previous = current
-    const next = e.target.value
-    setCurrent(next)
+// Picking a value only stages it — nothing is written until Save. Used to
+// save instantly on change, which made a misclick (or a failed request,
+// silently rolled back) easy to miss.
+function StatusSelect({ id, status }) {
+  const saved = status || 'upcoming'
+  const [selected, setSelected] = useState(saved)
+  const [saving, setSaving] = useState(false)
+  const [message, setMessage] = useState(null) // { type: 'error' | 'success' | 'warning', text }
+  const [, startTransition] = useTransition()
+  const confirm = useConfirm()
+  const dirty = selected !== saved
+
+  async function handleSave() {
+    if (selected === 'completed') {
+      const ok = await confirm(
+        'Mark this class as Completed? Every paid student in it will be emailed their certificate link.',
+        { confirmLabel: 'Mark completed' }
+      )
+      if (!ok) return
+    }
+    setSaving(true)
+    setMessage(null)
     const formData = new FormData()
     formData.set('id', id)
-    formData.set('status', next)
+    formData.set('status', selected)
     startTransition(async () => {
       try {
-        await updateClassDateStatusAction(formData)
+        const result = await updateClassDateStatusAction(formData)
+        if (result?.error) {
+          setMessage({ type: 'error', text: result.error })
+        } else if (result?.emailFailed) {
+          setMessage({ type: 'warning', text: 'Saved, but certificate emails failed to send.' })
+        } else {
+          setMessage({ type: 'success', text: 'Saved' })
+        }
       } catch {
-        setCurrent(previous)
+        setMessage({ type: 'error', text: 'Could not save — refresh the page and try again.' })
+      } finally {
+        setSaving(false)
       }
     })
   }
 
   return (
-    <select
-      value={current}
-      onChange={handleChange}
-      className={`rounded-full border px-2 py-0.5 text-xs font-medium outline-none ${STATUS_STYLES[current] || STATUS_STYLES.upcoming}`}
-    >
-      <option value="upcoming">Upcoming</option>
-      <option value="in-progress">In progress</option>
-      <option value="completed">Completed</option>
-    </select>
+    <span className="flex items-center gap-2">
+      <select
+        value={selected}
+        onChange={(e) => {
+          setSelected(e.target.value)
+          setMessage(null)
+        }}
+        disabled={saving}
+        className={`rounded-full border px-2 py-0.5 text-xs font-medium outline-none disabled:opacity-60 ${STATUS_STYLES[selected] || STATUS_STYLES.upcoming}`}
+      >
+        {Object.entries(STATUS_LABELS).map(([value, label]) => (
+          <option key={value} value={value}>
+            {label}
+          </option>
+        ))}
+      </select>
+      {dirty && (
+        <>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={saving}
+            className="rounded-md bg-brand px-2.5 py-0.5 text-xs font-medium text-white transition-opacity disabled:opacity-60"
+          >
+            {saving ? 'Saving…' : 'Save'}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setSelected(saved)
+              setMessage(null)
+            }}
+            disabled={saving}
+            className="text-xs text-neutral-400 hover:text-ink"
+          >
+            Cancel
+          </button>
+        </>
+      )}
+      {message && (
+        <span
+          className={`text-xs ${
+            message.type === 'error' ? 'text-red-600' : message.type === 'warning' ? 'text-amber-600' : 'text-green-600'
+          }`}
+        >
+          {message.text}
+        </span>
+      )}
+    </span>
   )
 }
 
